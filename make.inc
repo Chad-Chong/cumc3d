@@ -11,18 +11,25 @@ FIXPOLE = -DFIXPOLE
 #DEBUG = -DDEBUG
 
 # Want to get divergence of B? #
-DIVB = -DDIVB
+#DIVB = -DDIVB
 
 # Want to look for compilation message? #
-#COMPILE = -Minfo=accel
+#COMPILE = -Minfo -Mipa=fast
 
 # Choose between CPU or GPU threading #
-MULTICORE = -DGPU -acc
+#MULTICORE = -DGPU -acc
 #MULTICORE = -mp
 
 # Define F90 compiler #
-F90=/home/leon/HDF5/bin/h5fc
+F90=h5fc
+
+# need extra math packages? #
+#MATHPACK = -llapack -lblas
+
+# PGI Compiler flags
+PGI = -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -module . 
 
 # Define F90 flags #
-F90FLAGS= -llapack -lblas -cpp -fastsse -Mipa=fast -O4 -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE)
-LDFLAGS= -llapack -lblas -cpp -fastsse -Mipa=fast -O4 -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE)
+# -Mipa=fast is suppressed #
+F90FLAGS= -cpp -fastsse -O4 $(PGI) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+LDFLAGS= -cpp -fastsse -O4 $(PGI) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)

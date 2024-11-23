@@ -1,0 +1,3 @@
+[submodule "model/AIC_src"]
+	path = model/AIC_src
+	url = git@github.com:PeterParkerC/AIC_src_cumc3d.git

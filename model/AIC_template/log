@@ -1,0 +1,16 @@
+First rotating magnetised white dwarf
+On CUMC3D-Ver1.53
+
+Finding ways on calculating Br and Btheta on the face-centered grid
+Values exploding at origin and rotational axis
+
+mc suggest: try some analytical method and may perhaps cancelling the 1/rsin(theta) part
+
+
+/* Currently cannot compile code */
+/* Finally need some time dealing with hdf5 (maybe even pgfortran) */
+
+/* Downloaded hdf5 1.14.3 (although 1.14.2 is not using) */
+
+
+ALL solved
