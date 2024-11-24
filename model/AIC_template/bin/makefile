@@ -2,8 +2,8 @@
 include $(CUMC3D_DIR)/make.inc
 
 #specify HDF5#
-EXTRAINCS += $(HDF5INCS)
-EXTRAOBJECTS += $(HDF5LIBS)
+EXTRAINCS += $(HDF5INCS) -module .
+EXTRAOBJECTS += -module . $(HDF5LIBS)
 
 #specify directories#
 SOLVER := $(CUMC3D_DIR)/solver/mhd
@@ -17,7 +17,7 @@ SOURCE = $(shell cat $(SOLVER)/source.list) $(shell cat $(MODEL)/source.list)
 SRC = $(notdir $(SOURCE))
 OBJ = $(patsubst %.f90,%.o,$(SRC))
 
-# #core object files#
+#core object files#
 DEF_OBJ    = definition.o
 RECON_MOD  = ppmc_module.o tvd_module.o weno_module.o
 SIMPLE_MOD = rsolver_module.o mhd_module.o nuceos_module.o def.o				# Only depends on definition.o

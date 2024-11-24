@@ -1,0 +1,9 @@
+*.mod
+*.o
+*.hdf5
+*.png
+*.pdf
+*.mp4
+*CUMC3D
+fort.*
+tmp.txt

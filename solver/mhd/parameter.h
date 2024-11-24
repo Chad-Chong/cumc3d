@@ -31,10 +31,10 @@ REAL*8, PARAMETER :: small_num = TINY(1.0D0)
 ! 0 = Cartesian coordinate
 ! 1 = Cylindrical coordinate
 ! 2 = Spherical coordinate
-INTEGER, PARAMETER :: coordinate_flag = 1
+INTEGER, PARAMETER :: coordinate_flag = 2
 
 ! Dimension, 1 = 1D, 2 = 2D, 3 = 3D
-INTEGER, PARAMETER :: n_dim = 3
+INTEGER, PARAMETER :: n_dim = 2
 
 ! Flag for boundary condition
 ! The boundary flag is defined by four scalar
@@ -49,7 +49,7 @@ INTEGER, PARAMETER :: n_dim = 3
 ! 2 = reflecting boundary (depend on scalar/vector)
 ! 3 = axis-symmetric
 ! 4 = equatorial-symmetric
-INTEGER :: boundary_flag(6) = (/1,1,0,0,1,1/)
+INTEGER :: boundary_flag(6) = (/2,1,3,3,0,0/)
 
 ! Flag for simulating with the full box (extend to negative x,y,z)
 LOGICAL, PARAMETER :: fullx_flag = .false.
@@ -67,9 +67,9 @@ REAL*8, PARAMETER :: y_end = 2.0d0*pi
 REAL*8, PARAMETER :: z_end = 10.0d0
 
 ! The number of grid in the x,y,z direction for NM
-INTEGER, PARAMETER :: nx = 128 
-INTEGER, PARAMETER :: ny = 128
-INTEGER, PARAMETER :: nz = 128
+INTEGER, PARAMETER :: nx = 200 
+INTEGER, PARAMETER :: ny = 40
+INTEGER, PARAMETER :: nz = 1
 
 ! Grid sizes for NM
 REAL*8, PARAMETER :: dx_ini = (x_end - x_start)/DBLE(nx)	
@@ -78,7 +78,7 @@ REAL*8, PARAMETER :: dz_ini = (z_end - z_start)/DBLE(nz)
 
 ! Cournat-Friedrich-Levy constant
 ! Defined as dt = cfl * dx / MAX(vel + cs)
-REAL*8, PARAMETER :: cfl = 0.80D0			
+REAL*8, PARAMETER :: cfl = 0.50D0			
 
 ! Maximum time to be simulated in the model
 REAL*8 :: total_time = 120.0D0

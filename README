@@ -35,5 +35,9 @@ Future Updates:
   Volume rendering of 3D simulations
   Advanced Leakage Scheme for neutrino transport
 
+Note from User:
 If you know what the User doing, clone the repo by:
     git clone git@github.com:PeterParkerC/cumc3d.git --recurse-submodules -j8
+
+Create a path variable by adding a line anywhere in .bashrc:
+  export CUMC3D_DIR=Path/to/cumc3d

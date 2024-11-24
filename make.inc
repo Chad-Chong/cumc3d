@@ -21,15 +21,16 @@ FIXPOLE = -DFIXPOLE
 #MULTICORE = -mp
 
 # Define F90 compiler #
-F90=h5fc
+F90=h5pfc
 
 # need extra math packages? #
 #MATHPACK = -llapack -lblas
 
 # PGI Compiler flags
-PGI = -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -module . 
-
+#PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
+ifort = -O3 -traceback
+#-qopenmp 
 # Define F90 flags #
 # -Mipa=fast is suppressed #
-F90FLAGS= -cpp -fastsse -O4 $(PGI) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
-LDFLAGS= -cpp -fastsse -O4 $(PGI) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+F90FLAGS= -cpp $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+LDFLAGS= -cpp $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
