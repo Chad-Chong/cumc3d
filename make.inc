@@ -26,11 +26,15 @@ F90=h5pfc
 # need extra math packages? #
 #MATHPACK = -llapack -lblas
 
-# PGI Compiler flags
+# Compiler flags
 #PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
-ifort = -O3 -traceback
-#-qopenmp 
+ifortflags = -O3 -traceback
+ifortomp = -qopenmp
+#ifortdebug = -check all -fpe0
+
+ifort = $(ifortflags) $(ifortomp) $(ifortdebug)
+
 # Define F90 flags #
 # -Mipa=fast is suppressed #
-F90FLAGS= -cpp $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
-LDFLAGS= -cpp $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+F90FLAGS= -cpp -module . $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+LDFLAGS= -cpp -module . $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
