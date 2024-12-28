@@ -2,8 +2,8 @@
 include $(CUMC3D_DIR)/make.inc
 
 #specify HDF5#
-EXTRAINCS += $(HDF5INCS) -module .
-EXTRAOBJECTS += -module . $(HDF5LIBS)
+EXTRAINCS += $(HDF5INCS)
+EXTRAOBJECTS += $(HDF5LIBS)
 
 #specify directories#
 SOLVER := $(CUMC3D_DIR)/solver/mhd
@@ -24,10 +24,8 @@ SIMPLE_MOD = rsolver_module.o mhd_module.o nuceos_module.o def.o				# Only depen
 
 OTHER_OBJ = $(filter-out $(RECON_MOD) $(SIMPLE_MOD) $(DEF_OBJ), $(OBJ))
 
-#you can use make -j to build parallelly#
+#you can use make -j8 to build parallelly#
 ALL: $(OBJ)
-	echo $(SRC)
-	echo $(EXTRAINCS)
 	$(F90) $(LDFLAGS) -o ../CUMC3D $(OBJ) $(EXTRAOBJECTS)
 
 $(SIMPLE_MOD): $(DEF_OBJ)
