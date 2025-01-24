@@ -1,0 +1,8 @@
+*.dat
+*.hdf5
+*.png
+*.o
+*.mod
+*NULL
+CUMC3D
+*.nfs*
