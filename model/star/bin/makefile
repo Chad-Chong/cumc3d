@@ -11,6 +11,7 @@ MODEL  := $(CUMC3D_DIR)/model/star/src
 CUSTOM := $(CUMC3D_DIR)/model/star/custom-mhd
 
 vpath %.f90 $(CUSTOM):$(SOLVER):$(MODEL)
+vpath %.h $(CUSTOM):$(SOLVER)
 
 #source list#
 SOURCE = $(shell cat $(SOLVER)/source.list) $(shell cat $(MODEL)/source.list)
