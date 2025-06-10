@@ -18,21 +18,21 @@ FIXPOLE = -DFIXPOLE
 
 # Choose between CPU or GPU threading #
 #MULTICORE = -DGPU -acc
-#MULTICORE = -mp
+MULTICORE = -mp
 
 # Define F90 compiler #
-F90=h5pfc
+F90=/home/cmyip/HDF5/bin/h5fc 
 
 # need extra math packages? #
 #MATHPACK = -llapack -lblas
 
 # Compiler flags
 #PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
-ifortflags = -O3 -traceback
-ifortomp = -qopenmp
+#ifortflags = -O3 -traceback
+#ifortomp = -qopenmp
 #ifortdebug = -check all -fpe0
 
-ifort = $(ifortflags) $(ifortomp) $(ifortdebug)
+#ifort = $(ifortflags) $(ifortomp) $(ifortdebug)
 
 # Define F90 flags #
 # -Mipa=fast is suppressed #

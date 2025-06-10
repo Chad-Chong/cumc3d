@@ -2,14 +2,15 @@
 include $(CUMC3D_DIR)/make.inc
 
 #specify HDF5#
-EXTRAINCS += $(HDF5INCS) -module . -qopenmp #  -check all 
-EXTRAOBJECTS +=  $(HDF5LIBS) -module . -qopenmp # -check all 
+EXTRAINCS += $(HDF5INCS) -module .  #  -check all 
+EXTRAOBJECTS +=  $(HDF5LIBS) -module .  # -check all 
 
 #specify directories#
 SOLVER := $(CUMC3D_DIR)/solver/mhd
 MODEL  := $(CUMC3D_DIR)/model/star/src
+CUSTOM := $(CUMC3D_DIR_OLD)/model/star/custom-mhd
 
-vpath %.f90 $(SOLVER):$(MODEL)
+vpath %.f90 $(CUSTOM):$(SOLVER):$(MODEL)
 
 #source list#
 SOURCE = $(shell cat $(SOLVER)/source.list) $(shell cat $(MODEL)/source.list)
