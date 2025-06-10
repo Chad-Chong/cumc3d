@@ -8,7 +8,7 @@ EXTRAOBJECTS +=  $(HDF5LIBS) -module .  # -check all
 #specify directories#
 SOLVER := $(CUMC3D_DIR)/solver/mhd
 MODEL  := $(CUMC3D_DIR)/model/star/src
-CUSTOM := $(CUMC3D_DIR_OLD)/model/star/custom-mhd
+CUSTOM := $(CUMC3D_DIR)/model/star/custom-mhd
 
 vpath %.f90 $(CUSTOM):$(SOLVER):$(MODEL)
 
