@@ -74,7 +74,7 @@ INTEGER :: i, j, nlines
 
 ! Read the number of lines in the file !
 nlines = 0 
-OPEN (970, file = './profile/x1_fgrid.dat') 
+OPEN (970, file = './profile/hydro_x1_fgrid.dat') 
 DO 
   READ (970,*, END=10) 
   nlines = nlines + 1 
@@ -89,16 +89,17 @@ IF(nlines .ne. nx+7) THEN
 END IF
 
 ! Read !
-OPEN(UNIT=970, FILE = './profile/x1_fgrid.dat', ACTION='READ')
+OPEN(UNIT=970, FILE = './profile/hydro_x1_fgrid.dat', ACTION='READ')
 DO i = -3, nx+3
 	READ(970,*) xF(i)
 ENDDO
 CLOSE(970)
 
 xF = xF*lencgs2code
+xF(0) = 1.0D-50*lencgs2code
 
 nlines = 0 
-OPEN (970, file = './profile/x2_fgrid.dat')
+OPEN (970, file = './profile/hydro_x2_fgrid.dat')
 DO 
   READ (970,*, END=11) 
   nlines = nlines + 1 
@@ -113,7 +114,7 @@ IF(nlines .ne. ny+7) THEN
 END IF
 
 ! Read !
-OPEN(UNIT=970, FILE = './profile/x2_fgrid.dat', ACTION='READ')
+OPEN(UNIT=970, FILE = './profile/hydro_x2_fgrid.dat', ACTION='READ')
 DO i = -3, ny+3
 	READ(970,*) yF(i)
 ENDDO

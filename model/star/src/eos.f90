@@ -36,6 +36,7 @@ DO l = -2, nz + 3
 				prim(itau,j,k,l) = amax*small_pressure(xe)
 			END IF
 			cs(j,k,l) = DSQRT(amax*dpdx(xe)/3.0D0/(prim(irho,j,k,l)**2*bmax)**(1.0D0/3.0D0))
+			CALL EOSEPSILON_NM(prim(irho,j,k,l), prim(itau,j,k,l), epsilon(j,k,l))
    		 END DO
   	END DO
 END DO

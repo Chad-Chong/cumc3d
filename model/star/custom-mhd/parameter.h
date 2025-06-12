@@ -91,13 +91,13 @@ REAL*8 :: total_time = 120.0D0
 LOGICAL, PARAMETER :: LF_flag = .false.
 
 ! Use the HLL Riemann solver !
-LOGICAL, PARAMETER :: HLL_flag = .true.
+LOGICAL, PARAMETER :: HLL_flag = .false.
 
 ! Use the HLLC Riemann solver !
 LOGICAL, PARAMETER :: HLLC_flag = .false.
 
 ! Use the HLLD Riemann solver !
-LOGICAL, PARAMETER :: HLLD_flag = .false.
+LOGICAL, PARAMETER :: HLLD_flag = .true.
 
 ! Use the TVD (Mignone 2014) reconstruction scheme with Min-Mod limiter !
 LOGICAL, PARAMETER :: tvdmm_flag = .false.
@@ -109,10 +109,10 @@ LOGICAL, PARAMETER :: tvdmc_flag = .false.
 LOGICAL, PARAMETER :: tvdvl_flag = .false.
 
 ! Use the PPM (Colella 1984) reconstruction scheme !
-LOGICAL, PARAMETER :: ppmc_flag = .false.
+LOGICAL, PARAMETER :: ppmc_flag = .true.
 
 ! Use the WENO (Shu 1997) reconstruction scheme !
-LOGICAL, PARAMETER :: weno_flag = .true.
+LOGICAL, PARAMETER :: weno_flag = .false.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Section for Output setting
