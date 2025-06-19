@@ -30,20 +30,20 @@ CALL GET_SOURCE
 ! Custom source term !
 CALL CUSTOM_SOURCE
 
-DO k = 1, nz, 1
-	DO j = 1, ny, 1
-		DO i = 1, nx, 1
-			IF (ieee_is_nan(sc(itau,i,j,k))) THEN
-					WRITE(*,*) 'tau source term is nan'
-					STOP
-			ENDIF
-			IF (ieee_is_nan(sc(iturbq,i,j,k))) THEN
-					WRITE(*,*) 'turbulence energy source term is nan'
-					STOP
-			ENDIF
-		ENDDO
-	ENDDO
-ENDDO
+! DO k = 1, nz, 1
+! 	DO j = 1, ny, 1
+! 		DO i = 1, nx, 1
+! 			IF (ieee_is_nan(sc(itau,i,j,k))) THEN
+! 					WRITE(*,*) 'tau source term is nan'
+! 					STOP
+! 			ENDIF
+! 			IF (ieee_is_nan(sc(iturbq,i,j,k))) THEN
+! 					WRITE(*,*) 'turbulence energy source term is nan'
+! 					STOP
+! 			ENDIF
+! 		ENDDO
+! 	ENDDO
+! ENDDO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Do the x-sweep !

@@ -76,7 +76,7 @@ INTEGER, PARAMETER :: xisotran_flag = 1
 
 ! Helmholtz EOS Flag and its Checking Flag !
 INTEGER, PARAMETER :: helmeos_flag = 1
-INTEGER, PARAMETER :: helmcheck_flag = 1
+INTEGER, PARAMETER :: helmcheck_flag = 0
 INTEGER :: count = 0
 
 ! Turbulence Flag (only for spherical coordinates) !

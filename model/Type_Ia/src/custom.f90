@@ -344,7 +344,7 @@ DO l = 1, nz
       ! Standard !
       diff = prim(irho,j,k,l) - prim_a(irho)
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
-      prim(irho:ivz,j,k,l) = factor*prim(irho:ivz,j,k,l) + (1.0D0 - factor)*prim_a(irho:ivz)
+      prim(irho,j,k,l) = factor*prim(irho,j,k,l) + (1.0D0 - factor)*prim_a(irho) ! Do not force a value on atmosphere
       IF (helmeos_flag == 1) THEN
         temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
         epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a

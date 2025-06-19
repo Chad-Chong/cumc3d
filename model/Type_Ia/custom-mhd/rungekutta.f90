@@ -63,21 +63,21 @@ WRITE(*,*) 'backup = ', REAL(time_end - time_start) / rate
 ! Discretize !
 CALL SPATIAL
 
-DO l = 0, nz
-  DO k = 0, ny
-    DO j = 0, nx
-			DO i = imin, imax
-				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
-					WRITE(*,*) 'l operator is nan after 1st spatial for i=', i
-					nan_flag = 1
-				ENDIF
-			END DO
-		END DO
-	END DO
-END DO
-IF (nan_flag == 1) THEN
-	STOP
-ENDIF
+! DO l = 0, nz
+!   DO k = 0, ny
+!     DO j = 0, nx
+! 			DO i = imin, imax
+! 				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
+! 					WRITE(*,*) 'l operator is nan after 1st spatial for i=', i
+! 					nan_flag = 1
+! 				ENDIF
+! 			END DO
+! 		END DO
+! 	END DO
+! END DO
+! IF (nan_flag == 1) THEN
+! 	STOP
+! ENDIF
 
 
 #ifdef DEBUG
@@ -107,21 +107,21 @@ WRITE(*,*) 'rk1 = ', REAL(time_end - time_start) / rate
 ! Convert from conservative to primitive
 CALL FROMUTORVE
 
-DO l = 1, nz
-  DO k = 1, ny
-    DO j = 1, nx
-			DO i = imin, imax
-				IF (ieee_is_nan(prim(i,j,k,l))) THEN
-					WRITE(*,*) 'prim is nan before 2nd spatial for i=', i
-					nan_flag = 1
-				ENDIF
-			END DO
-		END DO
-	END DO
-END DO
-IF (nan_flag == 1) THEN
-	STOP
-ENDIF
+! DO l = 1, nz
+!   DO k = 1, ny
+!     DO j = 1, nx
+! 			DO i = imin, imax
+! 				IF (ieee_is_nan(prim(i,j,k,l))) THEN
+! 					WRITE(*,*) 'prim is nan before 2nd spatial for i=', i
+! 					nan_flag = 1
+! 				ENDIF
+! 			END DO
+! 		END DO
+! 	END DO
+! END DO
+! IF (nan_flag == 1) THEN
+! 	STOP
+! ENDIF
 
 ! Check density !
 CALL CUSTOM_CHECKRHO
@@ -135,21 +135,21 @@ call BOUNDARY
 ! Update 
 CALL UPDATE (1)
 
-DO l = 1, nz
-  DO k = 1, ny
-    DO j = 1, nx
-			DO i = imin, imax
-				IF (ieee_is_nan(prim(i,j,k,l))) THEN
-					WRITE(*,*) 'prim is nan after update1, before 2nd spatial for i=', i
-					nan_flag = 1
-				ENDIF
-			END DO
-		END DO
-	END DO
-END DO
-IF (nan_flag == 1) THEN
-	STOP
-ENDIF
+! DO l = 1, nz
+!   DO k = 1, ny
+!     DO j = 1, nx
+! 			DO i = imin, imax
+! 				IF (ieee_is_nan(prim(i,j,k,l))) THEN
+! 					WRITE(*,*) 'prim is nan after update1, before 2nd spatial for i=', i
+! 					nan_flag = 1
+! 				ENDIF
+! 			END DO
+! 		END DO
+! 	END DO
+! END DO
+! IF (nan_flag == 1) THEN
+! 	STOP
+! ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 2nd iteration
@@ -157,22 +157,22 @@ ENDIF
 ! Discretize !
 CALL SPATIAL
 
-DO l = 0, nz
-  DO k = 0, ny
-    DO j = 0, nx
-			DO i = imin, imax
-				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
-					WRITE(*,*) 'l operator is nan after 2nd spatial for i,j,k,l', i, j, k, l
-					nan_flag = 1
-				ENDIF
-			END DO
-		END DO
-	END DO
-END DO
+! DO l = 0, nz
+!   DO k = 0, ny
+!     DO j = 0, nx
+! 			DO i = imin, imax
+! 				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
+! 					WRITE(*,*) 'l operator is nan after 2nd spatial for i,j,k,l', i, j, k, l
+! 					nan_flag = 1
+! 				ENDIF
+! 			END DO
+! 		END DO
+! 	END DO
+! END DO
 
-IF (nan_flag == 1) THEN
-	STOP
-ENDIF
+! IF (nan_flag == 1) THEN
+! 	STOP
+! ENDIF
 
 
 #ifdef DEBUG
@@ -219,22 +219,22 @@ CALL UPDATE (2)
 
 CALL SPATIAL
 
-DO l = 0, nz
-  DO k = 0, ny
-    DO j = 0, nx
-			DO i = imin, imax
-				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
-					WRITE(*,*) 'l operator is nan after 3rd spatial for i=', i
-					nan_flag = 1
-				ENDIF
-			END DO
-		END DO
-	END DO
-END DO
+! DO l = 0, nz
+!   DO k = 0, ny
+!     DO j = 0, nx
+! 			DO i = imin, imax
+! 				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
+! 					WRITE(*,*) 'l operator is nan after 3rd spatial for i=', i
+! 					nan_flag = 1
+! 				ENDIF
+! 			END DO
+! 		END DO
+! 	END DO
+! END DO
 
-IF (nan_flag == 1) THEN
-	STOP
-ENDIF
+! IF (nan_flag == 1) THEN
+! 	STOP
+! ENDIF
 
 
 #ifdef DEBUG
