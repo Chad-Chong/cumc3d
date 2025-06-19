@@ -692,7 +692,8 @@ IMPLICIT NONE
 
 INTEGER :: j, k, l
 
-output_file = .true.
+! output_file = .true.
+
 END SUBROUTINE
 
 !!!!!!!!!!!!!!!!!!!!!!!!
