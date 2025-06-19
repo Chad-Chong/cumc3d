@@ -123,37 +123,24 @@ ENDIF
 
 ! set atmospheric primitive variables !
 prim_a(:) = 0.0D0
-atmosphere = 1.0D-8*MAXVAL(prim(irho,:,:,:))
+atmosphere = atmospheric*MAXVAL(prim(irho,:,:,:))
 prim_a(irho) = atmosphere
 
 IF (helmeos_flag == 1) THEN
-  CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2(nx,1,1),  zbar2(nx,1,1), prim(iye2, nx, 1, 1), prim_a(itau), dummy, dummy, flag_eostable)
-  CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2(nx,1,1), zbar2(nx,1,1), prim(iye2, nx, 1, 1), eps_a)
+  prim_a(ihe4) = xiso_ahe4
+  prim_a(ic12) = xiso_ac12
+  prim_a(io16) = xiso_ao16
+  CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, ye2_a)
+  CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2_a, zbar2_a, ye2_a, prim_a(itau), dummy, dummy, flag_eostable)
+  CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2_a, zbar2_a, ye2_a, eps_a)
 ELSE
   prim_a(itau) = prim(itau,nx,1,1)
   eps_a = epsilon(nx,1,1)
 ENDIF
 
 IF (helmcheck_flag == 1) THEN
-    WRITE(*,*) 'Atmosphere rho is', atmosphere, 'epsilon is', eps_a, 'pressure is', prim_a(itau)
+    WRITE(*,*) 'Atmosphere rho is', atmosphere, 'epsilon is', eps_a, 'pressure is', prim_a(itau), 'abar is', abar2_a, 'zbar is', zbar2_a, 'Ye is', ye2_a  
 ENDIF
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-! Assign floor density !
-DO j = 1, nx
-  DO k = 1, ny
-    IF(prim(irho,j,k,1) < atmosphere) THEN
-      prim(irho,j,k,1) = atmosphere
-      prim(ivx:ivz,j,k,1) = 0.0d0
-      epsilon(j,k,1) = eps_a
-      IF (helmeos_flag == 1) THEN
-        temp2(j,k,1) = temp2_a
-        temp2_old(j,k,1) = temp2_a
-      ENDIF
-    END IF
-  END DO
-END DO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -163,6 +150,11 @@ IF (turb_flag == 1) THEN
   CALL GetTurb
   CALL FINDTURBULENCE
 ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Assign floor density !
+CALL CUSTOM_CHECKRHO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

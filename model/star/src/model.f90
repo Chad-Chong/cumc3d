@@ -53,6 +53,8 @@ OPEN(UNIT=970, FILE = './profile/hydro_Aphi.dat', ACTION='READ')
 READ(970,*) ((a_phi(j,k,1), j = 0, nx), k = 0, ny)
 CLOSE(970)
 
+a_phi(:,:,:) = 0.0D0
+
 PRINT *, "Finished reading Aphi"
 
 ! Calculate magnetic field !
@@ -66,6 +68,9 @@ DO l = 0, nz
     END DO
   END DO
 END DO
+
+prim(ibx:iby,:,:,:) = 0
+
 prim(ibx:iby,:,:,:) = prim(ibx:iby,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
 
 PRINT *, "Finished calculating poloidal field"

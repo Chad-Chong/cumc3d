@@ -109,10 +109,10 @@ LOGICAL, PARAMETER :: tvdmc_flag = .false.
 LOGICAL, PARAMETER :: tvdvl_flag = .false.
 
 ! Use the PPM (Colella 1984) reconstruction scheme !
-LOGICAL, PARAMETER :: ppmc_flag = .true.
+LOGICAL, PARAMETER :: ppmc_flag = .false.
 
 ! Use the WENO (Shu 1997) reconstruction scheme !
-LOGICAL, PARAMETER :: weno_flag = .false.
+LOGICAL, PARAMETER :: weno_flag = .true.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Section for Output setting

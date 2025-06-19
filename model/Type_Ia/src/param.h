@@ -49,7 +49,7 @@ REAL*8, PARAMETER :: ye = 0.5D0
 ! Parameters !
 REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
-REAL*8, PARAMETER :: atmospheric = 1.0D-7
+REAL*8, PARAMETER :: atmospheric = 1.0D-8
 
 ! Constant for fermi equation of state !
 ! Note that the speed of light is unity !
@@ -76,7 +76,7 @@ INTEGER, PARAMETER :: xisotran_flag = 1
 
 ! Helmholtz EOS Flag and its Checking Flag !
 INTEGER, PARAMETER :: helmeos_flag = 1
-INTEGER, PARAMETER :: helmcheck_flag = 0
+INTEGER, PARAMETER :: helmcheck_flag = 1
 INTEGER :: count = 0
 
 ! Turbulence Flag (only for spherical coordinates) !
@@ -90,9 +90,10 @@ INTEGER, PARAMETER :: turb_flag = 0
 REAL*8, PARAMETER	:: temp_max = 7.0D1		
 REAL*8, PARAMETER 	:: temp_min = 1.0D-4
 
-! Atmosphere temperature !
-
-REAL*8, PARAMETER 	:: temp2_a = 1.0D-1
+! Atmosphere Parameters !
+REAL*8, PARAMETER    :: xiso_ahe4 = 1.0D0
+REAL*8, PARAMETER    :: xiso_ac12 = 0.0D0
+REAL*8, PARAMETER    :: xiso_ao16 = 0.0D0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Analysis flags !

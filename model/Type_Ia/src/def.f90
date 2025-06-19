@@ -22,7 +22,8 @@ REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: clp1, clm1, epsc
 ! for poisson solver !
 REAL*8, PARAMETER :: omega_weight = 1.9d0
 
-! epsilon at atmosphere !
+! temperature (HelmEOS) and epsilon at atmosphere !
+REAL*8 :: temp2_a = 1.0D-1
 REAL*8 :: eps_a
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -63,12 +64,10 @@ REAL*8 :: lumino_burn, lumino_flame, lumino_deton
 ! MAss burned by deflgration/detonation
 REAL*8 :: burn_mass
 
-! Initial chemical composition
-REAL*8 :: abar_ini, abar_ini1, abar_ini2
-REAL*8 :: zbar_ini, zbar_ini1, zbar_ini2
-REAL*8 :: ye2_ini, ye2_ini1, ye2_ini2
-
-REAL*8, dimension(totalion) :: xiso_a, xiso_a1, xiso_a2
+! Atmosphere chemical composition
+REAL*8 :: abar2_a
+REAL*8 :: zbar2_a
+REAL*8 :: ye2_a
 REAL*8 :: yiso_a, qash_a
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

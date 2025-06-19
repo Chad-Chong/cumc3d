@@ -305,11 +305,13 @@ END SUBROUTINE
 SUBROUTINE CUSTOM_CHECKRHO
 USE CUSTOM_DEF
 USE MHD_MODULE
+USE HELMEOS_MODULE
 USE DEFINITION
 IMPLICIT NONE
 
 ! Dummy variables
-INTEGER :: i, j, k, l
+INTEGER :: i, j, k, l, flag_eostable
+REAL*8 dummy
 
 ! Threshold for atmosphere density
 REAL*8 :: factor, diff, bfield, alven, rho_old, m_local
@@ -324,6 +326,14 @@ rate = REAL(cr)
 CALL system_clock(time_start)
 #endif
 
+IF (helmeos_flag == 1) THEN
+  atmosphere = MIN(atmosphere, 1.0D-4 * prim(irho,1,1,1))
+  prim_a(irho) = atmosphere
+  ! SC's code uses initial interior composition's ye for atmosphere, why? !
+  CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2_a,  zbar2_a, ye2_a, prim_a(itau), dummy, dummy, flag_eostable)
+  CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2_a, zbar2_a, ye2_a, eps_a)
+ENDIF
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !$OMP PARALLEL DO PRIVATE(diff, factor, bfield, alven, rho_old, m_local) COLLAPSE(3) SCHEDULE(STATIC)
@@ -335,12 +345,14 @@ DO l = 1, nz
       diff = prim(irho,j,k,l) - prim_a(irho)
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
       prim(irho:ivz,j,k,l) = factor*prim(irho:ivz,j,k,l) + (1.0D0 - factor)*prim_a(irho:ivz)
-      
       IF (helmeos_flag == 1) THEN
         temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
         epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
       ELSE
         epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*epsilon(nx,k,1)
+      ENDIF
+      IF (turb_flag == 1) THEN
+      prim(iturbq,j,k,l) = factor*prim(iturbq,j,k,l) + (1.0D0 - factor)*turb_q_a
       ENDIF
     END DO
   END DO

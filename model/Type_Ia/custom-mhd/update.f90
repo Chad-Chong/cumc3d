@@ -78,16 +78,6 @@ IF (helmcheck_flag == 1) THEN
         ENDDO
     ENDDO
     CLOSE(123)
-
-    OPEN (UNIT = 123, FILE = './rho_inverttemp'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
-    DO k = 1, ny, 1 
-        DO j = 1, nx, 1
-            CALL private_invert_helm_ed(epsilon(j,k,1), prim(irho,j,k,1), abar2(j,k,1), zbar2(j,k,1), prim(iye2,j,k,1), 1.0D-1, temp_output, &
-                                  dummy)
-            WRITE(123, *) prim(irho,j,k,1), temp_output
-        ENDDO
-    ENDDO
-    CLOSE(123)
 ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Custom updates !
