@@ -85,7 +85,7 @@ CALL GETFLUX_X
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Do the y-sweep !
-IF(n_dim > 1) THEN
+IF(n_dim > 1 .and. axissym_flag /= 1) THEN
 
 	! Reconstruction !
 	IF(tvdmm_flag) THEN

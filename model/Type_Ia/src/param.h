@@ -5,6 +5,28 @@
 ! Electron fraction is assumed to be 0.5 always everywhere !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! Feature Flags !
+
+! Flag for gravity
+INTEGER, PARAMETER :: gravity_flag = 1
+
+! Flag for phi BC (for this to work gravity flag needs to be 1)
+INTEGER, PARAMETER :: phitest_flag = 0
+
+! Chemical Composition and Transport (ISO) Flag
+INTEGER, PARAMETER :: xisotran_flag = 1
+
+! Helmholtz EOS Flag and its Checking Flag
+INTEGER, PARAMETER :: helmeos_flag = 1
+INTEGER, PARAMETER :: helmcheck_flag = 0
+INTEGER :: count = 0
+
+! Turbulence Flag (only for cylindrical coordinates (uniform r z grid); spherical coordinates are not implemented correctly, the stress tensor viscosity definition needs to be modified)
+
+INTEGER, PARAMETER :: turb_flag = 1
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! Unit constants !
 
 ! Physical constants to be as one !
@@ -49,7 +71,7 @@ REAL*8, PARAMETER :: ye = 0.5D0
 ! Parameters !
 REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
-REAL*8, PARAMETER :: atmospheric = 1.0D-8
+REAL*8, PARAMETER :: atmospheric = 1.0D-7
 
 ! Constant for fermi equation of state !
 ! Note that the speed of light is unity !
@@ -63,25 +85,13 @@ REAL*8, PARAMETER :: bmax = (mb2*me2**3)/(3.0D0*pi**2*h_bar**3*ye)
 INTEGER, PARAMETER :: n_pot = 20
 
 ! maximum number of relaxation !
-INTEGER, PARAMETER :: relax_max = 1000000
+INTEGER, PARAMETER :: relax_max = 100000
 
 ! Tolerance in relaxation of the potential			
 REAL*8, PARAMETER :: tolerance = 1.0D-8
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Type Ia Flags !
-
-! Chemical Composition and Transport (ISO) Flag!
-INTEGER, PARAMETER :: xisotran_flag = 1
-
-! Helmholtz EOS Flag and its Checking Flag !
-INTEGER, PARAMETER :: helmeos_flag = 1
-INTEGER, PARAMETER :: helmcheck_flag = 0
-INTEGER :: count = 0
-
-! Turbulence Flag (only for spherical coordinates) !
-
-INTEGER, PARAMETER :: turb_flag = 0
+! Number of multipoles at the boundary, maximum is quadrupole !
+INTEGER, PARAMETER :: n_pole = 0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Helmholtz EOS Parameters !

@@ -31,10 +31,13 @@ REAL*8, PARAMETER :: small_num = TINY(1.0D0)
 ! 0 = Cartesian coordinate
 ! 1 = Cylindrical coordinate
 ! 2 = Spherical coordinate
-INTEGER, PARAMETER :: coordinate_flag = 2
+INTEGER, PARAMETER :: coordinate_flag = 1
 
 ! Dimension, 1 = 1D, 2 = 2D, 3 = 3D
-INTEGER, PARAMETER :: n_dim = 2
+INTEGER, PARAMETER :: n_dim = 3
+
+! Flag for axis-symmetry in cylindrical coordinates (set n_dim = 3 for this)
+INTEGER, PARAMETER :: axissym_flag = 1
 
 ! Flag for boundary condition
 ! The boundary flag is defined by four scalar
@@ -49,27 +52,27 @@ INTEGER, PARAMETER :: n_dim = 2
 ! 2 = reflecting boundary (depend on scalar/vector)
 ! 3 = axis-symmetric
 ! 4 = equatorial-symmetric
-INTEGER :: boundary_flag(6) = (/2,1,3,3,0,0/)
+INTEGER :: boundary_flag(6) = (/2,1,0,0,1,1/)
 
 ! Flag for simulating with the full box (extend to negative x,y,z)
-LOGICAL, PARAMETER :: fullx_flag = .false.
-LOGICAL, PARAMETER :: fully_flag = .false.
-LOGICAL, PARAMETER :: fullz_flag = .false.
+LOGICAL, PARAMETER :: fullx_flag = .true.
+LOGICAL, PARAMETER :: fully_flag = .true.
+LOGICAL, PARAMETER :: fullz_flag = .true.
 
 ! Starting position of the grid !
-REAL*8, PARAMETER :: x_start = 1.5d0
+REAL*8, PARAMETER :: x_start = 1.5d0 ! Determined by custom grid
 REAL*8, PARAMETER :: y_start = 0.0d0
-REAL*8, PARAMETER :: z_start = 0.0D0
+REAL*8, PARAMETER :: z_start = 0.0D0 ! Determined by custom grid
 
 ! Ending position of the grid !
-REAL*8, PARAMETER :: x_end = 21.5d0
-REAL*8, PARAMETER :: y_end = pi
-REAL*8, PARAMETER :: z_end = 2.0D0*pi
+REAL*8, PARAMETER :: x_end = 21.5d0 ! Determined by custom grid
+REAL*8, PARAMETER :: y_end = 2.0D0*pi
+REAL*8, PARAMETER :: z_end = 2.0D0*pi ! Determined by custom grid
 
 ! The number of grid in the x,y,z direction for NM
-INTEGER, PARAMETER :: nx = 200 
-INTEGER, PARAMETER :: ny = 40
-INTEGER, PARAMETER :: nz = 1 !Use 1 if 2D
+INTEGER, PARAMETER :: nx = 150
+INTEGER, PARAMETER :: ny = 1 !Use 1 if 2D
+INTEGER, PARAMETER :: nz = 150
 
 ! Grid sizes for NM
 REAL*8, PARAMETER :: dx_ini = (x_end - x_start)/DBLE(nx)	
@@ -91,13 +94,13 @@ REAL*8 :: total_time = 120.0D0
 LOGICAL, PARAMETER :: LF_flag = .false.
 
 ! Use the HLL Riemann solver !
-LOGICAL, PARAMETER :: HLL_flag = .false.
+LOGICAL, PARAMETER :: HLL_flag = .true.
 
 ! Use the HLLC Riemann solver !
 LOGICAL, PARAMETER :: HLLC_flag = .false.
 
 ! Use the HLLD Riemann solver !
-LOGICAL, PARAMETER :: HLLD_flag = .true.
+LOGICAL, PARAMETER :: HLLD_flag = .false.
 
 ! Use the TVD (Mignone 2014) reconstruction scheme with Min-Mod limiter !
 LOGICAL, PARAMETER :: tvdmm_flag = .false.
