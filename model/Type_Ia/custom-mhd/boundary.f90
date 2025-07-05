@@ -12,6 +12,7 @@ IMPLICIT NONE
 ! Call boundary condition !
 call BOUNDARYP_NM
 call BOUNDARY1D_NM (epsilon, even, even, even, even, even, even)
+CALL BOUNDARY1D_NM (cs, even, even, even, even, even, even)
 
 IF (turb_flag == 1) CALL BOUNDARY1D_NM(turb_source, even, even, even, even, even, even)
 

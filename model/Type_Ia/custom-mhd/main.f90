@@ -79,8 +79,6 @@ CALL FIND_DIVB
 ! Custom quantities !
 CALL OPENFILE_CUSTOM
 
-WRITE(*,*) 'WENO Flag is', weno_flag
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Main rungekutta loop !
 

@@ -343,8 +343,8 @@ REAL*8 :: dummy
 ! Threshold for atmosphere density
 REAL*8 :: diff, factor, bfield, alven, rho_old, m_local
 
-! Minimum internal energy density
-REAL*8 :: epsilon_temp_min
+! Minimum / maximum internal energy density
+REAL*8 :: epsilon_temp_min, epsilon_temp_max
 
 ! Check timing with or without openmp
 #ifdef DEBUG
@@ -373,7 +373,8 @@ DO l = 1, nz
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
 
       IF (diff <  0.0D0 ) THEN
-        prim(irho,j,k,l) = prim_a(irho) ! Change the thermodynamic properties, not the composition
+        prim(irho,j,k,l) = prim_a(irho) ! Change the thermodynamic / hydro properties, not the composition
+        ! prim(ivx:ivz,j,k,l) = 0.0D0
         IF (helmeos_flag == 1) THEN
           CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
           CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
@@ -385,13 +386,20 @@ DO l = 1, nz
         ENDIF
       ENDIF
 
-      IF (helmeos_flag == 1) THEN
-        CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_min, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_min)
-          IF (epsilon(j,k,l) < epsilon_temp_min) THEN
-            epsilon(j,k,l) = epsilon_temp_min
-            temp2(j,k,l) = temp_min
-          ENDIF
-      ENDIF
+      ! This code segment gives a bug where it assigns epsilon_temp_min in the interior of the star (higher density)
+      ! IF (helmeos_flag == 1) THEN 
+      !   CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_min, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_min)
+      !   CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_max, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_max)
+      !     IF (epsilon(j,k,l) < epsilon_temp_min) THEN
+      !       epsilon(j,k,l) = epsilon_temp_min
+      !       temp2(j,k,l) = temp_min
+      !     ENDIF
+      !     IF (epsilon(j,k,l) > epsilon_temp_max) THEN
+      !       epsilon(j,k,l) = epsilon_temp_max
+      !       temp2(j,k,l) = temp_max
+      !     ENDIF
+      ! ENDIF
+
 
     END DO
   END DO
@@ -892,7 +900,7 @@ IMPLICIT NONE
 
 INTEGER :: j, k, l
 
-output_file = .true.
+! output_file = .true.
 
 END SUBROUTINE
 

@@ -537,7 +537,11 @@ CONTAINS
     epsilon_out = etot_row(1) * 1.0D-4 / 9.0D16
 
     IF (ieee_is_nan(epsilon_out)) THEN
-        WRITE(*,*) 'Epsilon is nan'
+        WRITE(*,*) 'Helmeos: epsilon is nan, input in cgs is'
+        WRITE(*,*) 'Density', den_row(1)
+        WRITE(*,*) 'Temperature', temp_row(1)
+        WRITE(*,*) 'Abar', abar_row(1)
+        WRITE(*,*) 'Zbar', zbar_row(1)
         STOP
     ENDIF
 

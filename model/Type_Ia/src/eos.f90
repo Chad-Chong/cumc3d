@@ -43,6 +43,7 @@ IF (helmeos_flag == 1) THEN
 			END DO
 		END DO
 	END DO
+	CALL BOUNDARY1D_NM(epsilon, even, even, even, even, even, even)
 	CALL BOUNDARY1D_NM(prim(itau,:,:,:), even, even, even, even, even, even)
 	CALL BOUNDARY1D_NM(cs, even, even, even, even, even, even)
 

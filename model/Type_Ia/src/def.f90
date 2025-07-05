@@ -67,7 +67,6 @@ REAL*8 :: burn_mass
 ! Atmosphere chemical composition
 REAL*8 :: abar2_a
 REAL*8 :: zbar2_a
-REAL*8 :: ye2_a
 REAL*8 :: yiso_a, qash_a
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

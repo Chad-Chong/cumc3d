@@ -11,15 +11,12 @@
 
 SUBROUTINE RUNGEKUTTA
 USE DEFINITION
-USE IEEE_ARITHMETIC
 IMPLICIT NONE
 
 ! Dummy variables
-INTEGER :: i, j, k, l, nan_flag
+INTEGER :: i, j, k, l
 ! Dummy !
 REAL*8 :: rhoaold, dummy
-
-nan_flag = 0
 
 ! Check timing with or without openmp
 #ifdef DEBUG
@@ -63,23 +60,6 @@ WRITE(*,*) 'backup = ', REAL(time_end - time_start) / rate
 ! Discretize !
 CALL SPATIAL
 
-! DO l = 0, nz
-!   DO k = 0, ny
-!     DO j = 0, nx
-! 			DO i = imin, imax
-! 				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
-! 					WRITE(*,*) 'l operator is nan after 1st spatial for i=', i
-! 					nan_flag = 1
-! 				ENDIF
-! 			END DO
-! 		END DO
-! 	END DO
-! END DO
-! IF (nan_flag == 1) THEN
-! 	STOP
-! ENDIF
-
-
 #ifdef DEBUG
 CALL system_clock(time_start)
 #endif
@@ -90,7 +70,7 @@ CALL system_clock(time_start)
 DO l = 0, nz
   DO k = 0, ny
     DO j = 0, nx
-			DO i = imin, imax
+			DO i = imin, imax 
 				cons (i,j,k,l) = u_old (i,j,k,l) + dt * l_rk (i,j,k,l) 
 			END DO
 		END DO
@@ -107,22 +87,6 @@ WRITE(*,*) 'rk1 = ', REAL(time_end - time_start) / rate
 ! Convert from conservative to primitive
 CALL FROMUTORVE
 
-! DO l = 1, nz
-!   DO k = 1, ny
-!     DO j = 1, nx
-! 			DO i = imin, imax
-! 				IF (ieee_is_nan(prim(i,j,k,l))) THEN
-! 					WRITE(*,*) 'prim is nan before 2nd spatial for i=', i
-! 					nan_flag = 1
-! 				ENDIF
-! 			END DO
-! 		END DO
-! 	END DO
-! END DO
-! IF (nan_flag == 1) THEN
-! 	STOP
-! ENDIF
-
 ! Check density !
 CALL CUSTOM_CHECKRHO
 
@@ -135,45 +99,11 @@ call BOUNDARY
 ! Update 
 CALL UPDATE (1)
 
-! DO l = 1, nz
-!   DO k = 1, ny
-!     DO j = 1, nx
-! 			DO i = imin, imax
-! 				IF (ieee_is_nan(prim(i,j,k,l))) THEN
-! 					WRITE(*,*) 'prim is nan after update1, before 2nd spatial for i=', i
-! 					nan_flag = 1
-! 				ENDIF
-! 			END DO
-! 		END DO
-! 	END DO
-! END DO
-! IF (nan_flag == 1) THEN
-! 	STOP
-! ENDIF
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 2nd iteration
 
 ! Discretize !
 CALL SPATIAL
-
-! DO l = 0, nz
-!   DO k = 0, ny
-!     DO j = 0, nx
-! 			DO i = imin, imax
-! 				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
-! 					WRITE(*,*) 'l operator is nan after 2nd spatial for i,j,k,l', i, j, k, l
-! 					nan_flag = 1
-! 				ENDIF
-! 			END DO
-! 		END DO
-! 	END DO
-! END DO
-
-! IF (nan_flag == 1) THEN
-! 	STOP
-! ENDIF
-
 
 #ifdef DEBUG
 CALL system_clock(time_start)
@@ -218,24 +148,6 @@ CALL UPDATE (2)
 ! Prepare for next step
 
 CALL SPATIAL
-
-! DO l = 0, nz
-!   DO k = 0, ny
-!     DO j = 0, nx
-! 			DO i = imin, imax
-! 				IF (ieee_is_nan(l_rk (i,j,k,l))) THEN
-! 					WRITE(*,*) 'l operator is nan after 3rd spatial for i=', i
-! 					nan_flag = 1
-! 				ENDIF
-! 			END DO
-! 		END DO
-! 	END DO
-! END DO
-
-! IF (nan_flag == 1) THEN
-! 	STOP
-! ENDIF
-
 
 #ifdef DEBUG
 CALL system_clock(time_start)

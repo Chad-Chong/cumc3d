@@ -70,9 +70,9 @@ REAL*8, PARAMETER :: y_end = 2.0D0*pi
 REAL*8, PARAMETER :: z_end = 2.0D0*pi ! Determined by custom grid
 
 ! The number of grid in the x,y,z direction for NM
-INTEGER, PARAMETER :: nx = 150
+INTEGER, PARAMETER :: nx = 375
 INTEGER, PARAMETER :: ny = 1 !Use 1 if 2D
-INTEGER, PARAMETER :: nz = 150
+INTEGER, PARAMETER :: nz = 375
 
 ! Grid sizes for NM
 REAL*8, PARAMETER :: dx_ini = (x_end - x_start)/DBLE(nx)	

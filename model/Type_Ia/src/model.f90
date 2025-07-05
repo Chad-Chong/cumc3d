@@ -220,6 +220,42 @@ ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+CALL FINDPRESSURE
+IF (helmeos_flag == 0 .and. coordinate_flag == 2) THEN
+  DO j = 1, nx
+    DO k = 1, ny
+      prim(irho,j,k,1) = max(prim(irho,j,k,1), atmosphere)
+      CALL EOSEPSILON_NM(prim(irho,j,k,1), prim(itau,j,k,1), epsilon(j,k,1))
+    END DO
+  END DO
+ELSEIF (helmeos_flag == 0 .and. coordinate_flag == 1) THEN 
+  DO j = 1, nx
+    DO l = 1, nz
+      prim(irho,j,k,1) = max(prim(irho,j,1,l), atmosphere)
+      CALL EOSEPSILON_NM(prim(irho,j,1,l), prim(itau,j,1,l), epsilon(j,1,l))
+    END DO
+  END DO
+ENDIF
+PRINT *, 'Finish calculating pressure, sound speed and epsilon'
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Sub-grid Turbulence !
+
+IF (turb_flag == 1) THEN
+  IF (ABS(dx(1) - dz(1)) > 1e-3*lencgs2code) THEN
+    WRITE(*,*) 'dx(1)=', dx(1), 'dz(1)=', dz(1)
+    WRITE(*,*) 'Grid is not uniform for cylindrical sub-grid scale turbulence'
+    STOP
+  ENDIF
+  CALL GetTurb
+  CALL FINDTURBULENCE
+  prim_a(iturbq) = turb_q_a
+ENDIF
+CALL BOUNDARY
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! set atmospheric primitive variables !
 prim_a(:) = 0.0D0
 atmosphere = atmospheric*MAXVAL(prim(irho,:,:,:))
@@ -232,7 +268,6 @@ IF (helmeos_flag == 1) THEN
   CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, prim_a(iye2))
   CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
   CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), eps_a)
-
 
   DO l = 1, nz
     DO k = 1, ny
@@ -255,48 +290,29 @@ IF (helmeos_flag == 1) THEN
 ENDIF
 
 IF (helmcheck_flag == 1) THEN
-    WRITE(*,*) 'Atmosphere rho is', atmosphere, 'epsilon is', eps_a, 'pressure is', prim_a(itau), 'abar is', abar2_a, 'zbar is', zbar2_a, 'Ye is', ye2_a  
+    WRITE(*,*) 'Atmosphere rho is', atmosphere, 'epsilon is', eps_a, 'pressure is', prim_a(itau), 'abar is', abar2_a, 'zbar is', zbar2_a, 'Ye is',  prim_a(iye2), 'temp is', temp2_a  
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! Sub-grid Turbulence !
+! OPEN (UNIT = 123, FILE = './rho_temp_bfcr.dat', STATUS = 'REPLACE')
+!     DO l = 1, nz, 1 
+!         DO j = 1, nx, 1
+!             WRITE(123, *) prim(irho,j,1,l), temp2(j,1,l)
+!         ENDDO
+!     ENDDO
+! CLOSE(123)
 
-IF (turb_flag == 1) THEN
-  IF (ABS(dx(1) - dz(1)) > 1e-3*lencgs2code) THEN
-    WRITE(*,*) 'dx(1)=', dx(1), 'dz(1)=', dz(1)
-    WRITE(*,*) 'Grid is not uniform for cylindrical sub-grid scale turbulence'
-    STOP
-  ENDIF
-  CALL GetTurb
-  CALL FINDTURBULENCE
-  prim_a(iturbq) = turb_q_a
-ENDIF
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-! Assign floor density !
+! Assign floor variables !
 CALL CUSTOM_CHECKRHO
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-CALL FINDPRESSURE
-IF (helmeos_flag == 0 .and. coordinate_flag == 2) THEN
-  DO j = 1, nx
-    DO k = 1, ny
-      prim(irho,j,k,1) = max(prim(irho,j,k,1), atmosphere)
-      CALL EOSEPSILON_NM(prim(irho,j,k,1), prim(itau,j,k,1), epsilon(j,k,1))
-    END DO
-  END DO
-ELSEIF (helmeos_flag == 0 .and. coordinate_flag == 1) THEN 
-  DO j = 1, nx
-    DO l = 1, nz
-      prim(irho,j,k,1) = max(prim(irho,j,k,1), atmosphere)
-      CALL EOSEPSILON_NM(prim(irho,j,1,l), prim(itau,j,1,l), epsilon(j,1,l))
-    END DO
-  END DO
-ENDIF
-PRINT *, 'Finish calculating pressure, sound speed and epsilon'
+! OPEN (UNIT = 123, FILE = './rho_temp_afcr.dat', STATUS = 'REPLACE')
+!     DO l = 1, nz, 1 
+!         DO j = 1, nx, 1
+!             WRITE(123, *) prim(irho,j,1,l), temp2(j,1,l)
+!         ENDDO
+!     ENDDO
+! CLOSE(123)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
