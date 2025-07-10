@@ -6,10 +6,8 @@ SUBROUTINE GET_MODEL
 USE DEFINITION
 USE CUSTOM_DEF
 USE MHD_MODULE
-USE FlameTable_module
+USE IEEE_ARITHMETIC
 USE Ecaptable_module
-USE Helmeos_module
-USE TURB_MODULE
 IMPLICIT NONE
 
 ! Integer !
@@ -45,6 +43,26 @@ ENDIF
 IF (turb_flag == 1 .and. coordinate_flag /= 1) THEN
   WRITE(*,*) 'SGS Turbulence is only implemented for cylindrical coordinates at the moment'
   STOP 
+ENDIF
+
+IF (helmeos_flag == 1 .and. xisotran_flag /= 1) THEN
+  WRITE(*,*) 'Helm eos must be initiated with isotope tracking'
+  STOP
+ENDIF
+
+IF (levelset_flag == 1 .and. coordinate_flag /= 1) THEN
+  WRITE(*,*) 'The level set method (2D) for flame tracking is only implemented for cylindrical coordinates at the moment'
+  STOP 
+ENDIF
+
+IF (flame_flag == 1 .and. coordinate_flag /= 1) THEN
+  WRITE(*,*) 'The level set method (2D) for flame tracking is only implemented for cylindrical coordinates at the moment'
+  STOP 
+ENDIF
+
+IF (flame_flag == 1 .and. xisotran_flag /= 1) THEN
+  WRITE(*,*) 'The flame must be initiated with the helm eos with isotope tracking'
+  STOP
 ENDIF
 
 IF (coordinate_flag == 0) THEN
@@ -221,6 +239,24 @@ ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 CALL FINDPRESSURE
+
+IF (helmeos_flag == 1) THEN
+	DO l = 1, nz
+		DO k = 1, ny
+			DO j = 1, nx
+
+				CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
+				IF (ieee_is_nan(epsilon(j,k,l))) THEN
+					WRITE(*,*) 'Global time', global_time, 'Input Rho', prim(irho,j,k,l), 'Input temp', temp2(j,k,l), 'abar2', abar2(j,k,l), 'zbar2', zbar2(j,k,l), 'ye', prim(iye2, j, k, l), 'at j,k,l', j,k,l
+					STOP
+				ENDIF
+				
+			END DO
+		END DO
+	END DO
+	CALL BOUNDARY1D_NM(epsilon, even, even, even, even, even, even)
+ENDIF
+
 IF (helmeos_flag == 0 .and. coordinate_flag == 2) THEN
   DO j = 1, nx
     DO k = 1, ny
@@ -236,6 +272,7 @@ ELSEIF (helmeos_flag == 0 .and. coordinate_flag == 1) THEN
     END DO
   END DO
 ENDIF
+
 PRINT *, 'Finish calculating pressure, sound speed and epsilon'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -250,7 +287,6 @@ IF (turb_flag == 1) THEN
   ENDIF
   CALL GetTurb
   CALL FINDTURBULENCE
-  prim_a(iturbq) = turb_q_a
 ENDIF
 CALL BOUNDARY
 
@@ -258,6 +294,9 @@ CALL BOUNDARY
 
 ! set atmospheric primitive variables !
 prim_a(:) = 0.0D0
+IF (turb_flag == 1) THEN
+  prim_a(iturbq) = turb_q_a
+ENDIF
 atmosphere = atmospheric*MAXVAL(prim(irho,:,:,:))
 prim_a(irho) = atmosphere
 
@@ -291,6 +330,24 @@ ENDIF
 
 IF (helmcheck_flag == 1) THEN
     WRITE(*,*) 'Atmosphere rho is', atmosphere, 'epsilon is', eps_a, 'pressure is', prim_a(itau), 'abar is', abar2_a, 'zbar is', zbar2_a, 'Ye is',  prim_a(iye2), 'temp is', temp2_a  
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Assign floor variables !
+CALL CUSTOM_CHECKRHO
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+IF (levelset_flag == 1) THEN
+  CALL GetFlame
+  WRITE(*,*) 'Finished building level set variables'
+ENDIF
+
+IF (xisotran_flag == 1 .and. helmeos_flag == 1 .and. levelset_flag == 1 .and. flame_flag == 1) THEN
+  CALL FLAME_INI()
+  CALL FIND_AZBAR()	
+  CALL FINDHELMTEMP()
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -68,6 +68,17 @@ IF (xisotran_flag == 1) THEN
   iye2 = no_of_eq
   WRITE(*,*) 'Make iye2 = ', no_of_eq
 
+  IF (levelset_flag == 1) THEN
+    no_of_eq = no_of_eq + 1 ! Deflagration level set
+    imax = no_of_eq
+    iscaG1 = no_of_eq
+    WRITE(*,*) 'Make iscaG1 = ', no_of_eq
+
+    no_of_eq = no_of_eq + 1 ! Deteonation level set
+    imax = no_of_eq
+    iscaG2 = no_of_eq
+    WRITE(*,*) 'Make iscaG2 = ', no_of_eq
+  ENDIF
 ENDIF
 
 END SUBROUTINE
@@ -78,8 +89,6 @@ END SUBROUTINE
 SUBROUTINE CUSTOM_HYDRO
 USE DEFINITION
 USE CUSTOM_DEF
-USE HELMEOS_MODULE
-USE TURB_MODULE
 IMPLICIT NONE
 
 ! atmospheric values !
@@ -109,6 +118,13 @@ IF (xisotran_flag == 1) THEN
   WRITE(*,*) 'Build chemical composition & nuclear variables'
   CALL buildHelm
   WRITE(*,*) 'Done building chemical composition & nuclear variables'
+  WRITE(*,*)
+ENDIF
+
+IF (levelset_flag == 1) THEN
+  WRITE(*,*) 'Build level set variables'
+  CALL buildLevelSet
+  WRITE(*,*) 'Done building level set variables'
   WRITE(*,*)
 ENDIF
 
@@ -332,7 +348,6 @@ END SUBROUTINE
 SUBROUTINE CUSTOM_CHECKRHO
 USE CUSTOM_DEF
 USE MHD_MODULE
-USE HELMEOS_MODULE
 USE DEFINITION
 IMPLICIT NONE
 
@@ -572,7 +587,6 @@ SUBROUTINE CUSTOM_UPDATE (p_in)
 USE DEFINITION
 USE CUSTOM_DEF
 USE MHD_MODULE
-USE TURB_MODULE 
 IMPLICIT NONE
 
 ! Integer !
@@ -866,6 +880,7 @@ IF (gravity_flag == 1) THEN
     END DO
   ENDIF
 ENDIF
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #ifdef DEBUG

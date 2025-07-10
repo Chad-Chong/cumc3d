@@ -179,10 +179,9 @@ REAL*8, DIMENSION(0:den_rowno2, 0:temp_rowno2, 1:totalion):: dettable_xiso
 
 INTEGER :: iye2
 
-! Refer to the module itself; this is to avoid redeclaration !
+! Refer to the module itself; this is to avoid redeclaration in helmeos !
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 ! For Turbulence !
 
@@ -198,5 +197,38 @@ REAL*8, allocatable, dimension(:,:,:) :: turb_diff
 
 ! The k-eps component
 REAL*8, allocatable, dimension(:,:,:) :: turb_eps
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! For level set
+
+integer :: iscaG1, iscaG2
+
+REAL*8 :: flame_rad
+INTEGER :: flame_grid      
+REAL*8 :: flame_vel_coeff = 0.03D0
+
+
+! Flag for finding detonation in the simulation
+INTEGER :: found_deton_flag = 0
+REAL*8 :: found_deton_time = 0.0D0
+
+! The type of grid depending on the geometry
+integer, allocatable, dimension(:,:,:) :: flamegrid_flag, detongrid_flag
+integer, allocatable, dimension(:,:,:) :: flamecorn_flag, detoncorn_flag
+
+! The level sets
+real*8, allocatable, dimension(:,:,:) :: scaG, scaG2
+
+! The fraction occupied by the level-set (1st)                                        
+real*8, allocatable, dimension(:,:,:) :: flame_ratio, flame_ratio_old
+real*8, allocatable, dimension(:,:,:) :: flame_loc_ratio
+                               
+! The fraction occupied by the level-set (2nd)           
+real*8, allocatable, dimension(:,:,:) :: deton_ratio, deton_ratio_old
+real*8, allocatable, dimension(:,:,:) :: deton_loc_ratio
+
+! Sum of fractions by level-set 
+real*8, allocatable, dimension(:,:,:) :: burn_ratio
 
 END MODULE

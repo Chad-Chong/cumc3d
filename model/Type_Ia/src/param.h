@@ -25,6 +25,31 @@ INTEGER :: count = 0
 
 INTEGER, PARAMETER :: turb_flag = 1
 
+! Flame Flags ! (the level set is written with uniform grid in mind)
+INTEGER, PARAMETER :: levelset_flag = 1
+INTEGER, PARAMETER :: flame_flag = 1
+INTEGER, PARAMETER :: flame_testflag = 0
+
+! Flag for allowing the interaction between level set 1 and energy input
+! 1 = Allow energy input by detonation + finding detonation
+
+INTEGER, PARAMETER :: deton_flag = 1
+
+! Flag for allowing final burning input for level set 1 & 2
+! 1 = Allow energy input by NSE evolution
+
+INTEGER, PARAMETER :: convert_nse_flag = 1
+
+! Flag for allowing 1st step burning input for level set 1 & 2
+! 1 = Allow energy input by carbon burning
+
+INTEGER, PARAMETER 	:: carburn_flag = 1
+
+! Flag for allowing 2nd step burning input for level set 1 & 2
+! 1 = Allow energy input by advanced burning
+
+INTEGER, PARAMETER 	:: advburn_flag = 1   
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Unit constants !

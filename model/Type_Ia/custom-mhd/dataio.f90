@@ -15,7 +15,7 @@ integer :: error, space_rank
 character(len=99) :: globalt
 character(len=99) :: filename
 integer(HID_T) :: file_id, dspace_id, dset_id1
-integer(HSIZE_T) :: temp_dims(3), cs_dims(3), eps_dims(3), data_dims(4), dist_dims(1)
+integer(HSIZE_T) :: sup_dims(3), data_dims(4), dist_dims(1)
 
 ! integer !
 INTEGER :: j  
@@ -196,18 +196,18 @@ call h5sclose_f(dspace_id,error)
 
 ! define DIMENSION !
 space_rank = 3
-eps_dims(1) = nx + 2
-eps_dims(2) = ny + 2
-eps_dims(3) = nz + 2
+sup_dims(1) = nx + 2
+sup_dims(2) = ny + 2
+sup_dims(3) = nz + 2
 
 ! open dataspace !
-call h5screate_simple_f(space_rank,eps_dims,dspace_id,error)
+call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
 
 ! create dataset !
 call h5dcreate_f(file_id,"epsilon",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,epsilon(0:nx+1,0:ny+1,0:nz+1),eps_dims,error)
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,epsilon(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
 
 ! close dataset !
 call h5dclose_f(dset_id1,error)
@@ -219,18 +219,18 @@ call h5sclose_f(dspace_id,error)
 
 ! define DIMENSION !
 space_rank = 3
-cs_dims(1) = nx + 2
-cs_dims(2) = ny + 2
-cs_dims(3) = nz + 2
+sup_dims(1) = nx + 2
+sup_dims(2) = ny + 2
+sup_dims(3) = nz + 2
 
 ! open dataspace !
-call h5screate_simple_f(space_rank,cs_dims,dspace_id,error)
+call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
 
 ! create dataset !
 call h5dcreate_f(file_id,"cs",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,cs(0:nx+1,0:ny+1,0:nz+1),cs_dims,error)
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,cs(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
 
 ! close dataset !
 call h5dclose_f(dset_id1,error)
@@ -242,18 +242,64 @@ call h5sclose_f(dspace_id,error)
 
 ! define DIMENSION !
 space_rank = 3
-temp_dims(1) = nx + 2
-temp_dims(2) = ny + 2
-temp_dims(3) = nz + 2
+sup_dims(1) = nx + 2
+sup_dims(2) = ny + 2
+sup_dims(3) = nz + 2
 
 ! open dataspace !
-call h5screate_simple_f(space_rank,temp_dims,dspace_id,error)
+call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
 
 ! create dataset !
 call h5dcreate_f(file_id,"temp",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,temp2(0:nx+1,0:ny+1,0:nz+1),temp_dims,error)
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,temp2(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+space_rank = 1
+sup_dims(1) = nx + 3
+sup_dims(2) = ny + 3
+sup_dims(3) = nz + 3
+
+! open dataspace !
+call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+
+! create dataset !
+call h5dcreate_f(file_id,"flame_stage",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,flamegrid_flag(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+space_rank = 1
+sup_dims(1) = nx + 3
+sup_dims(2) = ny + 3
+sup_dims(3) = nz + 3
+
+! open dataspace !
+call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+
+! create dataset !
+call h5dcreate_f(file_id,"deton_stage",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,detongrid_flag(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
 
 ! close dataset !
 call h5dclose_f(dset_id1,error)

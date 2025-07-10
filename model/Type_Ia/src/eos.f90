@@ -6,7 +6,6 @@
 SUBROUTINE FINDPRESSURE
 USE DEFINITION
 USE CUSTOM_DEF
-USE HELMEOS_MODULE
 USE IEEE_ARITHMETIC
 IMPLICIT NONE
 
@@ -20,6 +19,7 @@ IF (helmeos_flag == 1) THEN
 	DO l = 1, nz
 		DO k = 1, ny
 			DO j = 1, nx
+
 				flag_eostable = 1
 				CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2, j, k, l), prim(itau,j,k,l), dummy1, dummy2, flag_eostable)
 				IF (ieee_is_nan(prim(itau,j,k,l))) THEN
@@ -30,11 +30,7 @@ IF (helmeos_flag == 1) THEN
 					WRITE(*,*) 'EOS Failure: Pressure'
 					STOP
 				ENDIF
-				CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
-				IF (ieee_is_nan(epsilon(j,k,l))) THEN
-					WRITE(*,*) 'Global time', global_time, 'Input Rho', prim(irho,j,k,l), 'Input temp', temp2(j,k,l), 'abar2', abar2(j,k,l), 'zbar2', zbar2(j,k,l), 'ye', prim(iye2, j, k, l), 'at j,k,l', j,k,l
-					STOP
-				ENDIF
+
 				CALL HELM_EOSSOUNDSPEED(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), cs(j,k,l))
 				IF (ieee_is_nan(cs(j,k,l))) THEN
 					WRITE(*,*) 'Global time', global_time, 'Input Rho', prim(irho,j,k,l), 'Input temp', temp2(j,k,l), 'abar2', abar2(j,k,l), 'zbar2', zbar2(j,k,l), 'ye', prim(iye2, j, k, l), 'at j,k,l', j,k,l

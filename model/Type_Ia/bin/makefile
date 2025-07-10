@@ -22,11 +22,10 @@ OBJ = $(patsubst %.f90,%.o,$(SRC))
 DEF_OBJ    = definition.o
 RECON_MOD  = ppmc_module.o tvd_module.o weno_module.o
 SIMPLE_MOD = rsolver_module.o mhd_module.o def.o				# Only depends on definition.o
-CHEM_DEF = ecaptable_module.o flametable_module.o
-TURB_DEF = turb_module.o
-CHEM = helmeos_module.o
+CHEM_DEF = ecaptable_module.o
+CHEM = helmeos.o
 
-OTHER_OBJ = $(filter-out $(RECON_MOD) $(SIMPLE_MOD) $(DEF_OBJ), $(OBJ))
+OTHER_OBJ = $(filter-out $(RECON_MOD) $(SIMPLE_MOD) $(DEF_OBJ), $(CHEM_DEF), $(CHEM), $(OBJ))
 
 #you can use make -j to build parallelly#
 ALL: $(OBJ)
@@ -37,8 +36,8 @@ ALL: $(OBJ)
 $(SIMPLE_MOD): $(DEF_OBJ)
 $(RECON_MOD) : $(DEF_OBJ) $(SIMPLE_MOD)
 $(CHEM_DEF) : $(DEF_OBJ)
-$(CHEM) : $(CHEM_DEF) 
-$(OTHER_OBJ) : $(DEF_OBJ) $(SIMPLE_MOD) $(RECON_MOD) $(CHEM) $(CHEM_DEF) $(TURB_DEF)
+$(CHEM) : $(CHEM_DEF)
+$(OTHER_OBJ) : $(DEF_OBJ) $(SIMPLE_MOD) $(RECON_MOD) $(CHEM_DEF)
 
 %.o: %.f90
 	$(F90) $(F90FLAGS) $(EXTRAINCS) -c $< -o $@

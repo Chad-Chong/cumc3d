@@ -12,8 +12,6 @@
 SUBROUTINE UPDATE (p_in)
 USE DEFINITION
 USE CUSTOM_DEF
-USE HELMEOS_MODULE
-USE TURB_MODULE
 IMPLICIT NONE
 
 ! Integer !
@@ -26,23 +24,23 @@ REAL*8 :: temp_output
 ! Updates to hydrodynamic variables !
 
 IF (helmcheck_flag == 1) THEN
-write(charac_p,'(I)') count
-OPEN (UNIT = 123, FILE = './rho_eps_bfup'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
-    DO l = 1, nz, 1 
-        DO j = 1, nx, 1
-            WRITE(123, *) prim(irho,j,1,l), epsilon(j,1,l)
+    write(charac_p,'(I)') count
+    OPEN (UNIT = 123, FILE = './rho_eps_bfup'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
+        DO l = 1, nz, 1 
+            DO j = 1, nx, 1
+                WRITE(123, *) prim(irho,j,1,l), epsilon(j,1,l)
+            ENDDO
         ENDDO
-    ENDDO
 ENDIF
 
 IF (helmcheck_flag == 1) THEN
-write(charac_p,'(I)') count
-OPEN (UNIT = 123, FILE = './rho_temp_bfup'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
-    DO l = 1, nz, 1 
-        DO j = 1, nx, 1
-            WRITE(123, *) prim(irho,j,1,l), temp2(j,1,l)
+    write(charac_p,'(I)') count
+    OPEN (UNIT = 123, FILE = './rho_temp_bfup'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
+        DO l = 1, nz, 1 
+            DO j = 1, nx, 1
+                WRITE(123, *) prim(irho,j,1,l), temp2(j,1,l)
+            ENDDO
         ENDDO
-    ENDDO
 ENDIF
 
 ! Update Abar and Zbar !
@@ -52,13 +50,13 @@ IF(xisotran_flag == 1) CALL FIND_AZBAR()
 if(helmeos_flag == 1) CALL FINDHELMTEMP()
 
 IF (helmcheck_flag == 1) THEN
-write(charac_p,'(I)') count
-OPEN (UNIT = 123, FILE = './rho_temp'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
-    DO l = 1, nz, 1 
-        DO j = 1, nx, 1
-            WRITE(123, *) prim(irho,j,1,l), temp2(j,1,l)
+    write(charac_p,'(I)') count
+    OPEN (UNIT = 123, FILE = './rho_temp'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
+        DO l = 1, nz, 1 
+            DO j = 1, nx, 1
+                WRITE(123, *) prim(irho,j,1,l), temp2(j,1,l)
+            ENDDO
         ENDDO
-    ENDDO
 ENDIF
 
 ! Find pressure and speed of sound !
