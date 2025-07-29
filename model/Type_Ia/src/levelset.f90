@@ -1109,12 +1109,12 @@ deton_ratio_old = deton_ratio
 
 ! Let the first level-set self-Propagate
 IF(found_deton_flag == 0 .OR. (found_deton_flag == 1 .AND. ABS(global_time - found_deton_time) <= 25000.0D0)) THEN
-    ! CALL update_scaG()
+    CALL update_scaG()
 ENDIF
 
 ! Let the second level-set self-propagate
 IF(found_deton_flag == 1) THEN
-    ! call update_scaG2()
+    call update_scaG2()
 ENDIF
 
 ! Do the reinitilization and 
