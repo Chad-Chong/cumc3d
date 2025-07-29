@@ -477,9 +477,9 @@ DO k = 1, nz, 1
                         temp2(i,j,k) = temp_max
                         epsilon(i,j,k) = epsilon_temp_max
                 ENDIF
-            ELSE
-            temp2(i,j,k) = temp2_a
-            epsilon(i,j,k) = eps_a
+            ! ELSE
+            !     temp2(i,j,k) = temp2_a
+            !     epsilon(i,j,k) = eps_a
             ENDIF
         ENDDO
     ENDDO

@@ -11,7 +11,6 @@
 
 SUBROUTINE RUNGEKUTTA
 USE DEFINITION
-USE CUSTOM_DEF
 IMPLICIT NONE
 
 ! Dummy variables
@@ -57,7 +56,7 @@ WRITE(*,*) 'backup = ', REAL(time_end - time_start) / rate
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 1st iteration
- 
+
 ! Discretize !
 CALL SPATIAL
 
@@ -99,6 +98,12 @@ call BOUNDARY
 
 ! Update 
 CALL UPDATE (1)
+
+! Do conversion again !
+CALL FROMRVETOU
+
+! set boundary conditions !
+call BOUNDARY
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 2nd iteration
@@ -144,6 +149,12 @@ call BOUNDARY
 
 ! Update 
 CALL UPDATE (2)
+
+! Do conversion again !
+CALL FROMRVETOU
+
+! set boundary conditions !
+call BOUNDARY
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Prepare for next step
@@ -199,85 +210,18 @@ call BOUNDARY
 ! Update physical quantities
 CALL UPDATE (3)
 
+! Do conversion again !
+CALL FROMRVETOU
+
+! set boundary conditions !
+call BOUNDARY
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #ifdef DEBUG
 CALL system_clock(time1)
 WRITE(*,*) 'rk total = ', REAL(time1 - time0) / rate
 #endif
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Section for burning
-
-!CALL system_clock(time_start)
-
-IF(levelset_flag == 1 .and. xisotran_flag == 1) THEN
-
-	! If there is level-set, update it
-	IF (flame_testflag == 1) THEN
-		WRITE(*,*) 'Before update_flame_radius'
-	ENDIF
-	IF(flame_flag == 1) CALL UPDATE_FLAME_RADIUS
-	IF (flame_testflag == 1) THEN
-		WRITE(*,*) 'After update_flame_radius'
-	ENDIF 
-	! This trigger the burning package proposed by
-	! Reinecke 1999b
-	IF(flame_flag == 1) THEN
-
-		! This does the Carbon burning
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'Before carbon burning'
-		ENDIF
-		IF(carburn_flag == 1) CALL BURN_PHASE1B
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'After carbon burning'
-		ENDIF
-
-		! This do the O- and Si- burning
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'Before oxygen burning'
-		ENDIF
-		IF(advburn_flag == 1) CALL BURN_PHASE2B
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'After oxygen burning'
-		ENDIF
-
-		! Update the AZbar and temperature accordingly
-		CALL FIND_AZBAR
-		CALL FINDHELMTEMP
-
-		! For completely burnt zone, check if NSE applies
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'Before NSE2'
-		ENDIF
-		IF(convert_nse_flag == 1) CALL NSE2
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'After NSE2'
-		ENDIF
-
-		! Copy the new Xiso and epsilon to ghost cells
-		CALL BOUNDARY
-
-		! Check if the change of isotope perserve the sum
-		!CALL system_clock(time_start2)
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'Before check isotope'
-		ENDIF
-		CALL CHECKXISOTOPE
-		IF (flame_testflag == 1) THEN
-			WRITE(*,*) 'After check isotope'
-		ENDIF
-
-		! Update the burntime
-		last_burntime = global_time
-
-		! Update Abar and Zbar and temperature again
-		CALL FIND_AZBAR
-		CALL FINDHELMTEMP
-
-	ENDIF
-ENDIF
 
 END SUBROUTINE
 

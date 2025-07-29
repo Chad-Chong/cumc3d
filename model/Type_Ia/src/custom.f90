@@ -74,7 +74,7 @@ IF (xisotran_flag == 1) THEN
     iscaG1 = no_of_eq
     WRITE(*,*) 'Make iscaG1 = ', no_of_eq
 
-    no_of_eq = no_of_eq + 1 ! Deteonation level set
+    no_of_eq = no_of_eq + 1 ! Detonation level set
     imax = no_of_eq
     iscaG2 = no_of_eq
     WRITE(*,*) 'Make iscaG2 = ', no_of_eq
@@ -387,10 +387,13 @@ DO l = 1, nz
       diff = prim(irho,j,k,l) - prim_a(irho)
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
 
-      IF (diff <  0.0D0 ) THEN
-        prim(irho,j,k,l) = prim_a(irho) ! Change the thermodynamic / hydro properties, not the composition
-        ! prim(ivx:ivz,j,k,l) = 0.0D0
+      IF (diff/prim_a(irho)<1e-2) THEN
+
+        prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) ! Change the thermodynamic / hydro properties, not the composition
+
         IF (helmeos_flag == 1) THEN
+          CALL PRIVATE_HELMEOS_AZBAR(prim(ihe4:ini56,j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l))
+          CALL private_invert_helm_ed(epsilon(j,k,l), prim(irho,j,k,l), abar2(j,k,l),zbar2(j,k,l), prim(iye2,j,k,l), temp2_old(j,k,l), temp2(j,k,l), flag_eostable)
           CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
           CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
         ELSE
@@ -402,7 +405,7 @@ DO l = 1, nz
       ENDIF
 
       ! This code segment gives a bug where it assigns epsilon_temp_min in the interior of the star (higher density)
-      ! IF (helmeos_flag == 1) THEN 
+      ! IF (helmeos_flag == 1) THEN
       !   CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_min, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_min)
       !   CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_max, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_max)
       !     IF (epsilon(j,k,l) < epsilon_temp_min) THEN
@@ -415,6 +418,15 @@ DO l = 1, nz
       !     ENDIF
       ! ENDIF
 
+      ! Quantities that cannot < 0
+      IF (xisotran_flag == 1) THEN
+        DO i = ihe4, ini56, 1
+        prim(i,j,k,l) = prim(i,j,k,l)*MAX(SIGN(1.0D0, prim(i,j,k,l)), 0.0D0)
+        END DO
+      ENDIF
+      IF (turb_flag == 1) THEN
+        prim(iturbq,j,k,l) = prim(iturbq,j,k,l)*MAX(SIGN(1.0D0, prim(iturbq,j,k,l)), 0.0D0)
+      ENDIF
 
     END DO
   END DO
@@ -607,6 +619,9 @@ REAL*8 :: rho_in, factor, diff
 
 ! nuceos !
 REAL*8 :: eps_out, p_out, eosdummy
+
+! Character for debug
+character(len=99) :: globalt
 ! Check timing with or without openmp
 #ifdef DEBUG
 INTEGER :: time_start, time_end
@@ -636,22 +651,25 @@ IF (gravity_flag == 1) THEN
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! First, give a guessing potential !
       IF (coordinate_flag == 2) THEN
-      !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC)
-      !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT)
-      DO l = 0, nz+1 
-        DO k = 0, ny+1
-          DO j = 0, nx+1
-            phi(j,k,l) = 0.0d0
+        !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC)
+        !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT)
+        DO l = 0, nz+1 
+          DO k = 0, ny+1
+            DO j = 0, nx+1
+              phi(j,k,l) = 0.0d0
+            END DO
           END DO
         END DO
-      END DO
-      !$ACC END PARALLEL
-      !$OMP END PARALLEL DO
+        !$ACC END PARALLEL
+        !$OMP END PARALLEL DO
       ENDIF
 
       IF (coordinate_flag == 1) THEN
         CALL multipole_expansion(mono, dipo, quad)
         WRITE(*,*) 'Mass is', mono
+        IF (phitest_flag == 1) THEN
+          WRITE(*,*) 'Start initial guess'
+        ENDIF
         !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC)
         !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT)
         DO l = 0, nz+1 
@@ -665,54 +683,77 @@ IF (gravity_flag == 1) THEN
           END DO
         END DO
         !$ACC END PARALLEL
-        !$OMP END PARALLEL DO    
+        !$OMP END PARALLEL DO
+        IF (phitest_flag == 1) THEN
+          WRITE(*,*) 'End initial guess'
+        ENDIF    
       ENDIF
 
-      IF (phitest_flag  == 1) THEN
-        OPEN(UNIT = 123, FILE = './BCphi.dat', STATUS = 'REPLACE')
-        DO l = 1, nz, 1 
-            DO j = 1, nx, 1
-                WRITE(123, *) prim(irho, j, 1, l)
-            ENDDO
-        ENDDO
-        CLOSE(123)
+    ELSE
 
-        OPEN(UNIT = 123, FILE = './vol.dat', STATUS = 'REPLACE')
-        DO l = 1, nz, 1 
-            DO j = 1, nx, 1
-                WRITE(123, *) vol(j, 1, l)
-            ENDDO
-        ENDDO
-        CLOSE(123)
+    IF (coordinate_flag == 1) THEN
+    
+        CALL multipole_expansion(mono, dipo, quad)
 
-        OPEN(UNIT = 123, FILE = './z.dat', STATUS = 'REPLACE')
-        DO l = 0, nz, 1 
-          WRITE(123,*) zF(l)
-        ENDDO
-        CLOSE(123)
+        IF (phitest_flag == 1) THEN
+          WRITE(*,*) 'Start imposing boundary'
+        ENDIF
 
-        OPEN(UNIT = 123, FILE = './x.dat', STATUS = 'REPLACE')
-          DO j = 0, nx, 1
-              WRITE(123, *) xF(j)
-          ENDDO
-        CLOSE(123)
+        !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
+        !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(2) DEFAULT(PRESENT)
+        DO l = 1, nz
+          DO k = 1, ny
+              posit(1) = abs(x(nx+1)*DCOS(y(k)))
+              posit(2) = abs(x(nx+1)*DSIN(y(k)))
+              posit(3) = z(l)
+              phi(nx+1,k,l) = -mono/DSQRT(x(nx+1)**2+z(l)**2) - dot_product(dipo, posit)/DSQRT(x(nx+1)**2+z(l)**2)**3 - quadSum(quad, posit, posit)/(2*DSQRT(x(nx+1)**2+z(l)**2)**5)
+          END DO
+        END DO
+        !$ACC END PARALLEL
+        !$OMP END DO
 
-        OPEN(UNIT = 123, FILE = './y.dat', STATUS = 'REPLACE')
-        DO k = 0, ny, 1 
-          WRITE(123,*) yF(k)
-        ENDDO
-        CLOSE(123)
+        !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
+        !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(2) DEFAULT(PRESENT)
+        DO k = 1, ny
+          DO j = 1, nx
+              posit(1) = abs(x(j)*DCOS(y(k)))
+              posit(2) = abs(x(j)*DSIN(y(k)))
+              posit(3) = z(nz+1)
+              phi(j,k,nz+1) = -mono/DSQRT(x(j)**2+z(nz+1)**2) - dot_product(dipo, posit)/DSQRT(x(j)**2+z(nz+1)**2)**3 - quadSum(quad, posit, posit)/(2*DSQRT(x(j)**2+z(nz+1)**2)**5)
+          END DO
+        END DO
+        !$ACC END PARALLEL
+        !$OMP END DO
 
-        OPEN(UNIT = 123, FILE = './dy.dat', STATUS = 'REPLACE')
-        DO k = 1, ny, 1 
-          WRITE(123,*) dy(k)
-        ENDDO
-        CLOSE(123)
+        !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
+        !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(2) DEFAULT(PRESENT)
+        DO k = 1, ny
+          DO j = 1, nx
+              posit(1) = abs(x(j)*DCOS(y(k)))
+              posit(2) = abs(x(j)*DSIN(y(k)))
+              posit(3) = z(0)
+              phi(j,k,0) = -mono/DSQRT(x(j)**2+z(0)**2) - dot_product(dipo, posit)/DSQRT(x(j)**2+z(0)**2)**3 - quadSum(quad, posit, posit)/(2*DSQRT(x(j)**2+z(0)**2)**5)
+          END DO
+        END DO
+        !$ACC END PARALLEL
+        !$OMP END DO
 
-        WRITE(*,*) 'ny is', ny
+        !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
+        !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(2) DEFAULT(PRESENT)
+        DO l = 1, nz
+          DO j = 1, nx
+              phi(j,0,l) = phi(j,1,l)
+              phi(j,ny+1,l) = phi(j,ny,l)
+          END DO
+        END DO
+        !$ACC END PARALLEL
+        !$OMP END DO
 
-        STOP
+        IF (phitest_flag == 1) THEN
+          WRITE(*,*) 'End imposing boundary'
+        ENDIF
       ENDIF
+
     ENDIF
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Calucaltes potential by RBSOR
@@ -842,7 +883,6 @@ IF (gravity_flag == 1) THEN
         !$OMP END DO
 
       ELSEIF(coordinate_flag == 1) THEN
-        CALL multipole_expansion(mono, dipo, quad)
 
         !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
         !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(2) DEFAULT(PRESENT)
@@ -870,7 +910,12 @@ IF (gravity_flag == 1) THEN
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! Debug and exit !
       !WRITE (*,*) n, abserror
-      IF(abserror <= tolerance) EXIT 
+      IF(abserror <= tolerance) THEN
+        IF (phitest_flag == 1) THEN
+            WRITE(*,*) 'n =', n
+        ENDIF
+        EXIT
+      ENDIF
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! Stop condition !
       IF(n == relax_max) THEN
@@ -878,6 +923,75 @@ IF (gravity_flag == 1) THEN
         STOP 'Convergence error in poisson solver'
       END IF
     END DO
+  ENDIF
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Section for burning (burns only at the last step of RK)
+
+IF (p_in == 3) THEN
+  
+  IF(levelset_flag == 1 .and. xisotran_flag == 1) THEN
+
+    ! If there is level-set, update it
+
+    CALL UPDATE_FLAME_RADIUS
+
+    ! IF (update_flag == 0) THEN
+    !   write(globalt,'(I)') n_step
+    !   IF (MOD(n_step, 10) == 0) THEN
+    !       OPEN (UNIT = 124, FILE = './scaG1_'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+    !   ENDIF
+    !       DO k = 1, nz, 1 
+    !           DO j = 1, nx, 1
+
+    !               IF (MOD(n_step, 10) == 0) THEN
+    !                   WRITE(124,*) prim(iscaG1,j,1,k)
+    !               ENDIF
+
+    !           ENDDO
+    !       ENDDO
+    !   IF (MOD(n_step, 10) == 0) THEN
+    !       CLOSE(124)
+    !   ENDIF
+    ! ENDIF
+    
+    ! This trigger the burning package proposed by
+    ! Reinecke 1999b
+    IF(burn_flag == 1) THEN
+
+      ! This does the Carbon burning
+    
+      IF(carburn_flag == 1) CALL BURN_PHASE1B
+
+      ! This do the O- and Si- burning
+
+      IF(advburn_flag == 1) CALL BURN_PHASE2B
+
+      ! Update the AZbar and temperature accordingly
+      CALL FIND_AZBAR
+      CALL FINDHELMTEMP
+
+      ! For completely burnt zone, check if NSE applies
+
+      IF(convert_nse_flag == 1) CALL NSE2
+
+      ! Copy the new Xiso and epsilon to ghost cells
+      CALL BOUNDARY
+
+      ! Check if the change of isotope perserve the sum
+      !CALL system_clock(time_start2)
+
+      CALL CHECKXISOTOPE
+
+      ! Update the burntime
+      last_burntime = global_time
+
+      ! Update Abar and Zbar and temperature again
+      CALL FIND_AZBAR
+      CALL FINDHELMTEMP
+    ENDIF
+    
   ENDIF
 ENDIF
 
@@ -915,7 +1029,7 @@ IMPLICIT NONE
 
 INTEGER :: j, k, l
 
-! output_file = .true.
+!  output_file = .true.
 
 END SUBROUTINE
 

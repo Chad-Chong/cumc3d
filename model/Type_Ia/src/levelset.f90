@@ -61,12 +61,12 @@ do j = 1, nx, 1
     do k  = 1, nz, 1 
 
     ! big c3 flame
-    !prim(iscaG1,j,1,k) = 148.90D0 - DSQRT(x(j)**2 + z(k)**2) + &
-        !            60.92D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+    prim(iscaG1,j,1,k) = 148.90D0 - DSQRT(x(j)**2 + z(k)**2) + &
+                   60.92D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
 
     ! c3 flame
-        prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
-                    30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+        ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
+        !             30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
 
     ! small c3 flame
     !prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
@@ -138,6 +138,9 @@ implicit none
 ! Dummy variables
 integer :: j, k
 
+! Delta and d0
+real*8 :: delta, d0
+
 ! The number of point intersected by the grid and the front
 integer :: flame_count
 
@@ -150,34 +153,93 @@ real*8 :: sgn_scaG
 ! Array storing the minimal distance of the grid to the nearest front
 real*8, dimension(-2:nx+3, -2:nz+3) :: flame_distance
 
+! Character for debug
+character(len=99) :: globalt
+
 ! Array storing all intersection points
 real*8, dimension (nx * nz, 2):: flame_position
 
 ! First find all intersections
 call locate_flame_grid(1, flame_count, flame_position)
 
+! write(globalt,'(I)') n_step
+! IF (MOD(n_step, 10) == 0) THEN
+!     OPEN (UNIT = 123, FILE = './flame_posit'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+! ENDIF
+
+!     DO k = 1, flame_count, 1
+
+!         IF (MOD(n_step, 10) == 0) THEN
+!             WRITE(123, *) flame_position(k,1), flame_position(k,2)
+!         ENDIF
+
+!     ENDDO
+! IF (MOD(n_step, 10) == 0) THEN
+!     CLOSE(123)
+! ENDIF
+
 ! Then find the minimal distance
 call locate_min_flame_distance(flame_count, flame_position, flame_distance)
 
-!$OMP PARALLEL DO PRIVATE(j, k, H_d, sgn_scaG)
+! write(globalt,'(I)') n_step
+! IF (MOD(n_step, 10) == 0) THEN
+!     OPEN (UNIT = 123, FILE = './flame_distance'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+!     OPEN (UNIT = 124, FILE = './scaG1_before'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+! ENDIF
+!     DO k = 1, nz, 1 
+!         DO j = 1, nx, 1
+
+!             IF (MOD(n_step, 10) == 0) THEN
+!                 WRITE(123, *) flame_distance(j,k)
+!                 WRITE(124,*) prim(iscaG1,j,1,k)
+!             ENDIF
+
+!         ENDDO
+!     ENDDO
+! IF (MOD(n_step, 10) == 0) THEN
+!     CLOSE(123)
+!     CLOSE(124)
+! ENDIF
+
+
+d0 = 3.0D0*dx(1)
+delta = 1.0D0*dx(1)
+
+! write(globalt,'(I)') n_step
+! IF (MOD(n_step, 10) == 0) THEN
+!     OPEN (UNIT = 123, FILE = './H_d'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+!     OPEN (UNIT = 124, FILE = './scaG1_after'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+!     OPEN (UNIT = 125, FILE = './prim'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+! ENDIF
+
 do k = 1, nz, 1
     do j = 1, nx, 1
 
     ! Correct the level set
-        !if(prim(iscaG1,j,1,k) > 10.0D0 * dx(j) .or. prim(iscaG1,j,1,k) < -10.0D0 * dx(j)) cycle
+        H_d = (1.0D0 - TANH(3.0D0*(flame_distance(j,k) - d0)/delta)) / & 
+            (1.0D0 - TANH(-3.0D0*d0/delta))
 
-        H_d = (1.0D0 - TANH(3.0D0 * (flame_distance(j,k) - 3.0D0 * dx(j)) / dx(j))) / & 
-            (1.0D0 - TANH(-9.0D0))
         if(prim(iscaG1,j,1,k) >= 0.0D0) then
         sgn_scaG = 1.0D0
         else
         sgn_scaG = -1.0D0
         endif
         prim(iscaG1,j,1,k) = H_d * prim(iscaG1,j,1,k) + (1.0D0 - H_d) * sgn_scaG * flame_distance(j,k)
+        
+        ! IF (MOD(n_step, 10) == 0) THEN
+        !     WRITE(123, *) flame_distance(j,k), H_d
+        !     WRITE(124,*) prim(iscaG1,j,1,k)
+        !     WRITE(125,*) prim(ic12,j,1,k)
+        ! ENDIF
 
     enddo
 enddo
-!$OMP END PARALLEL DO
+
+! IF (MOD(n_step, 10) == 0) THEN
+!     CLOSE(123)
+!     CLOSE(124)
+!     CLOSE(125)
+! ENDIF
 
 ! Copy the results to ghost cells
 CALL BOUNDARY1D_NM(prim(iscaG1,:,:,:), even, even, even, even, even, even)  
@@ -204,6 +266,9 @@ implicit none
 ! Dummy variables                 
 integer :: j, k          
 
+! Delta and d0
+real*8 :: delta, d0
+
 ! The number of point intersected by the grid and the front
 integer :: flame_count
 
@@ -225,15 +290,16 @@ call locate_flame_grid(2, flame_count, flame_position)
 ! Then find the minimal distance
 call locate_min_flame_distance(flame_count, flame_position, flame_distance)
 
-!$OMP PARALLEL DO PRIVATE(j,k,H_d,sgn_scaG)   
+d0 = 3.0D0*dx(1)
+delta = 1.0D0*dx(1)
+
+
 do k = 1, nz, 1
     do j = 1, nx, 1  
     
     ! Correct the level set
-        !if(scaG(j,k) > 10.0D0 * dx(j) .or. scaG(j,k) < -10.0D0 * dx(j)) cycle
-
-        H_d = (1.0D0 - TANH(3.0D0 * (flame_distance(j,k) - 3.0D0 * dx(j)) / dx(j))) / &
-            (1.0D0 - TANH(-9.0D0))
+        H_d = (1.0D0 - TANH(3.0D0*(flame_distance(j,k) - d0)/delta)) / & 
+            (1.0D0 - TANH(-3.0D0*d0/delta))
         if(prim(iscaG2,j,1,k) >= 0.0D0) then
             sgn_scaG = 1.0D0
         else
@@ -243,7 +309,7 @@ do k = 1, nz, 1
 
     enddo
 enddo
-!$OMP END PARALLEL DO
+
 
 ! Copy the results to the ghost cells
 CALL BOUNDARY1D_NM(prim(iscaG2,:,:,:), even, even, even, even, even, even)  
@@ -289,7 +355,7 @@ integer :: mode
 real*8 :: flame_dx
 
 ! Output array of intersection point
-real*8, dimension(nx * nz, 2):: flame_position
+real*8, dimension(nx*nz, 2) :: flame_position
 
 ! Initialization
 flame_count = 0 
@@ -315,7 +381,7 @@ if(mode == 1) then
             flame_count = flame_count + 1
             flame_dx = ABS(prim(iscaG1,j,1,k)) / ABS(prim(iscaG1,j,1,k+1) - prim(iscaG1,j,1,k))
             flame_position(flame_count, 1) = x(j)
-            flame_position(flame_count, 2) = z(k) + flame_dx * dx(j)
+            flame_position(flame_count, 2) = z(k) + flame_dx * dz(k)
             if(flame_position(flame_count, 1) > flame_rad) flame_rad = flame_position(flame_count, 1) 
         endif
 
@@ -326,23 +392,23 @@ elseif(mode == 2) then
 
     ! For the second level set
     do k = 1, nz, 1
-    do j = 1, nx, 1
+        do j = 1, nx, 1
 
-    if(prim(iscaG2,j,1,k) * prim(iscaG2,j+1,1,k) < 0.0D0) then
-            flame_count = flame_count + 1
-            flame_dx = ABS(prim(iscaG2,j,1,k)) / ABS(prim(iscaG2,j+1,1,k) - prim(iscaG2,j,1,k))
-            flame_position(flame_count, 1) = x(j) + flame_dx * dx(j)
-            flame_position(flame_count, 2) = z(k)
-            if(flame_position(flame_count, 1) > flame_rad) flame_rad = flame_position(flame_count, 1)
-        endif
+            if(prim(iscaG2,j,1,k) * prim(iscaG2,j+1,1,k) < 0.0D0) then
+                flame_count = flame_count + 1
+                flame_dx = ABS(prim(iscaG2,j,1,k)) / ABS(prim(iscaG2,j+1,1,k) - prim(iscaG2,j,1,k))
+                flame_position(flame_count, 1) = x(j) + flame_dx * dx(j)
+                flame_position(flame_count, 2) = z(k)
+                if(flame_position(flame_count, 1) > flame_rad) flame_rad = flame_position(flame_count, 1)
+            endif
 
-        if(prim(iscaG2,j,1,k) * prim(iscaG2,j,1,k+1) < 0.0D0) then
-            flame_count = flame_count + 1
-            flame_dx = ABS(prim(iscaG2,j,1,k)) / ABS(prim(iscaG2,j,1,k+1) - prim(iscaG2,j,1,k))
-            flame_position(flame_count, 1) = x(j) 
-            flame_position(flame_count, 2) = z(k) + flame_dx * dx(j)
-            if(flame_position(flame_count, 1) > flame_rad) flame_rad = flame_position(flame_count, 1)
-        endif
+            if(prim(iscaG2,j,1,k) * prim(iscaG2,j,1,k+1) < 0.0D0) then
+                flame_count = flame_count + 1
+                flame_dx = ABS(prim(iscaG2,j,1,k)) / ABS(prim(iscaG2,j,1,k+1) - prim(iscaG2,j,1,k))
+                flame_position(flame_count, 1) = x(j) 
+                flame_position(flame_count, 2) = z(k) + flame_dx * dz(k)
+                if(flame_position(flame_count, 1) > flame_rad) flame_rad = flame_position(flame_count, 1)
+            endif
 
         enddo
     enddo
@@ -382,11 +448,11 @@ real (selected_real_kind(15,307)), dimension(-2:nx+3, -2:nz+3):: flame_distance
 ! Input array of intersection point positions
 real (selected_real_kind(15,307)), dimension(nx * nz, 2) :: flame_position
 
-!$OMP PARALLEL DO SHARED(flame_distance) PRIVATE(j,k,k2,last_distance,distance)
+
 do j = 1, nx, 1
     do k = 1, nz, 1
 
-        last_distance = 10.0D0 * DBLE(nz) * dx(j)
+        last_distance = 10.0D0 * DBLE(MAX(nx,nz)) * MAX(dx(j), dz(k))
 
         ! Search for the minimal distance
         do k2 = 1, flame_count, 1
@@ -404,7 +470,7 @@ do j = 1, nx, 1
 
     enddo
 enddo
-!$OMP END PARALLEL DO
+
 
 !WRITE(*,*) flame_distance(1,1), flame_count
 
@@ -484,8 +550,6 @@ do j = 0, nx, 1
 
     enddo
 enddo
-
-!CALL BOUNDARY1D_INT(flamegrid_flag, even)
 
 100 FORMAT (6I5)
 101 FORMAT (6E13.6)
@@ -988,7 +1052,7 @@ DO k = 1, nz, 1
         epsilon(j,1,k) = (1.0D0 - flame_ratio(j,1,k)) * epsilon(j,1,k) + flame_ratio(j,1,k) * eps_ash
         prim(irho,j,1,k) = (1.0D0 - flame_ratio(j,1,k)) * rho_mid + flame_ratio(j,1,k) * rho_ash
         prim(ihe4:ini56,j,1,k) = (1.0D0 - flame_ratio(j,1,k)) * prim(ihe4:ini56,j,1,k) + flame_ratio(j,1,k) * x_burn(:) 
-        burn_mass = burn_mass + rho_mid * 2.0D0 * pi * x(j) * dx(j) * dx(j)
+        burn_mass = burn_mass + rho_mid * 2.0D0 * pi * x(j) * dx(j) * dz(k)
         
     ENDIF
 
@@ -1029,38 +1093,14 @@ REAL :: rate
 ! The deflagration is neglected as long as detonation has
 ! takes place long enough to surround the whole deflagration
 IF(found_deton_flag == 0 .or. (found_deton_flag == 1 .AND. ABS(global_time - found_deton_time) <= 25000.0D0)) THEN
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before identify flamegrid'
-    ENDIF
     CALL identify_flamegrid()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After identify flamegrid'
-    ENDIF
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before compute flamegrid'
-    ENDIF
     CALL compute_flameratio()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After compute flamegrid'
-    ENDIF
 ENDIF                
 
 ! Update the second level-set
 IF(found_deton_flag == 1) THEN
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before identify deton grid'
-    ENDIF
     CALL identify_detongrid()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After identify deton grid'
-    ENDIF
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before compute flamegrid'
-    ENDIF
     CALL compute_detonratio()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After compute flamegrid'
-    ENDIF
 ENDIF
 
 ! Backup the data
@@ -1069,80 +1109,29 @@ deton_ratio_old = deton_ratio
 
 ! Let the first level-set self-Propagate
 IF(found_deton_flag == 0 .OR. (found_deton_flag == 1 .AND. ABS(global_time - found_deton_time) <= 25000.0D0)) THEN
-
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before update scaG'
-    ENDIF
-    CALL update_scaG()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After update scaG'
-    ENDIF
-
+    ! CALL update_scaG()
 ENDIF
 
 ! Let the second level-set self-propagate
 IF(found_deton_flag == 1) THEN
-
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before update scaG2'
-    ENDIF
-    call update_scaG2()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After update scaG2'
-    ENDIF
-
+    ! call update_scaG2()
 ENDIF
 
 ! Do the reinitilization and 
 ! comput the geometry for the 1st level-set
 IF(found_deton_flag == 0 .OR. (found_deton_flag == 1 .and. ABS(global_time - found_deton_time) <= 25000.0D0)) THEN
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before reinitialization scaG'
-    ENDIF
-    CALL reinitialization2()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After reinitialization scaG'
-    ENDIF
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before identify flamegrid'
-    ENDIF
+
+    IF (update_flag == 1) CALL reinitialization2()
     CALL identify_flamegrid()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After identify flamegrid'
-    ENDIF
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before compute flameratio'
-    ENDIF
     CALL compute_flameratio()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After compute flameratio'
-    ENDIF
 ENDIF
 
 ! Do the reinitilization and 
 ! compute the geometry for the 2nd level-set
 IF(found_deton_flag == 1) THEN
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before reinitialization scaG2'
-    ENDIF
-    CALL reinitialization3()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After reinitialization scaG2'
-    ENDIF
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before identify deton grid'
-    ENDIF
+    IF (update_flag == 1) CALL reinitialization3()
     CALL identify_detongrid()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After identify deton grid'
-    ENDIF
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'Before compute deton ratio'
-    ENDIF
     CALL compute_detonratio()
-    IF (flame_testflag == 1) THEN
-        WRITE(*,*) 'After compute deton ratio'
-    ENDIF
 ENDIF
 
 ! Conmpute the total local fraction
@@ -1177,15 +1166,13 @@ real*8 :: norm_r, norm_z
 real*8 :: cs_grid
 
 ! Local propagation
-real*8, dimension(-2:nx+3, -2:ny+3, -2:nz+3) :: scaG_flux1
+real*8, allocatable, dimension(:,:,:) :: scaG_flux1
+allocate(scaG_flux1(-2:nx+3, -2:ny+3, -2:nz+3))
 
 ! initilization
 cs_grid = 0.0D0
 scaG_flux1 = 0.0D0
 
-IF (flame_testflag == 1) THEN
-    WRITE(*,*) 'Before update flame velocity'
-ENDIF
 do k = 1, nz, 1
     do j = 1, nx, 1
 
@@ -1195,16 +1182,12 @@ do k = 1, nz, 1
     endif
 
     enddo
-enddo
-IF (flame_testflag == 1) THEN
-    WRITE(*,*) 'After update flame velocity'
-ENDIF          
+enddo  
 
 ! Copy the results to ghost cells
 call boundary1D_NM(scaG_flux1, even, even, even, even, even, even)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! And then, I calculate the flux by fluid motion
 
 ! Now update the level set
 do j = 1, nx, 1
@@ -1216,6 +1199,7 @@ enddo
 ! Fill the level set ghost grid
 CALL BOUNDARY1D_NM(prim(iscaG1,:,:,:), even, even, even, even, even, even)
 
+deallocate(scaG_flux1)
 end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1280,7 +1264,6 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! First, I calculate the flux by the flame
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! And then, I calculate the flux by fluid motion
 
 do k = 1, nz, 1
     do j = 1, nx, 1

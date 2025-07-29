@@ -437,8 +437,6 @@ ENDIF
 
 CALL BOUNDARY1D_NM(turb_source, even, even, even, even, even, even)
 CALL BOUNDARY1D_NM(turb_diff, even, even, even, even, even, even)
-!call boundary1D(turb_diff_r, oddR)
-!call boundary1D(turb_diff_z, oddZ)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Find source

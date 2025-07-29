@@ -109,6 +109,9 @@ DO l = 0, nz
       IF (turb_flag == 1) THEN
         cons(iturbq,j,k,l) = prim(iturbq,j,k,l)*prim(irho,j,k,l)
       ENDIF
+      IF (levelset_flag == 1) THEN
+        cons(iscaG1:iscaG2,j,k,l) = prim(iscaG1:iscaG2,j,k,l)*prim(irho,j,k,l)
+      ENDIF
 		  cons(ibx:ibz,j,k,l) = prim(ibx:ibz,j,k,l)
 	  END DO
   END DO
@@ -214,6 +217,9 @@ DO l = 1, nz
       prim(itau+1:ibx-1,j,k,l) = cons(itau+1:ibx-1,j,k,l)/cons(irho,j,k,l)
       IF (xisotran_flag == 1) THEN
         prim(ihe4:iye2,j,k,l) = cons(ihe4:iye2,j,k,l)/prim(irho,j,k,l)
+      ENDIF
+      IF (levelset_flag == 1) THEN
+        prim(iscaG1:iscaG2,j,k,l) = cons(iscaG1:iscaG2,j,k,l)/prim(irho,j,k,l)
       ENDIF
       IF (turb_flag == 1) THEN
         prim(iturbq,j,k,l) = cons(iturbq,j,k,l)/prim(irho,j,k,l)

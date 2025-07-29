@@ -23,7 +23,7 @@ REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: clp1, clm1, epsc
 REAL*8, PARAMETER :: omega_weight = 1.9d0
 
 ! temperature (HelmEOS) and epsilon at atmosphere !
-REAL*8 :: temp2_a = 1.0D-1
+REAL*8 :: temp2_a
 REAL*8 :: eps_a
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

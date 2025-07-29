@@ -11,7 +11,7 @@ USE Ecaptable_module
 IMPLICIT NONE
 
 ! Integer !
-INTEGER :: i, j, k, l, m, flag_eostable
+INTEGER :: i, j, k, l, m, flag_eostable, found_atmo, flag_notfindtemp
 REAL*8 :: dummy
 ! Magnetic field !
 REAL*8 :: maxdb
@@ -101,89 +101,102 @@ ELSEIF (coordinate_flag == 1) THEN
   prim(ivz,:,1,:) = 0.0d0
 ENDIF
 
-! Read and assign azimuth direction velocity !
-OPEN(UNIT=970, FILE = './profile/hydro_vphi.dat', ACTION='READ')
-IF (coordinate_flag == 2) THEN
-  READ(970,*) ((prim(ivz,j,k,1), j = 1, nx), k = 1, ny)
-  prim(ivz,:,:,:) = prim(ivz,:,:,:)*lencgs2code/tcgs2code
-ELSEIF (coordinate_flag == 1) THEN
-  READ(970,*) ((prim(ivy,j,1,l), j = 1, nx), l = 1, nz)
-  prim(ivy,:,:,:) = prim(ivy,:,:,:)*lencgs2code/tcgs2code
-ENDIF
-CLOSE(970)
-PRINT *, "Finished reading vphi"
-
-! Read for magnetic vector potential !
-OPEN(UNIT=970, FILE = './profile/hydro_Aphi.dat', ACTION='READ')
-IF (coordinate_flag == 2) THEN
-  READ(970,*) ((a_phi(j,k,1), j = 0, nx), k = 0, ny)
-ELSEIF (coordinate_flag == 1) THEN
-  READ(970,*) ((a_phi(j,1,l), j = 0, nx), l = 0, nz)
-  a_phi(j,:,l) = a_phi(j,1,l)
-ENDIF
-
-CLOSE(970)
-
-PRINT *, "Finished reading Aphi"
-
-! In the direction of symmetry, cell centered is the same as face centered
-OPEN(UNIT=970, FILE = './profile/hydro_bphi.dat', ACTION='READ')
-IF (coordinate_flag == 2) THEN
-  READ(970,*) ((prim(ibz,j,k,1), j = 1, nx), k = 1, ny)
-  prim(ibz,:,:,0) = prim(ibz,:,:,1)
-ELSEIF (coordinate_flag == 1) THEN
-  READ(970,*) ((prim(iby,j,1,l), j = 1, nx), l = 1, nz)
-  prim(iby,:,0,:) = prim(iby,:,1,:)
-  prim(iby,:,:,:) = prim(iby,:,:,:)*gauss2code*lencgs2code
+IF (rotate_flag == 1) THEN
+  ! Read and assign azimuth direction velocity !
+  OPEN(UNIT=970, FILE = './profile/hydro_vphi.dat', ACTION='READ')
+  IF (coordinate_flag == 2) THEN
+    READ(970,*) ((prim(ivz,j,k,1), j = 1, nx), k = 1, ny)
+    prim(ivz,:,:,:) = prim(ivz,:,:,:)*lencgs2code/tcgs2code
+  ELSEIF (coordinate_flag == 1) THEN
+    READ(970,*) ((prim(ivy,j,1,l), j = 1, nx), l = 1, nz)
+    prim(ivy,:,:,:) = prim(ivy,:,:,:)*lencgs2code/tcgs2code
+  ENDIF
+  CLOSE(970)
+  PRINT *, "Finished reading vphi"
+ELSE
+  IF (coordinate_flag == 2) THEN
+    prim(ivz,:,:,:) = 0.0D0
+  ELSEIF (coordinate_flag == 1) THEN
+    prim(ivy,:,:,:) = 0.0D0
+  ENDIF
+  PRINT *, "No rotation in this run"
 ENDIF
 
-CLOSE(970)
+IF (mhd_flag == 1) THEN
+  ! Read for magnetic vector potential !
+  OPEN(UNIT=970, FILE = './profile/hydro_Aphi.dat', ACTION='READ')
+  IF (coordinate_flag == 2) THEN
+    READ(970,*) ((a_phi(j,k,1), j = 0, nx), k = 0, ny)
+  ELSEIF (coordinate_flag == 1) THEN
+    READ(970,*) ((a_phi(j,1,l), j = 0, nx), l = 0, nz)
+    a_phi(j,:,l) = a_phi(j,1,l)
+  ENDIF
 
-PRINT *, "Finished reading Bphi"
+  CLOSE(970)
 
-! Coordinate here are in code unit but aphi is in gaussian unit !
-! Unit conversion below !
-IF (coordinate_flag == 2) THEN
-  DO l = 1, nz
-    DO k = 1, ny
-      DO j = 0, nx
-        prim(ibx,j,k,l) = (sinf(k)*a_phi(j,k,l) - sinf(k-1)*a_phi(j,k-1,l))/(xF(j)*dcose(k)+small_num)
+  PRINT *, "Finished reading Aphi"
+
+  ! In the direction of symmetry, cell centered is the same as face centered
+  OPEN(UNIT=970, FILE = './profile/hydro_bphi.dat', ACTION='READ')
+  IF (coordinate_flag == 2) THEN
+    READ(970,*) ((prim(ibz,j,k,1), j = 1, nx), k = 1, ny)
+    prim(ibz,:,:,0) = prim(ibz,:,:,1)
+  ELSEIF (coordinate_flag == 1) THEN
+    READ(970,*) ((prim(iby,j,1,l), j = 1, nx), l = 1, nz)
+    prim(iby,:,0,:) = prim(iby,:,1,:)
+    prim(iby,:,:,:) = prim(iby,:,:,:)*gauss2code*lencgs2code
+  ENDIF
+
+  CLOSE(970)
+
+  PRINT *, "Finished reading Bphi"
+
+  ! Coordinate here are in code unit but aphi is in gaussian unit !
+  ! Unit conversion below !
+  IF (coordinate_flag == 2) THEN
+    DO l = 1, nz
+      DO k = 1, ny
+        DO j = 0, nx
+          prim(ibx,j,k,l) = (sinf(k)*a_phi(j,k,l) - sinf(k-1)*a_phi(j,k-1,l))/(xF(j)*dcose(k)+small_num)
+        END DO
       END DO
     END DO
-  END DO
 
-  DO l = 1, nz
-    DO k = 0, ny
-      DO j = 1, nx
-        prim(iby,j,k,l) = - (xF(j)*a_phi(j,k,l) - xF(j-1)*a_phi(j-1,k,l))/(x(j)*dx(j))
+    DO l = 1, nz
+      DO k = 0, ny
+        DO j = 1, nx
+          prim(iby,j,k,l) = - (xF(j)*a_phi(j,k,l) - xF(j-1)*a_phi(j-1,k,l))/(x(j)*dx(j))
+        END DO
       END DO
     END DO
-  END DO
 
-  prim(ibx:ibz,:,:,:) = prim(ibx:iby,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
-ELSEIF(coordinate_flag == 1) THEN
-  DO l = 1, nz
-    DO k = 1, ny
-      DO j = 0, nx
-        prim(ibx,j,k,l) = - (a_phi(j,k,l) - a_phi(j,k,l-1))/(dz(l))
+    prim(ibx:ibz,:,:,:) = prim(ibx:iby,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
+  ELSEIF(coordinate_flag == 1) THEN
+    DO l = 1, nz
+      DO k = 1, ny
+        DO j = 0, nx
+          prim(ibx,j,k,l) = - (a_phi(j,k,l) - a_phi(j,k,l-1))/(dz(l))
+        END DO
       END DO
     END DO
-  END DO
 
-  DO l = 0, nz
-    DO k = 1, ny
-      DO j = 1, nx
-        prim(ibz,j,k,l) = (xF(j)*a_phi(j,k,l) - xF(j-1)*a_phi(j-1,k,l))/(x(j)*dx(j))
+    DO l = 0, nz
+      DO k = 1, ny
+        DO j = 1, nx
+          prim(ibz,j,k,l) = (xF(j)*a_phi(j,k,l) - xF(j-1)*a_phi(j-1,k,l))/(x(j)*dx(j))
+        END DO
       END DO
     END DO
-  END DO
 
-  prim(ibx,:,:,:) = prim(ibx,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
-  prim(ibz,:,:,:) = prim(ibz,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
+    prim(ibx,:,:,:) = prim(ibx,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
+    prim(ibz,:,:,:) = prim(ibz,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
+  ENDIF
+
+  PRINT *, "Finished calculating magnetic field"
+ELSE
+  prim(ibx:ibz,:,:,:) = 0.0D0
+  PRINT *, "No magnetic field in this run"
 ENDIF
-
-PRINT *, "Finished calculating magnetic field"
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Deallocate
 Deallocate(a_phi)
@@ -305,8 +318,8 @@ IF (helmeos_flag == 1) THEN
   prim_a(ic12) = xiso_ac12
   prim_a(io16) = xiso_ao16
   CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, prim_a(iye2))
-  CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
-  CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), eps_a)
+
+  found_atmo = 0 ! Find atmosphere flag
 
   DO l = 1, nz
     DO k = 1, ny
@@ -314,6 +327,19 @@ IF (helmeos_flag == 1) THEN
         ! Standard !
         diff = prim(irho,j,k,l) - prim_a(irho)
         factor = MAX(SIGN(1.0D0, diff), 0.0D0)
+
+        IF (factor == 0.0D0 .and. found_atmo == 0) THEN
+          found_atmo = 1
+          eps_a = epsilon(j,k,l)
+          WRITE(*,*) 'Atmosphere epsilon is', eps_a
+          CALL private_invert_helm_ed(epsilon(j,k,l), &
+                            prim_a(irho), abar2_a, &
+                            zbar2_a, prim_a(iye2), &
+                                            temp2_old(j,k,l), temp2_a, flag_notfindtemp)
+          CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
+          CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), eps_a)
+        ENDIF
+
         prim(imin:ibx-1,j,k,l) = factor*prim(imin:ibx-1,j,k,l) + (1.0D0 - factor)*prim_a(:)
         temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
         abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
@@ -339,15 +365,12 @@ CALL CUSTOM_CHECKRHO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-IF (levelset_flag == 1) THEN
-  CALL GetFlame
-  WRITE(*,*) 'Finished building level set variables'
-ENDIF
-
 IF (xisotran_flag == 1 .and. helmeos_flag == 1 .and. levelset_flag == 1 .and. flame_flag == 1) THEN
+  CALL GetFlame
   CALL FLAME_INI()
   CALL FIND_AZBAR()	
   CALL FINDHELMTEMP()
+  WRITE(*,*) 'Finished initializing flame'
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -382,6 +405,6 @@ WRITE (*,*)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set output profile interval !
-total_time = 0.3*tcgs2code ! cgs
+total_time = 2.0D0*tcgs2code ! cgs
 output_profiletime = total_time/100.0d0
 END SUBROUTINE

@@ -115,9 +115,15 @@ DO while (global_time < total_time)
   ! Print out !
   WRITE (*,*) n_step, dt, global_time
 
+  IF (dt < 1) THEN
+    CALL print_hydroprofile 
+    WRITE(*,*) 'dt is extremely small'
+    STOP
+  ENDIF
+
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!s	
   ! Section for data I/O !
-  if(ABS(global_time - output_profiletime_last) >= output_profiletime .or. output_file .eqv. .true.) then
+  if(ABS(global_time - output_profiletime_last) >= output_profiletime .or. output_file .eqv. .true. .or. MOD(n_step,25) == 0) then
 
     ! print out !
 	  output_profiletime_last = global_time

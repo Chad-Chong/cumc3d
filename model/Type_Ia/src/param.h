@@ -7,10 +7,16 @@
 
 ! Feature Flags !
 
-! Flag for gravity
-INTEGER, PARAMETER :: gravity_flag = 1
+!Flag for Rotation (set initial vphi to 0 if 0)!
+INTEGER, PARAMETER :: rotate_flag = 0
 
-! Flag for phi BC (for this to work gravity flag needs to be 1)
+!Flag for MHD (set initial magnetic field to 0 if 0)!
+INTEGER, PARAMETER :: mhd_flag = 0
+
+! Flag for gravity
+INTEGER, PARAMETER :: gravity_flag = 0
+
+! Flag for testing phi (for this to work gravity flag needs to be 1)!
 INTEGER, PARAMETER :: phitest_flag = 0
 
 ! Chemical Composition and Transport (ISO) Flag
@@ -27,8 +33,9 @@ INTEGER, PARAMETER :: turb_flag = 1
 
 ! Flame Flags ! (the level set is written with uniform grid in mind)
 INTEGER, PARAMETER :: levelset_flag = 1
-INTEGER, PARAMETER :: flame_flag = 1
-INTEGER, PARAMETER :: flame_testflag = 0
+INTEGER, PARAMETER :: update_flag = 1 ! Flag to change the level set by reinitialization
+INTEGER, PARAMETER :: flame_flag = 1 ! Flag to initialize flame
+INTEGER, PARAMETER :: burn_flag = 0
 
 ! Flag for allowing the interaction between level set 1 and energy input
 ! 1 = Allow energy input by detonation + finding detonation
