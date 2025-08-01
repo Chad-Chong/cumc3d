@@ -20,10 +20,10 @@ INTEGER, PARAMETER :: gravity_flag = 1
 INTEGER, PARAMETER :: phitest_flag = 0
 
 ! Chemical Composition and Transport (ISO) Flag
-INTEGER, PARAMETER :: xisotran_flag = 1
+INTEGER, PARAMETER :: xisotran_flag = 0
 
 ! Helmholtz EOS Flag and its Checking Flag
-INTEGER, PARAMETER :: helmeos_flag = 1
+INTEGER, PARAMETER :: helmeos_flag = 0
 INTEGER, PARAMETER :: helmcheck_flag = 0
 INTEGER :: count = 0
 
@@ -32,10 +32,10 @@ INTEGER :: count = 0
 INTEGER, PARAMETER :: turb_flag = 1
 
 ! Flame Flags ! (the level set is written with uniform grid in mind)
-INTEGER, PARAMETER :: levelset_flag = 1
-INTEGER, PARAMETER :: update_flag = 1 ! Flag to change the level set by reinitialization
-INTEGER, PARAMETER :: flame_flag = 1 ! Flag to initialize flame
-INTEGER, PARAMETER :: burn_flag = 1
+INTEGER, PARAMETER :: levelset_flag = 0
+INTEGER, PARAMETER :: update_flag = 0 ! Flag to change the level set by reinitialization
+INTEGER, PARAMETER :: flame_flag = 0 ! Flag to initialize flame
+INTEGER, PARAMETER :: burn_flag = 0
 
 ! Flag for allowing the interaction between level set 1 and energy input
 ! 1 = Allow energy input by detonation + finding detonation

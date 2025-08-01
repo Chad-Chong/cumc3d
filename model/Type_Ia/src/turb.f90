@@ -223,9 +223,9 @@ IF (coordinate_flag == 1) THEN
    do k = 1, nz, 1
       do j = 1, ny, 1
          do i = 1, nx, 1
-            turb_str_tensor(i,j,k,1,:) = prim(irho,i,j,k)*turb_eta(i,j,k,1)*turb_str_tensor(i,j,k,1,:)
-            turb_str_tensor(i,j,k,2,:) = prim(irho,i,j,k)*turb_eta(i,j,k,2)*turb_str_tensor(i,j,k,2,:)
-            turb_str_tensor(i,j,k,3,:) = prim(irho,i,j,k)*turb_eta(i,j,k,3)*turb_str_tensor(i,j,k,3,:)
+            turb_str_tensor(i,j,k,:,1) = prim(irho,i,j,k)*turb_eta(i,j,k,1)*turb_str_tensor(i,j,k,:,1)
+            turb_str_tensor(i,j,k,:,2) = prim(irho,i,j,k)*turb_eta(i,j,k,2)*turb_str_tensor(i,j,k,:,2)
+            turb_str_tensor(i,j,k,:,3) = prim(irho,i,j,k)*turb_eta(i,j,k,3)*turb_str_tensor(i,j,k,:,3)
          enddo
       enddo
    enddo
