@@ -114,7 +114,7 @@ integer :: j,k,l
 real*8, intent(out) :: mono
 real*8, dimension(3) :: posit
 real*8, dimension(3), intent(out) :: dipo
-real*8, dimension(3,3) :: qposit, eye
+real*8, dimension(3,3) :: qposit
 real*8, dimension(3,3), intent(out) :: quad
 
 mono = 0.0D0
@@ -154,17 +154,6 @@ DO j = 1, nx
 ENDDO
 
 ELSEIF (n_pole == 2) THEN
-
-DO j = 1, 3
-	DO k = 1, 3
-		IF (j==k) THEN
-			eye(j,k) = 1.0D0
-		ELSE
-			eye(j,k) = 0.0D0
-		ENDIF
-	ENDDO
-ENDDO
-
 
 DO j = 1, nx
 	DO k = 1, ny

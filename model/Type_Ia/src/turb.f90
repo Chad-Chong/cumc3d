@@ -291,8 +291,6 @@ CALL BOUNDARY1D_NM(turb_diff, even, even, even, even, even, even)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Find source
 
-! if(flame_flag == 0) then
-
 do k = 1, nz, 1
    do j = 1, ny, 1
       do i = 1, nx, 1
@@ -300,25 +298,6 @@ do k = 1, nz, 1
       enddo
    enddo
 enddo
-
-! else
-
-!    DO k = length_step_z_min_part, length_step_z_part, 1
-!       DO j = 1, length_step_r_part, 1
-!     IF(flamegrid_flag(j,k) == 1 .or. flamegrid_flag(j,k) == 0) THEN
-!             turb_source(j,k) = -turb_comp(j,k) + turb_str(j,k) - turb_eps(j,k) + &
-!                                (turb_diff_r(j+1,k) - turb_diff_r(j-1,k)) / 2.0D0 / dx + &
-!                                (turb_diff_z(j,k+1) - turb_diff_z(j,k-1)) / 2.0D0 / dx
-! 	    ELSE
-!        turb_source(j,k) = turb_RT(j,k) - turb_eps(j,k) + &
-!                                (turb_diff_r(j+1,k) - turb_diff_r(j-1,k)) / 2.0D0 / dx + &
-!                                (turb_diff_z(j,k+1) - turb_diff_z(j,k-1)) / 2.0D0 / dx
-
-! 	    ENDIF
-!       ENDDO 
-!    ENDDO
-
-! ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
