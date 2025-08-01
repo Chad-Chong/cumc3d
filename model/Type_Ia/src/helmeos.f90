@@ -1893,8 +1893,6 @@ real*8 :: nse_burntime, temp_nse
 
 ! Initialization
 ! Already done in burn_phase2b
-!burn_qdot(:,:) = 0.0D0
-nu_qdot(:,:,:) = 0.0D0
 
 do k = 1, nz, 1              
     do j = 1, nx, 1                    
@@ -1907,25 +1905,25 @@ do k = 1, nz, 1
         if(prim(irho,j,1,k) < 1.62D-11) cycle
         if(burn_ratio(j,1,k) /= 1.0D0) cycle
 
-    ! Special test if multi-stage burning is used
-    !if(advburn_flag == 1) then
+        ! Special test if multi-stage burning is used
+        !if(advburn_flag == 1) then
         if(nse_flag(j,1,k) == 1) cycle
-    !endif
+        !endif
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ! If they pass then start the iteration
         nse_flag(j,1,k) = 2                
 
-    ! The density is not changed, so 
-    ! the trial value is also the 
-    ! final value
+        ! The density is not changed, so 
+        ! the trial value is also the 
+        ! final value
         rho_mid = prim(irho,j,1,k)
 
         ! Give a trial temperature
         temp_beg = temp2(j,1,k)                  
         eps_beg = epsilon(j,1,k)
 
-    ! Also give the trial composition
+        ! Also give the trial composition
         abar_mid = abar2(j,1,k)
         zbar_mid = zbar2(j,1,k)
         ye_mid = prim(iye2,j,1,k)                
@@ -2022,16 +2020,16 @@ do k = 1, nz, 1
                         exit
                     endif            
 
-                !if(j == 1 .and. k == 1) write(*,100) i, temp_mid, check_e, ecaprate_mid, eneurate_mid, (x_burn(k2), k2 = 1, totalion)
-                !if(mod(i,100) == 0 .and. j == 1 .and. k == 1) read(*,*)
+                    !if(j == 1 .and. k == 1) write(*,100) i, temp_mid, check_e, ecaprate_mid, eneurate_mid, (x_burn(k2), k2 = 1, totalion)
+                    !if(mod(i,100) == 0 .and. j == 1 .and. k == 1) read(*,*)
 
                 enddo
 
             !nse_burntime = EXP(196.02D0 / temp_mid - 41.646D0) / 4.9282D-6
-                temp_nse = -8.6803D0 + 1.8787D0 * LOG10(rho_mid * 6.171D17)
+            temp_nse = -8.6803D0 + 1.8787D0 * LOG10(rho_mid * 6.171D17)
             nse_burntime = EXP(196.02D0 / temp_nse - 41.646D0) / 4.9282D-6
 
-                if(dt > nse_burntime) then
+            if(dt > nse_burntime) then
 
             ! When things are done, move the refined
             ! trial results to the outpuit
@@ -2039,10 +2037,9 @@ do k = 1, nz, 1
                 epsilon(j,1,k) = eps_mid
                 prim(iye2,j,1,k) = ye_mid                
                 prim(ihe4:ini56,j,1,k) = x_burn(:) 
-                burn_qdot(j,1,k) = burn_qdot(j,1,k) + binde_af - binde_bf
-            !nu_qdot(j,1,k) = eneurate_mid 
+                ! burn_qdot(j,1,k) = burn_qdot(j,1,k) + binde_af - binde_bf
 
-                else
+            else
 
             ! When things are partially done, use
             ! linear interpolation
@@ -2058,29 +2055,27 @@ do k = 1, nz, 1
                 epsilon(j,1,k) = eps_mid
                 prim(iye2,j,1,k) = ye_mid    
                 prim(ihe4:ini56,j,1,k) = x_burn(:)
-                burn_qdot(j,1,k) = burn_qdot(j,1,k) + binde_af - binde_bf
-            !nu_qdot(j,1,k) = eneurate_mid 
+                ! burn_qdot(j,1,k) = burn_qdot(j,1,k) + binde_af - binde_bf
 
-                endif
+            endif
 
-            else !(burn_ratio =/ 1)       
+        else !(burn_ratio =/ 1)       
 
-        ! For detonation, no NSE energy is accounted
+            ! For detonation, no NSE energy is accounted
                 temp_mid = temp2(j,1,k)
 
-        ! Electron capture for deflagration zone
-        !if(flame_loc_ratio(j,1,k) == 1.0D0) then
-        !   call getecaprate(rho_mid, temp_mid, ye2(j,1,k), ecaprate_mid, eneurate_mid)
-            !   ye2(j,1,k) = ye2(j,1,k) + ecaprate_mid * dt
-        !endif
+            ! Electron capture for deflagration zone
+            !if(flame_loc_ratio(j,1,k) == 1.0D0) then
+            !   call getecaprate(rho_mid, temp_mid, ye2(j,1,k), ecaprate_mid, eneurate_mid)
+                !   ye2(j,1,k) = ye2(j,1,k) + ecaprate_mid * dt
+            !endif
 
-        ! Get the NSE state
+            ! Get the NSE state
                 call getnsestate(rho_mid, temp_mid, x_burn) 
 
-        ! Copy the result to output
+            ! Copy the result to output
             prim(ihe4:ini56,j,1,k) = x_burn(:)
-            burn_qdot(j,1,k) = 0.0D0  
-
+            ! burn_qdot(j,1,k) = 0.0D0  
         endif
 
     enddo         

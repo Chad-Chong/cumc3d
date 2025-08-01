@@ -198,6 +198,9 @@ REAL*8, allocatable, dimension(:,:,:) :: turb_diff
 ! The k-eps component
 REAL*8, allocatable, dimension(:,:,:) :: turb_eps
 
+! Kronecker Delta
+real*8, dimension(3,3) :: eye
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! For level set
