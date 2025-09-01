@@ -12,3 +12,4 @@ clean:
 cleanfile:
 	rm -rf ./outfile/*.dat
 	rm -rf ./outfile/*.hdf5
+	rm -rf ./outfile/*.mp4

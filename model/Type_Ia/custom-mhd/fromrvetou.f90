@@ -209,9 +209,9 @@ ENDIF
 ! Do the rest conversation !
 !$OMP DO COLLAPSE(3) SCHEDULE(STATIC)
 !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) PRIVATE(vsquare, bsquare) DEFAULT(present)
-DO l = 1, nz
-  DO k = 1, ny
-    DO j = 1, nx
+DO l = 0, nz
+  DO k = 0, ny
+    DO j = 0, nx
       prim(irho,j,k,l) = cons(irho,j,k,l)
 		  prim(ivx:itau-1,j,k,l) = cons(ivx:itau-1,j,k,l)/cons(irho,j,k,l)
       prim(itau+1:ibx-1,j,k,l) = cons(itau+1:ibx-1,j,k,l)/cons(irho,j,k,l)

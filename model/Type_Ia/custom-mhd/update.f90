@@ -62,6 +62,10 @@ ENDIF
 ! Find pressure and speed of sound !
 CALL FINDPRESSURE
 
+IF (say_flag == 1) THEN
+    WRITE(*,*) 'Update: Finish find pressure'
+ENDIF
+
 IF (helmcheck_flag == 1) THEN
     OPEN (UNIT = 123, FILE = './rho_cs'//trim(adjustl(charac_p))//'.dat', STATUS = 'REPLACE')
     DO l = 1, nz, 1 

@@ -75,11 +75,10 @@ REAL*8 :: yiso_a, qash_a
 integer :: ihe4, ic12, io16, ine20, img24, isi28, ini56
 integer :: che4, cc12, co16, cne20, cmg24, csi28, cni56
 character(len=5) :: ionam(1:totalion)
-REAL*8 :: mev2erg,mev2gr
 REAL*8, PARAMETER :: ev2erg = 1.60217648740d-12
 REAL*8, PARAMETER :: avo     = 6.0221367d23
-PARAMETER        (mev2erg = ev2erg*1.0d6, &
-                    mev2gr  = mev2erg/clight**2)
+REAL*8, PARAMETER :: mev2erg =  1.60217648740d-12 * 1.0d6 ! mev2erg = ev2erg*1.0d6
+REAL*8, PARAMETER :: mev2gr = 1.60217648740d-12 * 1.0d6 / 2.99792458D10**2 ! mev2gr  = mev2erg/clight**2)
 
 
 real (selected_real_kind(15,307)), dimension(1:totalion) :: aion, zion, bion, nion, mion, wion
@@ -181,6 +180,25 @@ INTEGER :: iye2
 
 ! Refer to the module itself; this is to avoid redeclaration in helmeos !
 
+! For Thermal Neutrino !
+
+REAL*8, allocatable, dimension(:,:,:) :: Q_nudot
+
+! For Neutrino Spectrum
+
+! Size of table
+INTEGER, PARAMETER :: temp_rowno3 = 10
+INTEGER, PARAMETER :: den_rowno3 = 30    
+
+! The effective electron mass
+REAL*8, DIMENSION(temp_rowno3, den_rowno3):: nutable_mass
+
+! The calculated emissivities
+REAL*8, DIMENSION(temp_rowno3, den_rowno3):: nutable_emiss
+
+! The neutrino spectra
+real*8 :: nu_phi(1:10)
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! For Turbulence !
@@ -201,7 +219,7 @@ REAL*8, allocatable, dimension(:,:,:) :: turb_eps
 ! Kronecker Delta
 real*8, dimension(3,3) :: eye
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! For level set
 

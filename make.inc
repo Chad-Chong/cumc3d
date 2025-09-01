@@ -21,14 +21,14 @@ FIXPOLE = -DFIXPOLE
 MULTICORE = -mp
 
 # Define F90 compiler #
-F90=/home/cmyip/HDF5/bin/h5fc 
+F90=/home/shcheung/app/hdf5-1.12.3/fortran/src/h5fc
 
 # need extra math packages? #
 #MATHPACK = -llapack -lblas
 
 # Compiler flags
 #PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
-#ifortflags = -O3 -traceback
+#ifortflags = -g -O3 -traceback -warn all -check all
 #ifortomp = -qopenmp
 #ifortdebug = -check all -fpe0
 

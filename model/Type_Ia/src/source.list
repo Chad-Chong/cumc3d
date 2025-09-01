@@ -8,3 +8,6 @@ model.f90
 poisson.f90
 turb.f90
 levelset.f90
+funct_fermi1.f90
+sneut5.f90
+nuspec.f90

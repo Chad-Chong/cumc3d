@@ -53,18 +53,6 @@ integer :: m,n
 !First give the turbulent kinetic energy field a very small number
 prim(iturbq,:,:,:) = turb_q_a
 
-! Define the Kronecker Delta
-
-do m = 1, 3, 1
-   do n = 1, 3, 1
-      if (m==n) then
-         eye(m,n) = 1.0D0
-      else
-         eye(m,n) = 0.0D0
-      endif
-   enddo
-enddo
-
 END SUBROUTINE GetTurb
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -74,16 +62,18 @@ END SUBROUTINE GetTurb
 subroutine findturbulence
 use DEFINITION
 use CUSTOM_DEF
-! use levelset_module
+use ieee_arithmetic
 implicit none
 
-integer :: i, j, k, m, n
+integer :: i, j, k, m, n, neighbour_flag
 real*8 :: sum
 real*8 :: turb_C, turb_D, turb_F
 real*8 :: at_no, g_eff, phi_r, phi_z
 real*8 :: inv_sqrt2 = 1.0D0 / DSQRT(2.0D0)
 real*8 :: c_lambda = 2.0D0/3.0D0
 
+! Character for debug
+character(len=99) :: globalt
 
 ! For Archimedis Production
 real*8, allocatable, dimension(:,:,:) :: turb_RT
@@ -99,7 +89,6 @@ real*8, allocatable, dimension(:,:,:) :: turb_str
 real*8, allocatable, dimension(:,:,:,:) :: turb_eta
 real*8, allocatable, dimension(:,:,:) :: gm
 real*8, allocatable, dimension(:,:,:,:,:) :: turb_velgrad
-real*8, allocatable, dimension(:,:,:,:,:) :: turb_velgrad_trans
 
 ! For turbulence diffusion
 REAL*8 :: dqdx, dqdy, dqdz, dqdevdx, dqdevdy, dqdevdz
@@ -116,7 +105,6 @@ allocate(turb_str_tensor(-2:nx+3,-2:ny+3,-2:nz+3,3,3))
 allocate(turb_str(-2:nx+3,-2:ny+3,-2:nz+3))
 allocate(turb_eta(-2:nx+3,-2:ny+3,-2:nz+3,3))
 allocate(turb_velgrad(-2:nx+3,-2:ny+3,-2:nz+3,3,3))
-allocate(turb_velgrad_trans(-2:nx+3,-2:ny+3,-2:nz+3,3,3))
 allocate(turb_qdev(-2:nx+3,-2:ny+3,-2:nz+3,3))
 allocate(gm(-2:nx+3,-2:ny+3,-2:nz+3))
 
@@ -124,45 +112,74 @@ allocate(gm(-2:nx+3,-2:ny+3,-2:nz+3))
 
 IF (coordinate_flag == 1) THEN
 
-   do k = 1, nz, 1
-      do j = 1, ny, 1
-         do i=1, nx, 1
+   do k = 0, nz+1, 1
+      do j = 0, ny+1, 1
+         do i=0, nx+1, 1
             gm(i,j,k) = vol(i,j,k)**(1.0D0/3.0D0)
          enddo
       enddo
    enddo
 
-   do k = 1, nz, 1
-      do j = 1, ny, 1
-         do i=1, nx, 1
+   IF (turbcheck_flag == 1) THEN
+      write(globalt,'(I)') count
+      OPEN (UNIT = 127, FILE = './turb_F'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+   ENDIF
+
+   do k = 0, nz+1, 1
+      do j = 0, ny+1, 1
+         do i=0, nx+1, 1
 
             turb_F = MIN(100.0D0, MAX(0.1D0, 1.0D-4 * epsilon(i,j,k)/prim(iturbq,i,j,k)))
             turb_C = 0.1D0 * turb_F
             turb_D = 0.5D0 / turb_F
 
+            IF (turbcheck_flag == 1) THEN
+               IF (i /= 0 .and. j == 1 .and. k /=0 .and. i /= nx+1 .and. k /= nz+1) THEN
+                  WRITE(127,*) 1.0D-4 * epsilon(i,j,k)/prim(iturbq,i,j,k)
+               ENDIF
+            ENDIF
+
             ! Different viscosity at different direction for diffusion (note that dx(i) = dz(k)) !
-            turb_eta(i,j,k,1) = turb_C * dx(i)**2/gm(i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2))
-            turb_eta(i,j,k,2) = turb_C * (x(i)*dy(j))**2/gm(i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2))
-            turb_eta(i,j,k,3) = turb_C * dz(k)**2/gm(i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2))
+            turb_eta(i,j,k,1) = turb_C * 1.6D0 * dx(i)**2/gm(i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2))
+            turb_eta(i,j,k,2) = turb_C * 1.6D0 * x(i)*dy(j)**2/gm(i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2))
+            turb_eta(i,j,k,3) = turb_C * 1.6D0 * dz(k)**2/gm(i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2))
             ! Same viscosity for dissipation !
-            turb_eps(i,j,k) = prim(irho,i,j,k) * turb_D * DSQRT(DSQRT(prim(iturbq,i,j,k)**6)) / gm(i,j,k)
+            turb_eps(i,j,k) = prim(irho,i,j,k) * turb_D * DSQRT(DSQRT(prim(iturbq,i,j,k)**6)) / (1.6D0 * gm(i,j,k))
             turb_RT(i,j,k) = 0.0D0
-            IF (flame_flag == 1) THEN
+            
+            IF (gravity_flag == 1 .and. update_flag == 1) THEN
                if(flamegrid_flag(i,j,k) /= 0 .and. flamegrid_flag(i,j,k) /= 1) then
                   at_no = MAX(0.5D0 * (0.0522D0 + 0.145D0 / DSQRT(prim(irho,i,j,k)/1.62D-9) - 0.01D0 / (prim(irho,i,j,k)/1.62D-9)), 0.0D0)
                   phi_r = first_derivative(x(i-1), x(i), x(i+1), phi(i-1,j,k), phi(i,j,k), phi(i+1,j,k))
                   phi_z = first_derivative(z(k-1), z(k), z(k+1), phi(i,j,k-1), phi(i,j,k), phi(i,j,k+1))
                   g_eff = at_no * DSQRT(phi_r**2 + phi_z**2)
 	               turb_RT(i,j,k) = 0.625D0 * prim(irho,i,j,k) * DSQRT(DSQRT(prim(iturbq,i,j,k)**2)) * g_eff
-               else
-                  turb_RT(i,j,k) = 0.0D0
                endif
             ENDIF
 
          enddo
       enddo
    enddo
-   ! endif
+
+
+   IF (turbcheck_flag == 1) THEN
+      CLOSE(127)
+      OPEN (UNIT = 125, FILE = './turb_eps'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+      DO k = 1, nz, 1
+         DO i = 1, nx, 1
+            WRITE(125,*) turb_eps(i,1,k)
+         ENDDO
+      ENDDO
+      CLOSE(125)
+      
+      OPEN (UNIT = 126, FILE = './turb_RT'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+      DO k = 1, nz, 1
+         DO i = 1, nx, 1
+            WRITE(126,*) turb_RT(i,1,k)
+         ENDDO
+      ENDDO
+      CLOSE(126)
+   ENDIF
 
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -171,13 +188,13 @@ IF (coordinate_flag == 1) THEN
          do i = 1, nx, 1
 
             dvxdx = first_derivative (x(i-1), x(i), x(i+1), prim(ivx,i-1,j,k), prim(ivx,i,j,k), prim(ivx,i+1,j,k))
-            dvxdy = first_derivative (y(j-1), y(j), y(j+1), prim(ivx,i,j-1,k), prim(ivx,i,j,k), prim(ivx,i,j+1,k))
+            dvxdy = 0.0D0 !first_derivative (y(j-1), y(j), y(j+1), prim(ivx,i,j-1,k), prim(ivx,i,j,k), prim(ivx,i,j+1,k))
             dvxdz = first_derivative (z(k-1), z(k), z(k+1), prim(ivx,i,j,k-1), prim(ivx,i,j,k), prim(ivx,i,j,k+1))
             dvydx = first_derivative (x(i-1), x(i), x(i+1), prim(ivy,i-1,j,k), prim(ivy,i,j,k), prim(ivy,i+1,j,k))
-            dvydy = first_derivative (y(j-1), y(j), y(j+1), prim(ivy,i,j-1,k), prim(ivy,i,j,k), prim(ivy,i,j+1,k))
+            dvydy = 0.0D0 !first_derivative (y(j-1), y(j), y(j+1), prim(ivy,i,j-1,k), prim(ivy,i,j,k), prim(ivy,i,j+1,k))
             dvydz = first_derivative (z(k-1), z(k), z(k+1), prim(ivy,i,j,k-1), prim(ivy,i,j,k), prim(ivy,i,j,k+1))
             dvzdx = first_derivative (x(i-1), x(i), x(i+1), prim(ivz,i-1,j,k), prim(ivz,i,j,k), prim(ivz,i+1,j,k))
-            dvzdy = first_derivative (y(j-1), y(j), y(j+1), prim(ivz,i,j-1,k), prim(ivz,i,j,k), prim(ivz,i,j+1,k))
+            dvzdy = 0.0D0 !first_derivative (y(j-1), y(j), y(j+1), prim(ivz,i,j-1,k), prim(ivz,i,j,k), prim(ivz,i,j+1,k))
             dvzdz = first_derivative (z(k-1), z(k), z(k+1), prim(ivz,i,j,k-1), prim(ivz,i,j,k), prim(ivz,i,j,k+1))
 
             turb_velgrad(i,j,k,1,1) = dvxdx
@@ -190,18 +207,6 @@ IF (coordinate_flag == 1) THEN
             turb_velgrad(i,j,k,3,2) = dvydz
             turb_velgrad(i,j,k,3,3) = dvzdz
 
-            DO m = 1, 3, 1
-               DO n = 1, 3, 1
-                  IF (m == 2 .and. n /= 2) THEN
-                     turb_velgrad_trans(i,j,k,m,n) = turb_velgrad(i,j,k,m,n)/x(i)**2
-                  ELSEIF (m /= 2 .and. n ==2) THEN
-                     turb_velgrad_trans(i,j,k,m,n) = turb_velgrad(i,j,k,m,n)*x(i)**2
-                  ELSE
-                     turb_velgrad_trans(i,j,k,m,n) = turb_velgrad(i,j,k,m,n)
-                  ENDIF
-               ENDDO
-            ENDDO
-
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             turb_div_v(i,j,k) = prim(ivx,i,j,k)/x(i)+dvxdx + 1.0D0/x(i)*dvydy + dvzdz 
@@ -212,10 +217,22 @@ IF (coordinate_flag == 1) THEN
       enddo
    enddo
 
+   IF (turbcheck_flag == 1) THEN
+
+      OPEN (UNIT = 123, FILE = './turb_comp'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+      DO k = 1, nz, 1
+         DO i = 1, nx, 1
+            WRITE(123,*) turb_comp(i,1,k)
+         ENDDO
+      ENDDO
+      CLOSE(123)
+
+   ENDIF
+
    do k = 1, nz, 1
       do j = 1, ny, 1
          do i = 1, nx, 1
-            turb_str_tensor(i,j,k,:,:) = turb_velgrad(i,j,k,:,:)+turb_velgrad_trans(i,j,k,:,:) - c_lambda*eye
+            turb_str_tensor(i,j,k,:,:) = turb_velgrad(i,j,k,:,:) + TRANSPOSE(turb_velgrad(i,j,k,:,:)) - c_lambda*turb_div_v(i,j,k)*eye
          enddo
       enddo
    enddo
@@ -236,13 +253,7 @@ IF (coordinate_flag == 1) THEN
             sum = 0.0D0
             do m = 1, 3, 1
                do n = 1, 3, 1
-                  IF (m == 2 .and. n /= 2) THEN
-                     sum = sum + turb_str_tensor(i,j,k,m,n) * turb_velgrad(i,j,k,m,n)/x(i)**2
-                  ELSEIF (m /=2 .and. n == 2) THEN
-                     sum = sum + turb_str_tensor(i,j,k,m,n) * turb_velgrad(i,j,k,m,n)*x(i)**2
-                  ELSE
                      sum = sum + turb_str_tensor(i,j,k,m,n) * turb_velgrad(i,j,k,m,n)
-                  ENDIF
                enddo
             enddo
             turb_str(i,j,k) = sum
@@ -250,17 +261,25 @@ IF (coordinate_flag == 1) THEN
       enddo
    enddo
 
+   IF (turbcheck_flag == 1) THEN
+
+      OPEN (UNIT = 124, FILE = './turb_str'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+      DO k = 1, nz, 1
+         DO i = 1, nx, 1
+            WRITE(124,*) turb_str(i,1,k)
+         ENDDO
+      ENDDO
+      CLOSE(124)
+   ENDIF
+
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    ! Find diffusion
 
-   !call splitppm(turb_q(:,:), turb_qdev(:,:,1), 1, 1)
-   !call splitppm(turb_q(:,:), turb_qdev(:,:,2), 2, 2)
-
-   do k = 1, nz, 1
-      do j = 1, ny, 1
-         do i = 1, nx, 1
+   do k = 0, nz+1, 1
+      do j = 0, ny+1, 1
+         do i = 0, nx+1, 1
             dqdx = first_derivative (x(i-1), x(i), x(i+1), prim(iturbq,i-1,j,k), prim(iturbq,i,j,k), prim(iturbq,i+1,j,k))
-            dqdy = first_derivative (y(j-1), y(j), y(j+1), prim(iturbq,i,j-1,k), prim(iturbq,i,j,k), prim(iturbq,i,j+1,k))
+            dqdy = 0.0D0 !first_derivative (y(j-1), y(j), y(j+1), prim(iturbq,i,j-1,k), prim(iturbq,i,j,k), prim(iturbq,i,j+1,k))
             dqdz = first_derivative (z(k-1), z(k), z(k+1), prim(iturbq,i,j,k-1), prim(iturbq,i,j,k), prim(iturbq,i,j,k+1))
 
             turb_qdev(i,j,k,1) = prim(irho,i,j,k)*turb_eta(i,j,k,1)*dqdx
@@ -274,19 +293,15 @@ IF (coordinate_flag == 1) THEN
    do k = 1, nz, 1
       do j = 1, ny, 1
          do i = 1, nx, 1
-               dqdevdx = first_derivative (x(i-1), x(i), x(i+1), turb_qdev(i-1,j,k,1), turb_qdev(i,j,k,1), turb_qdev(i+1,j,k,1))
-               dqdevdy = first_derivative (y(j-1), y(j), y(j+1), turb_qdev(i,j-1,k,2), turb_qdev(i,j,k,2), turb_qdev(i,j+1,k,2))
-               dqdevdz = first_derivative (z(k-1), z(k), z(k+1), turb_qdev(i,j,k-1,3), turb_qdev(i,j,k,3), turb_qdev(i,j,k+1,3))
 
-               turb_diff(i,j,k) = turb_qdev(i,j,k,1)/x(i)+dqdevdx + 1.0D0/x(i)*dqdevdy + dqdevdz
+               dqdevdx = first_derivative (x(i-1), x(i), x(i+1), turb_qdev(i-1,j,k,1), turb_qdev(i,j,k,1), turb_qdev(i+1,j,k,1))
+               dqdevdy = 0.0D0 !first_derivative (y(j-1), y(j), y(j+1), turb_qdev(i,j-1,k,2), turb_qdev(i,j,k,2), turb_qdev(i,j+1,k,2))
+               dqdevdz = first_derivative (z(k-1), z(k), z(k+1), turb_qdev(i,j,k-1,3), turb_qdev(i,j,k,3), turb_qdev(i,j,k+1,3))
 
          enddo
       enddo
    enddo
 ENDIF
-
-CALL BOUNDARY1D_NM(turb_source, even, even, even, even, even, even)
-CALL BOUNDARY1D_NM(turb_diff, even, even, even, even, even, even)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Find source
@@ -294,10 +309,62 @@ CALL BOUNDARY1D_NM(turb_diff, even, even, even, even, even, even)
 do k = 1, nz, 1
    do j = 1, ny, 1
       do i = 1, nx, 1
-         turb_source(i,j,k) = -turb_comp(i,j,k) + turb_str(i,j,k) - turb_eps(i,j,k) + turb_RT(i,j,k)
+
+         neighbour_flag = 1         
+         turb_source(i,j,k) = 0.0D0
+         turb_diff(i,j,k) = 0.0D0
+
+         IF (turb_comp(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+            turb_comp(i,j,k) = 0.0D0
+         ENDIF
+
+         IF (turb_str(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+            turb_str(i,j,k) = 0.0D0
+         ENDIF
+
+         IF (turb_eps(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+            turb_eps(i,j,k) = 0.0D0
+         ENDIF
+
+         IF (turb_RT(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+            turb_RT(i,j,k) = 0.0D0
+         ENDIF
+
+         do m = -turb_neighbour, turb_neighbour, 1
+            do n = -turb_neighbour, turb_neighbour, 1
+
+               IF ( (prim(irho,i+m,j,k+n)-prim_a(irho))/prim_a(irho) < 1e-2 ) THEN
+                  neighbour_flag = 0
+                  EXIT
+               ENDIF
+
+            enddo
+         enddo
+         
+         IF (neighbour_flag == 1) THEN
+            ! Only calculate SGS turbulence for non-atmosphere terms whose neighbour also not atmosphere !
+            turb_source(i,j,k) = -turb_comp(i,j,k) + turb_str(i,j,k) - turb_eps(i,j,k) + turb_RT(i,j,k)
+            turb_diff(i,j,k) = turb_qdev(i,j,k,1)/x(i)+dqdevdx + 1.0D0/x(i)*dqdevdy + dqdevdz
+         ENDIF
+
       enddo
    enddo
 enddo
+
+IF (turbcheck_flag == 1) THEN
+
+   OPEN (UNIT = 128, FILE = './turb_diff'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
+   DO k = 1, nz, 1
+      DO i = 1, nx, 1
+         WRITE(128,*) turb_diff(i,1,k)
+      ENDDO
+   ENDDO
+   CLOSE(128)
+ENDIF
+
+CALL BOUNDARY1D_NM(turb_source, even, even, even, even, even, even)
+CALL BOUNDARY1D_NM(turb_diff, even, even, even, even, even, even)
+CALL BOUNDARY1D_NM(turb_eps, even, even, even, even, even, even)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -308,7 +375,6 @@ DEALLOCATE(turb_div_v)
 DEALLOCATE(turb_str)
 DEALLOCATE(turb_eta)
 DEALLOCATE(turb_velgrad)
-DEALLOCATE(turb_velgrad_trans)
 
 DEALLOCATE(turb_qdev)
 

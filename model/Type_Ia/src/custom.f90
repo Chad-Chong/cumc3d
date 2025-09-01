@@ -128,6 +128,13 @@ IF (levelset_flag == 1) THEN
   WRITE(*,*)
 ENDIF
 
+IF (thermal_flag == 1) THEN
+  WRITE(*,*) 'Build thermal neutrino variables'
+  CALL buildThermalNeutrino
+  WRITE(*,*) 'Done building thermal neutrino variables'
+  WRITE(*,*)
+ENDIF
+
 END SUBROUTINE
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -372,8 +379,9 @@ CALL system_clock(time_start)
 #endif
 
 IF (helmeos_flag == 1) THEN
-  atmosphere = MIN(atmosphere, 1.0D-4 * MAXVAL(prim(irho,:,:,:)))
-  prim_a(irho) = atmosphere
+
+  prim_a(irho) = MIN(prim_a(irho), 1.0D-4 * MAXVAL(prim(irho,:,:,:)))
+
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -387,7 +395,7 @@ DO l = 1, nz
       diff = prim(irho,j,k,l) - prim_a(irho)
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
 
-      IF (diff/prim_a(irho)<1e-2) THEN
+      IF (diff/prim_a(irho) < 1e-2) THEN
 
         prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) ! Change the thermodynamic / hydro properties, not the composition
 
@@ -418,14 +426,23 @@ DO l = 1, nz
       !     ENDIF
       ! ENDIF
 
-      ! Quantities that cannot < 0
       IF (xisotran_flag == 1) THEN
         DO i = ihe4, ini56, 1
-        prim(i,j,k,l) = prim(i,j,k,l)*MAX(SIGN(1.0D0, prim(i,j,k,l)), 0.0D0)
+          IF (prim(i,j,k,l) < 1.0D-30) THEN
+            prim(i,j,k,l) = 1.0D-30
+          ENDIF
         END DO
       ENDIF
+
       IF (turb_flag == 1) THEN
-        prim(iturbq,j,k,l) = prim(iturbq,j,k,l)*MAX(SIGN(1.0D0, prim(iturbq,j,k,l)), 0.0D0)
+        IF (prim(iturbq,j,k,l) < 1.0D-10) THEN
+          prim(iturbq,j,k,l) = 1.0D-10
+        ENDIF
+      ENDIF
+      
+      IF (helmeos_flag /= 1) THEN
+        factor = MAX(SIGN(1.0D0, epsilon(j,k,l)), 0.0D0)
+        epsilon(j,k,l) = epsilon(j,k,l)*factor + (1.0D0-factor)*epsilon(nx,k,1)
       ENDIF
 
     END DO
@@ -533,6 +550,7 @@ ELSEIF(coordinate_flag == 1) THEN
 
           IF (ieee_is_nan(factor*prim(irho,j,k,l)*dphidx)) THEN
             WRITE(*,*) prim(irho,j,k,l)
+            WRITE(*,*) j,k,l
             WRITE(*,*) dphidx
             WRITE(*,*) 'dphidx term is nan'
             STOP 
@@ -564,8 +582,10 @@ IF (turb_flag == 1) THEN
   DO k = 1, nz, 1
     DO j = 1, ny, 1
       DO i = 1, nx, 1
+
         sc(itau,i,j,k) = sc(itau,i,j,k) - turb_source(i,j,k) 
         sc(iturbq,i,j,k) = sc(iturbq,i,j,k) + turb_source(i,j,k) + turb_diff(i,j,k)
+
       ENDDO
     ENDDO
   ENDDO
@@ -638,6 +658,20 @@ CALL system_clock(time_start)
 ! For SGS Turbulence !
 
 IF(turb_flag == 1) CALL FINDTURBULENCE
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'Update: Finished find turbulence'
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! For Thermal Neutrino !
+
+IF(thermal_flag == 1) CALL FINDNEUTRINOLOSS
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'Update: Finished find neutrinoloss'
+ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -926,73 +960,8 @@ IF (gravity_flag == 1) THEN
   ENDIF
 ENDIF
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Section for burning (burns only at the last step of RK)
-
-IF (p_in == 3) THEN
-  
-  IF(levelset_flag == 1 .and. xisotran_flag == 1) THEN
-
-    ! If there is level-set, update it
-
-    CALL UPDATE_FLAME_RADIUS
-
-    ! IF (update_flag == 0) THEN
-    !   write(globalt,'(I)') n_step
-    !   IF (MOD(n_step, 10) == 0) THEN
-    !       OPEN (UNIT = 124, FILE = './scaG1_'// trim(adjustl(globalt)) //'.dat', STATUS = 'REPLACE')
-    !   ENDIF
-    !       DO k = 1, nz, 1 
-    !           DO j = 1, nx, 1
-
-    !               IF (MOD(n_step, 10) == 0) THEN
-    !                   WRITE(124,*) prim(iscaG1,j,1,k)
-    !               ENDIF
-
-    !           ENDDO
-    !       ENDDO
-    !   IF (MOD(n_step, 10) == 0) THEN
-    !       CLOSE(124)
-    !   ENDIF
-    ! ENDIF
-    
-    ! This trigger the burning package proposed by
-    ! Reinecke 1999b
-    IF(burn_flag == 1) THEN
-
-      ! This does the Carbon burning
-    
-      IF(carburn_flag == 1) CALL BURN_PHASE1B
-
-      ! This do the O- and Si- burning
-
-      IF(advburn_flag == 1) CALL BURN_PHASE2B
-
-      ! Update the AZbar and temperature accordingly
-      CALL FIND_AZBAR
-      CALL FINDHELMTEMP
-
-      ! For completely burnt zone, check if NSE applies
-
-      IF(convert_nse_flag == 1) CALL NSE2
-
-      ! Copy the new Xiso and epsilon to ghost cells
-      CALL BOUNDARY
-
-      ! Check if the change of isotope perserve the sum
-      !CALL system_clock(time_start2)
-
-      CALL CHECKXISOTOPE
-
-      ! Update the burntime
-      last_burntime = global_time
-
-      ! Update Abar and Zbar and temperature again
-      CALL FIND_AZBAR
-      CALL FINDHELMTEMP
-    ENDIF
-    
-  ENDIF
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'Update: Finished find gravity'
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1028,8 +997,6 @@ USE CUSTOM_DEF
 IMPLICIT NONE
 
 INTEGER :: j, k, l
-
-!  output_file = .true.
 
 END SUBROUTINE
 

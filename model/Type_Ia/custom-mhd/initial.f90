@@ -94,20 +94,20 @@ IMPLICIT NONE
 ! Check density !
 CALL CUSTOM_CHECKRHO
 
+! set boundary conditions !
+CALL BOUNDARY
+
 WRITE(*,*) 'Build conservative variables'
 CALL FROMRVETOU
 WRITE(*,*) 'Done building initial conservative variables'
 WRITE(*,*)
 
-! set boundary conditions !
-CALL BOUNDARY
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Calculate the items needed for SPATIAL
 WRITE(*,*) 'Do update'
 CALL UPDATE (0)
-CALL FROMRVETOU
 CALL BOUNDARY
+CALL FROMRVETOU
 WRITE(*,*) 'Done initial update'
 WRITE(*,*)
 

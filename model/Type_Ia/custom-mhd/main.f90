@@ -16,6 +16,8 @@ USE MHD_MODULE
 USE DEFINITION
 IMPLICIT NONE
 
+INTEGER :: j, l
+
 ! Check timing with or without openmp
 #ifdef DEBUG
 INTEGER :: time_start, time_end
@@ -28,7 +30,7 @@ rate = REAL(cr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set number of threads !
-CALL OMP_SET_NUM_THREADS(4)
+CALL OMP_SET_NUM_THREADS(8)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -121,9 +123,15 @@ DO while (global_time < total_time)
     STOP
   ENDIF
 
+  ! IF (MOD(n_step,5) == 0) THEN
+  ! output_file = .true.
+  ! ELSE
+  !   output_file = .false.
+  ! ENDIF
+
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!s	
   ! Section for data I/O !
-  if(ABS(global_time - output_profiletime_last) >= output_profiletime .or. output_file .eqv. .true. .or. MOD(n_step,25) == 0) then
+  if(ABS(global_time - output_profiletime_last) >= output_profiletime .or. output_file .eqv. .true.) then
 
     ! print out !
 	  output_profiletime_last = global_time

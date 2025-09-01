@@ -10,6 +10,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 SUBROUTINE RUNGEKUTTA
+USE CUSTOM_DEF
 USE DEFINITION
 IMPLICIT NONE
 
@@ -54,16 +55,25 @@ CALL system_clock(time_end)
 WRITE(*,*) 'backup = ', REAL(time_end - time_start) / rate
 #endif
 
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st backup'
+ENDIF
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 1st iteration
 
 ! Discretize !
 CALL SPATIAL
 
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st spatial'
+ENDIF
+
+
 #ifdef DEBUG
 CALL system_clock(time_start)
 #endif
-
 ! NM sector !
 !$OMP PARALLEL DO COLLAPSE(4) SCHEDULE(STATIC)
 !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(4) DEFAULT(PRESENT)
@@ -84,32 +94,62 @@ CALL system_clock(time_end)
 WRITE(*,*) 'rk1 = ', REAL(time_end - time_start) / rate
 #endif
 
-! Convert from conservative to primitive
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st opearation'
+ENDIF
+
+! Convert from conservative to primitive !
 CALL FROMUTORVE
 
-! Check density !
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st FROMUTORVE'
+ENDIF
+
+! Check quantities !
 CALL CUSTOM_CHECKRHO
 
-! Do conversion again !
-CALL FROMRVETOU
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st CUSTOM_CHECKRHO'
+ENDIF
 
 ! set boundary conditions !
 call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st Boundary'
+ENDIF
 
 ! Update 
 CALL UPDATE (1)
 
-! Do conversion again !
-CALL FROMRVETOU
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st Updat'
+ENDIF
 
 ! set boundary conditions !
 call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st Boundary'
+ENDIF
+
+! Convert from primitive to conservative !
+CALL FROMRVETOU
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 1st FROMRVETOU'
+ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 2nd iteration
 
 ! Discretize !
 CALL SPATIAL
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd spatial'
+ENDIF
 
 #ifdef DEBUG
 CALL system_clock(time_start)
@@ -135,31 +175,60 @@ CALL system_clock(time_end)
 WRITE(*,*) 'rk2 = ', REAL(time_end - time_start) / rate
 #endif
 
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd operation'
+ENDIF
+
 ! Convert from conservative to primitive
 CALL FROMUTORVE
 
-! Check density !
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd FROMUTORVE'
+ENDIF
+
+! Check quantities !
 CALL CUSTOM_CHECKRHO
 
-! Do conversion again !
-CALL FROMRVETOU
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd CUSTOM_CHECKRHO'
+ENDIF
 
 ! set boundary conditions !
 call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd BOUNDARY'
+ENDIF
 
 ! Update 
 CALL UPDATE (2)
 
-! Do conversion again !
-CALL FROMRVETOU
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd UPDATE'
+ENDIF
 
 ! set boundary conditions !
 call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd Boundary'
+ENDIF
+
+! Convert from primitive to conservative !
+CALL FROMRVETOU
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 2nd FROMRVETOU'
+ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Prepare for next step
 
 CALL SPATIAL
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd SPATIAL'
+ENDIF
 
 #ifdef DEBUG
 CALL system_clock(time_start)
@@ -185,11 +254,37 @@ CALL system_clock(time_end)
 WRITE(*,*) 'rk3 = ', REAL(time_end - time_start) / rate
 #endif
 
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd opeartion'
+ENDIF
+
 ! Convert from conservative to primitive
 CALL FROMUTORVE 
 
-! Check density !
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd FROMUTORVE'
+ENDIF
+
+! Check quantities !
 CALL CUSTOM_CHECKRHO
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd CUSTOM_CHECKRHO'
+ENDIF
+
+! set boundary conditions !
+call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd BOUNDARY'
+ENDIF
+
+! Convert from primitive to conservative !
+CALL FROMRVETOU
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd FROMRVETOU'
+ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Section for operator splitting
@@ -198,23 +293,142 @@ CALL OPERATOR_SPLIT
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! Check density !
+! uncomment the below if conservative variables are changed with opeartor split
+
+! ! Convert from conservative to primitive
+! CALL FROMUTORVE 
+
+! ! Check quantities !
+! CALL CUSTOM_CHECKRHO
+
+! ! set boundary conditions !
+! call BOUNDARY
+
+! ! Update again !
+! CALL FROMRVETOU
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Section for burning (burns only at the last step of RK)
+  
+IF(levelset_flag == 1 .and. xisotran_flag == 1) THEN
+
+  ! If there is level-set, update it
+
+  CALL UPDATE_FLAME_RADIUS
+
+  	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished UPDATE_FLAME_RADIUS'
+	ENDIF
+  
+  ! This trigger the burning package proposed by
+  ! Reinecke 1999b
+  IF(burn_flag == 1) THEN
+
+    ! This does the Carbon burning
+  
+    IF(carburn_flag == 1) CALL BURN_PHASE1B
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished BURN_PHASE1B'
+	ENDIF
+
+
+    ! This do the O- and Si- burning
+
+    IF(advburn_flag == 1) CALL BURN_PHASE2B
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished BURN_PHASE2B'
+	ENDIF
+
+    ! Update the AZbar and temperature accordingly
+    CALL FIND_AZBAR
+    CALL FINDHELMTEMP
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished EOS find azbar and helmtemp'
+	ENDIF
+
+    ! For completely burnt zone, check if NSE applies
+
+    IF(convert_nse_flag == 1) CALL NSE2
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished NSE2'
+	ENDIF
+
+    ! Copy the new Xiso and epsilon to ghost cells
+    CALL BOUNDARY
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished final boundary'
+	ENDIF
+
+    ! Check if the change of isotope perserve the sum
+    !CALL system_clock(time_start2)
+
+    CALL CHECKXISOTOPE
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished checkxisotope'
+	ENDIF
+
+    ! Update the burntime
+    last_burntime = global_time
+
+    ! Update Abar and Zbar and temperature again
+    CALL FIND_AZBAR
+    CALL FINDHELMTEMP
+
+	IF (say_flag == 1) THEN
+		WRITE(*,*) 'RK: Finished EOS find azbar and helmtemp'
+	ENDIF
+
+	ENDIF
+ENDIF
+
+! Check quantities !
 CALL CUSTOM_CHECKRHO
 
-! Update again !
-CALL FROMRVETOU
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished CUSTOM_CHECKRHO'
+ENDIF
 
 ! set boundary conditions !
 call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished BOUNDARY'
+ENDIF
 
 ! Update physical quantities
 CALL UPDATE (3)
 
-! Do conversion again !
-CALL FROMRVETOU
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished 3rd update'
+ENDIF
 
 ! set boundary conditions !
 call BOUNDARY
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished BOUNDARY'
+ENDIF
+
+! Do conversion again !
+CALL FROMRVETOU
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished FROMRVETOU'
+ENDIF
+
+IF (nuspec_flag == 1) THEN
+	CALL FINDNUSPEC
+ENDIF
+
+IF (say_flag == 1) THEN
+	WRITE(*,*) 'RK: Finished FINDNUSPEC'
+ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

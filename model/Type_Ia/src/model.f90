@@ -11,7 +11,7 @@ USE Ecaptable_module
 IMPLICIT NONE
 
 ! Integer !
-INTEGER :: i, j, k, l, m, flag_eostable, found_atmo, flag_notfindtemp
+INTEGER :: i, j, k, l, m, n, flag_eostable, flag_notfindtemp, found_atmo
 REAL*8 :: dummy
 ! Magnetic field !
 REAL*8 :: maxdb
@@ -143,8 +143,10 @@ IF (mhd_flag == 1) THEN
     prim(ibz,:,:,0) = prim(ibz,:,:,1)
   ELSEIF (coordinate_flag == 1) THEN
     READ(970,*) ((prim(iby,j,1,l), j = 1, nx), l = 1, nz)
-    prim(iby,:,0,:) = prim(iby,:,1,:)
-    prim(iby,:,:,:) = prim(iby,:,:,:)*gauss2code*lencgs2code
+    DO k = -2, ny+3, 1 
+      prim(iby,:,k,:) = prim(iby,:,1,:)
+    ENDDO
+    prim(iby,:,:,:) = prim(iby,:,:,:)*gauss2code
   ENDIF
 
   CLOSE(970)
@@ -197,9 +199,22 @@ ELSE
   prim(ibx:ibz,:,:,:) = 0.0D0
   PRINT *, "No magnetic field in this run"
 ENDIF
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Deallocate
 Deallocate(a_phi)
+
+! Define the Kronecker Delta
+
+do m = 1, 3, 1
+   do n = 1, 3, 1
+      if (m==n) then
+         eye(m,n) = 1.0D0
+      else
+         eye(m,n) = 0.0D0
+      endif
+   enddo
+enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -236,6 +251,7 @@ IF (helmeos_flag == 1) THEN
     READ(970,*) ((temp2(j,1,l), j = 1, nx), l = 1, nz)
   ENDIF
   CLOSE(970)
+  temp2 = temp2/1.0D9
   temp2_old = temp2
   PRINT *, "Finished reading temperature for Helmholtz EOS"
 
@@ -251,6 +267,12 @@ ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+IF (nuspec_flag == 1) THEN
+  CALL read_nutable
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 CALL FINDPRESSURE
 
 IF (helmeos_flag == 1) THEN
@@ -259,16 +281,20 @@ IF (helmeos_flag == 1) THEN
 			DO j = 1, nx
 
 				CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
-				IF (ieee_is_nan(epsilon(j,k,l))) THEN
-					WRITE(*,*) 'Global time', global_time, 'Input Rho', prim(irho,j,k,l), 'Input temp', temp2(j,k,l), 'abar2', abar2(j,k,l), 'zbar2', zbar2(j,k,l), 'ye', prim(iye2, j, k, l), 'at j,k,l', j,k,l
-					STOP
-				ENDIF
 				
 			END DO
 		END DO
 	END DO
 	CALL BOUNDARY1D_NM(epsilon, even, even, even, even, even, even)
 ENDIF
+
+! OPEN (UNIT = 125, FILE = './eps.dat', STATUS = 'REPLACE')
+!       DO k = 1, nz, 1
+!          DO i = 1, nx, 1
+!             WRITE(125,*) epsilon(i,1,k)
+!          ENDDO
+!       ENDDO
+! CLOSE(125)
 
 IF (helmeos_flag == 0 .and. coordinate_flag == 2) THEN
   DO j = 1, nx
@@ -286,7 +312,7 @@ ELSEIF (helmeos_flag == 0 .and. coordinate_flag == 1) THEN
   END DO
 ENDIF
 
-PRINT *, 'Finish calculating pressure, sound speed and epsilon'
+PRINT *, 'Finished calculating pressure, sound speed and epsilon'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -299,9 +325,7 @@ IF (turb_flag == 1) THEN
     STOP
   ENDIF
   CALL GetTurb
-  CALL FINDTURBULENCE
 ENDIF
-CALL BOUNDARY
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -310,48 +334,72 @@ prim_a(:) = 0.0D0
 IF (turb_flag == 1) THEN
   prim_a(iturbq) = turb_q_a
 ENDIF
-atmosphere = atmospheric*MAXVAL(prim(irho,:,:,:))
-prim_a(irho) = atmosphere
+
+! atmosphere = atmospheric*MAXVAL(prim(irho,:,:,:))
 
 IF (helmeos_flag == 1) THEN
-  prim_a(ihe4) = xiso_ahe4
+  ! prim_a(ihe4) = xiso_ahe4
   prim_a(ic12) = xiso_ac12
   prim_a(io16) = xiso_ao16
   CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, prim_a(iye2))
 
-  found_atmo = 0 ! Find atmosphere flag
+  eps_a = MINVAL(epsilon(1:nx, 1, 1:nz))
+
+  found_atmo = 0
 
   DO l = 1, nz
     DO k = 1, ny
       DO j = 1, nx
-        ! Standard !
-        diff = prim(irho,j,k,l) - prim_a(irho)
-        factor = MAX(SIGN(1.0D0, diff), 0.0D0)
+        IF (helmeos_flag == 1) THEN
+          IF (epsilon(j,k,l) == eps_a .and. found_atmo == 0) THEN
 
-        IF (factor == 0.0D0 .and. found_atmo == 0) THEN
-          found_atmo = 1
-          eps_a = epsilon(j,k,l)
-          WRITE(*,*) 'Atmosphere epsilon is', eps_a
-          CALL private_invert_helm_ed(epsilon(j,k,l), &
-                            prim_a(irho), abar2_a, &
-                            zbar2_a, prim_a(iye2), &
-                                            temp2_old(j,k,l), temp2_a, flag_notfindtemp)
-          CALL HELM_EOSPRESSURE(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
-          CALL HELM_EOSEPSILON(atmosphere, temp2_a, abar2_a, zbar2_a, prim_a(iye2), eps_a)
+            eps_a = epsilon(j,k,l)
+            prim_a(irho) = prim(irho,j,k,l)
+
+            
+            WRITE(*,*) 'Atmosphere epsilon is', eps_a
+
+            CALL private_invert_helm_ed(epsilon(j,k,l), &
+                              prim_a(irho), abar2_a, &
+                              zbar2_a, prim_a(iye2), &
+                                              temp2_old(j,k,l), temp2_a, flag_notfindtemp)
+            WRITE(*,*) 'Found temp_a is', temp2_a
+            CALL HELM_EOSPRESSURE(prim_a(irho), temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
+
+            found_atmo = 1
+          
+          ENDIF
+        ELSE
+
+          prim_a(itau) = prim(itau,nx,1,1)
+          eps_a = epsilon(nx,1,1)
+
+          EXIT
+
         ENDIF
 
-        prim(imin:ibx-1,j,k,l) = factor*prim(imin:ibx-1,j,k,l) + (1.0D0 - factor)*prim_a(:)
-        temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
-        abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
-        zbar2(j,k,l) = factor*zbar2(j,k,l) + (1.0D0 - factor)*zbar2_a
-        epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
       END DO
     END DO
   END DO
 
-  ELSE
-    prim_a(itau) = prim(itau,nx,1,1)
-    eps_a = epsilon(nx,1,1)
+  DO l = 1, nz
+    DO k = 1, ny
+      DO j = 1, nx
+
+        diff = prim(irho,j,k,l) - prim_a(irho)
+        factor = MAX(SIGN(1.0D0, diff), 0.0D0)
+        prim(imin:ibx-1,j,k,l) = factor*prim(imin:ibx-1,j,k,l) + (1.0D0 - factor)*prim_a(:)
+        IF (helmeos_flag == 1) THEN
+          temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
+          abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
+          zbar2(j,k,l) = factor*zbar2(j,k,l) + (1.0D0 - factor)*zbar2_a
+          epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
+        ENDIF
+        
+      END DO
+    END DO
+  END DO
+
 ENDIF
 
 IF (helmcheck_flag == 1) THEN

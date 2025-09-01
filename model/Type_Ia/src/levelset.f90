@@ -1364,7 +1364,7 @@ if(deton_flag == 1) then
 
         ! Characteristic length scale
         flame_length = 5.1381D-9 * (rho_fuel/1.62D-9)**(-1.9375D0)
-        gibson_length = dx(j) * (flame_vel_lam**2 / 2.0D0 / prim(iturbq,j_in,1,k_in))**1.5D0
+        gibson_length = dx(j_in) * (flame_vel_lam**2 / 2.0D0 / prim(iturbq,j_in,1,k_in))**1.5D0
 
         ! Flame width > turbulence eddy-overturn scale is needed
         ! But the exact value is not yet discovered

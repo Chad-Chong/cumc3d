@@ -20,21 +20,23 @@ INTEGER, PARAMETER :: gravity_flag = 1
 INTEGER, PARAMETER :: phitest_flag = 0
 
 ! Chemical Composition and Transport (ISO) Flag
-INTEGER, PARAMETER :: xisotran_flag = 0
+INTEGER, PARAMETER :: xisotran_flag = 1
 
 ! Helmholtz EOS Flag and its Checking Flag
-INTEGER, PARAMETER :: helmeos_flag = 0
+INTEGER, PARAMETER :: helmeos_flag = 1
 INTEGER, PARAMETER :: helmcheck_flag = 0
 INTEGER :: count = 0
 
 ! Turbulence Flag (only for cylindrical coordinates (uniform r z grid); spherical coordinates are not implemented correctly, the stress tensor viscosity definition needs to be modified)
 
 INTEGER, PARAMETER :: turb_flag = 1
+INTEGER, PARAMETER :: turbcheck_flag = 0
+INTEGER, PARAMETER :: turb_neighbour = 3 ! Number of cells that is not atmosphere for turbulence
 
 ! Flame Flags ! (the level set is written with uniform grid in mind)
 INTEGER, PARAMETER :: levelset_flag = 0
-INTEGER, PARAMETER :: update_flag = 0 ! Flag to change the level set by reinitialization
 INTEGER, PARAMETER :: flame_flag = 0 ! Flag to initialize flame
+INTEGER, PARAMETER :: update_flag = 0 ! Flag to change the level set by reinitialization
 INTEGER, PARAMETER :: burn_flag = 0
 
 ! Flag for allowing the interaction between level set 1 and energy input
@@ -55,7 +57,16 @@ INTEGER, PARAMETER 	:: carburn_flag = 1
 ! Flag for allowing 2nd step burning input for level set 1 & 2
 ! 1 = Allow energy input by advanced burning
 
-INTEGER, PARAMETER 	:: advburn_flag = 1   
+INTEGER, PARAMETER 	:: advburn_flag = 1
+
+! Flag for thermal neutrino !
+INTEGER, PARAMETER 	:: thermal_flag = 1
+
+! Flag for neutrino spectrum 
+INTEGER, PARAMETER :: nuspec_flag = 1
+
+! Flag for output
+INTEGER, PARAMETER :: say_flag = 0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -133,9 +144,9 @@ REAL*8, PARAMETER	:: temp_max = 7.0D1
 REAL*8, PARAMETER 	:: temp_min = 1.0D-4
 
 ! Atmosphere Parameters !
-REAL*8, PARAMETER    :: xiso_ahe4 = 1.0D0
-REAL*8, PARAMETER    :: xiso_ac12 = 0.0D0
-REAL*8, PARAMETER    :: xiso_ao16 = 0.0D0
+REAL*8, PARAMETER    :: xiso_ahe4 = 0.0D0
+REAL*8, PARAMETER    :: xiso_ac12 = 0.49D0
+REAL*8, PARAMETER    :: xiso_ao16 = 0.51D0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Analysis flags !
