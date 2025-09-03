@@ -69,6 +69,9 @@ REAL*8 :: abar2_a
 REAL*8 :: zbar2_a
 REAL*8 :: yiso_a, qash_a
 
+!Success flag for inversion
+INTEGER :: invert
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! My iso7 prescription
 

@@ -14,6 +14,7 @@
 PROGRAM CUMC3D
 USE MHD_MODULE
 USE DEFINITION
+USE CUSTOM_DEF
 IMPLICIT NONE
 
 INTEGER :: j, l
@@ -99,6 +100,8 @@ CALL system_clock(time_start)
 n_iter = 1
 DO while (global_time < total_time)
 
+  invert = 0
+
   ! Find time step !
   CALL finddt
 
@@ -116,6 +119,10 @@ DO while (global_time < total_time)
 
   ! Print out !
   WRITE (*,*) n_step, dt, global_time
+
+  IF (invert == 1) THEN
+    WRITE(*,*) 'EOS inversion to find temperature failed at this timestep'
+  ENDIF
 
   IF (dt < 1) THEN
     CALL print_hydroprofile 

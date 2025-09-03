@@ -468,8 +468,9 @@ DO k = 1, nz, 1
                             zbar2(i,j,k), prim(iye2,i,j,k), &
                                             temp2_old(i,j,k), temp2(i,j,k), flag_notfindtemp)
                 
-                IF (flag_notfindtemp == 1) THEN
+                IF (invert == 0 .and. flag_notfindtemp == 1) THEN
                     WRITE(*,*) 'EOS inversion to find temperature failed'
+                    invert = 1
                     ! STOP
                 ENDIF
             
@@ -753,19 +754,19 @@ include 'vector_eos.dek'
 
 
 ! we did not converge if we land here
-     write(6,*)
-     write(6,*) 'newton-raphson failed in routine invert_helm_ed'
-     write(6,*) 'pipeline element',j
-     write(6,01) 'ewant  =',eoswrk03(j)
-01   format(1x,5(a,1pe16.8))
-     write(6,01) 'error =',eoswrk01(j), &
-                 '  eostol=',eostol,'  fpmin =',fpmin
-     write(6,01) 'tmp   =',temp_row(j),'  tmpold=',eoswrk04(j)
-     write(6,01) 'f/df  =',eoswrk02(j),' f   =',f,    ' df    =',df
-     write(6,*)
+!      write(6,*)
+!      write(6,*) 'newton-raphson failed in routine invert_helm_ed'
+!      write(6,*) 'pipeline element',j
+!      write(6,01) 'ewant  =',eoswrk03(j)
+! 01   format(1x,5(a,1pe16.8))
+!      write(6,01) 'error =',eoswrk01(j), &
+!                  '  eostol=',eostol,'  fpmin =',fpmin
+!      write(6,01) 'tmp   =',temp_row(j),'  tmpold=',eoswrk04(j)
+!      write(6,01) 'f/df  =',eoswrk02(j),' f   =',f,    ' df    =',df
+!      write(6,*)
 
-    ! stop 'could not find a temperature in routine invert_helm_ed'
-    write(*,*) 'attnetion! cannot find temperature'
+!     ! stop 'could not find a temperature in routine invert_helm_ed'
+!     write(*,*) 'attnetion! cannot find temperature'
     flag_notfindtemp = 1
 
 
