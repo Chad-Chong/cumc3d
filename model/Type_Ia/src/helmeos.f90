@@ -469,7 +469,6 @@ DO k = 1, nz, 1
                                             temp2_old(i,j,k), temp2(i,j,k), flag_notfindtemp)
                 
                 IF (invert == 0 .and. flag_notfindtemp == 1) THEN
-                    WRITE(*,*) 'EOS inversion to find temperature failed'
                     invert = 1
                     ! STOP
                 ENDIF
