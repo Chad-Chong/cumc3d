@@ -1800,7 +1800,7 @@ real*8 :: temp_in, rho_in, abar_in, zbar_in
 rho_in = prim(irho,j_in,1,k_in)
 temp_in = temp2(j_in,1,k_in)
 abar_in = abar2(j_in,1,k_in)
-zbar_in = zbar2(j_in,1,k_in)
+zbar_in = MIN(prim(iye2, j_in,1,k_in)*abar2(j_in,1,k_in), zbar2(j_in,1,k_in))
 
 ! Pass to the HELMHOLTZ
 call HELM_EOSSOUNDSPEED(rho_in, temp_in, abar_in, zbar_in, cs_out)

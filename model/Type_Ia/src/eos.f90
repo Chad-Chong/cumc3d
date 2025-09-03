@@ -12,7 +12,7 @@ IMPLICIT NONE
 ! Integer !
 INTEGER :: j, k, l, flag_eostable
 ! Real !
-REAL*8 :: xe, dummy1, dummy2
+REAL*8 :: xe, dummy1, dummy2, zbar_in
 
 
 IF (helmeos_flag == 1) THEN
@@ -31,7 +31,8 @@ IF (helmeos_flag == 1) THEN
 					STOP
 				ENDIF
 
-				CALL HELM_EOSSOUNDSPEED(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), cs(j,k,l))
+				zbar_in = MIN(prim(iye2,j,k,l)*abar2(j,k,l), zbar2(j,k,l))
+				CALL HELM_EOSSOUNDSPEED(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar_in, cs(j,k,l))
 				IF (ieee_is_nan(cs(j,k,l))) THEN
 					WRITE(*,*) 'Global time', global_time, 'Input Rho', prim(irho,j,k,l), 'Input temp', temp2(j,k,l), 'abar2', abar2(j,k,l), 'zbar2', zbar2(j,k,l), 'ye', prim(iye2, j, k, l), 'at j,k,l', j,k,l
 					STOP

@@ -515,8 +515,8 @@ REAL (selected_real_kind(15,307)) :: epsilon_out
 den_row(1) = rho_in * 6.1710D17
 temp_row(1) = temp_in * 1.0D9
 abar_row(1) = abar_in
-zbar_row(1) = zbar_in
-!zbar_row(1) = MIN(zbar_in, ye_in * abar_in)
+! zbar_row(1) = zbar_in
+zbar_row(1) = MIN(zbar_in, ye_in * abar_in)
 jlo_eos = 1 
 jhi_eos = 1
 
@@ -567,6 +567,7 @@ temp_row(1) = temp_in * 1.0D9
 den_row(1) = rho_in * 6.1710D17   
 abar_row(1) = abar_in
 zbar_row(1) = zbar_in
+! zbar_row(1) = MIN(zbar_in, ye_in * abar_in)
 jlo_eos = 1
 jhi_eos = 1
 

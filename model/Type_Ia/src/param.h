@@ -34,10 +34,10 @@ INTEGER, PARAMETER :: turbcheck_flag = 0
 INTEGER, PARAMETER :: turb_neighbour = 3 ! Number of cells that is not atmosphere for turbulence
 
 ! Flame Flags ! (the level set is written with uniform grid in mind)
-INTEGER, PARAMETER :: levelset_flag = 0
-INTEGER, PARAMETER :: flame_flag = 0 ! Flag to initialize flame
-INTEGER, PARAMETER :: update_flag = 0 ! Flag to change the level set by reinitialization
-INTEGER, PARAMETER :: burn_flag = 0
+INTEGER, PARAMETER :: levelset_flag = 1
+INTEGER, PARAMETER :: flame_flag = 1 ! Flag to initialize flame
+INTEGER, PARAMETER :: update_flag = 1 ! Flag to change the level set by reinitialization
+INTEGER, PARAMETER :: burn_flag = 1
 
 ! Flag for allowing the interaction between level set 1 and energy input
 ! 1 = Allow energy input by detonation + finding detonation
