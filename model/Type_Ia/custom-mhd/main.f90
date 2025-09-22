@@ -120,7 +120,7 @@ DO while (global_time < total_time)
   ! Print out !
   WRITE (*,*) n_step, dt, global_time
 
-  IF (invert == 1) THEN
+  IF (invert == 1 .and. check_invert == 1) THEN
     WRITE(*,*) 'EOS inversion to find temperature failed at this timestep'
   ENDIF
 

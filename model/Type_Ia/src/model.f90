@@ -410,12 +410,15 @@ ENDIF
 
 ! Assign floor variables !
 CALL CUSTOM_CHECKRHO
+WRITE(*,*) 'Finished assigning variable floor'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 IF (xisotran_flag == 1 .and. helmeos_flag == 1 .and. levelset_flag == 1 .and. flame_flag == 1) THEN
   CALL GetFlame
+  WRITE(*,*) 'Finished assigning deflagration level set'
   CALL FLAME_INI()
+  WRITE(*,*) 'Finished injecting flame energy'
   CALL FIND_AZBAR()	
   CALL FINDHELMTEMP()
   WRITE(*,*) 'Finished initializing flame'
@@ -453,6 +456,6 @@ WRITE (*,*)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set output profile interval !
-total_time = 2.0D0*tcgs2code ! cgs
+total_time = 1.0D0*tcgs2code ! cgs
 output_profiletime = total_time/100.0d0
 END SUBROUTINE

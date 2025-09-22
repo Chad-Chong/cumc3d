@@ -255,4 +255,8 @@ real*8, allocatable, dimension(:,:,:) :: deton_loc_ratio
 ! Sum of fractions by level-set 
 real*8, allocatable, dimension(:,:,:) :: burn_ratio
 
+! detonation count
+INTEGER :: det_count = 0
+real*8, allocatable, dimension(:) :: det_times
+
 END MODULE

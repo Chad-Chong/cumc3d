@@ -193,6 +193,30 @@ call h5sclose_f(dspace_id,error)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! define DIMENSION !
+IF (levelset_flag == 1 .and. det_count /= 0 .and. deton_flag == 1) THEN
+    space_rank = 1
+    dist_dims(1) = det_count
+
+    ! open dataspace !
+    call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
+
+    ! create dataset !
+    call h5dcreate_f(file_id,"detonations",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+    ! write dataset !
+    call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,det_times,dist_dims,error)
+
+    ! close dataset !
+    call h5dclose_f(dset_id1,error)
+
+    ! close data space !
+    call h5sclose_f(dspace_id,error)
+
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
 space_rank = 4
 data_dims(1) = (ibx - 1 - imin) + 1
 data_dims(2) = nx + 2

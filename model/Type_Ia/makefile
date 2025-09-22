@@ -7,9 +7,9 @@ clean:
 	rm -rf ./bin/*genmod
 	rm -rf ./bin/*.mod
 	rm -rf ./bin/*.f90
-	rm tmp.txt
 
 cleanfile:
 	rm -rf ./outfile/*.dat
 	rm -rf ./outfile/*.hdf5
 	rm -rf ./outfile/*.mp4
+	rm -f tmp.txt

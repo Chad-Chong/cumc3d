@@ -34,6 +34,11 @@ ALLOCATE(burn_qdot(-2:nx+3,-2:ny+3,-2:nz+3))
 ALLOCATE(flame_qdot(-2:nx+3,-2:ny+3,-2:nz+3))
 ALLOCATE(deton_qdot(-2:nx+3,-2:ny+3,-2:nz+3))
 
+! To record detonation
+IF (deton_flag == 1) THEN
+    allocate(det_times(0))
+ENDIF
+
 end subroutine buildLevelSet
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -151,13 +156,16 @@ real*8 :: H_d
 real*8 :: sgn_scaG
 
 ! Array storing the minimal distance of the grid to the nearest front
-real*8, dimension(-2:nx+3, -2:nz+3) :: flame_distance
+real*8, allocatable, dimension(:,:) :: flame_distance
 
 ! Character for debug
 character(len=99) :: globalt
 
 ! Array storing all intersection points
-real*8, dimension (nx * nz, 2):: flame_position
+real*8, allocatable, dimension(:,:) :: flame_position
+
+allocate(flame_distance(-2:nx+3, -2:nz+3))
+allocate(flame_position(nx*nz, 2))
 
 ! First find all intersections
 call locate_flame_grid(1, flame_count, flame_position)
@@ -242,7 +250,9 @@ enddo
 ! ENDIF
 
 ! Copy the results to ghost cells
-CALL BOUNDARY1D_NM(prim(iscaG1,:,:,:), even, even, even, even, even, even)  
+CALL BOUNDARY1D_NM(prim(iscaG1,:,:,:), even, even, even, even, even, even)
+deallocate(flame_distance)
+deallocate(flame_position)  
 
 100 FORMAT (6E13.6)
 
@@ -279,10 +289,15 @@ real*8 :: H_d
 real*8 :: sgn_scaG            
 
 ! Array storing the minimal distance of the grid to the nearest front
-real*8, dimension(-2:nx+3, -2:nz+3) :: flame_distance
+real*8, allocatable, dimension(:,:) :: flame_distance
+
 
 ! Array storing all intersection points
-real*8, dimension(nx * nz, 2):: flame_position
+real*8, allocatable, dimension(:,:) :: flame_position
+
+
+allocate(flame_distance(-2:nx+3, -2:nz+3))
+allocate(flame_position(nx*nz, 2))
             
 ! First find all intersections         
 call locate_flame_grid(2, flame_count, flame_position)
@@ -313,6 +328,9 @@ enddo
 
 ! Copy the results to the ghost cells
 CALL BOUNDARY1D_NM(prim(iscaG2,:,:,:), even, even, even, even, even, even)  
+
+deallocate(flame_distance)
+deallocate(flame_position)
 
 100 FORMAT (6E13.6)
 
@@ -1385,6 +1403,8 @@ if(deton_flag == 1) then
                     write(*,*) 'Flame length = ', flame_length
                     write(*,*) 'Gibson length = ', gibson_length
                     write(*,*)
+                    det_count = det_count + 1
+                    det_times = [det_times, global_time]
 
                     !cfl = 0.2D0  
                     ! output_profiletime = 0.5D4
@@ -1427,6 +1447,8 @@ if(deton_flag == 1) then
                     write(*,*) 'Flame length = ', flame_length
                     write(*,*) 'Gibson length = ', gibson_length
                     write(*,*)
+                    det_count = det_count + 1
+                    det_times = [det_times, global_time]
 
                         do j = j_in - 3, j_in + 3, 1
                             do k = k_in - 3, k_in + 3, 1

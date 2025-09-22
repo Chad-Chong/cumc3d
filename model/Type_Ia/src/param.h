@@ -8,10 +8,10 @@
 ! Feature Flags !
 
 !Flag for Rotation (set initial vphi to 0 if 0)!
-INTEGER, PARAMETER :: rotate_flag = 1
+INTEGER, PARAMETER :: rotate_flag = 0
 
 !Flag for MHD (set initial magnetic field to 0 if 0)!
-INTEGER, PARAMETER :: mhd_flag = 1
+INTEGER, PARAMETER :: mhd_flag = 0
 
 ! Flag for gravity
 INTEGER, PARAMETER :: gravity_flag = 1
@@ -25,6 +25,7 @@ INTEGER, PARAMETER :: xisotran_flag = 1
 ! Helmholtz EOS Flag and its Checking Flag
 INTEGER, PARAMETER :: helmeos_flag = 1
 INTEGER, PARAMETER :: helmcheck_flag = 0
+INTEGER, PARAMETER :: check_invert = 0
 INTEGER :: count = 0
 
 ! Turbulence Flag (only for cylindrical coordinates (uniform r z grid); spherical coordinates are not implemented correctly, the stress tensor viscosity definition needs to be modified)
