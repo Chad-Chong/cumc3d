@@ -64,6 +64,29 @@ call h5dclose_f(dset_id1,error)
 call h5sclose_f(dspace_id,error)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+IF (burn_flag == 1) THEN
+    ! define DIMENSION !
+    space_rank = 1
+    dist_dims(1) = 1
+
+    ! open dataspace !
+    call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
+
+    ! create dataset !
+    call h5dcreate_f(file_id,"Enuc",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+    ! write dataset !
+    call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,Enuc,dist_dims,error)
+
+    ! close dataset !
+    call h5dclose_f(dset_id1,error)
+
+    ! close data space !
+    call h5sclose_f(dspace_id,error)
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
 ! define DIMENSION !
 space_rank = 1

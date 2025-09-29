@@ -259,4 +259,7 @@ real*8, allocatable, dimension(:,:,:) :: burn_ratio
 INTEGER :: det_count = 0
 real*8, allocatable, dimension(:) :: det_times
 
+! Energy released in nuclear fusion
+real*8 :: Enuc = 0.0D0
+
 END MODULE

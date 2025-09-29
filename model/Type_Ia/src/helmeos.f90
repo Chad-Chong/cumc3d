@@ -2083,6 +2083,8 @@ do k = 1, nz, 1
             prim(ihe4:ini56,j,1,k) = x_burn(:)
             ! burn_qdot(j,1,k) = 0.0D0  
         endif
+        
+        Enuc = (epsilon(j,1,k)-eps_beg)*prim(irho,j,1,k)*vol(j,1,k)
 
     enddo         
 enddo

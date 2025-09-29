@@ -1598,6 +1598,9 @@ do k = 1, nz, 1
         prim(ihe4:ini56,j,1,k) = prim(ihe4:ini56,j,1,k) - x2 *  x_fuel1(:) + x2 * x_ash1(:)
         burn_mass = burn_mass + x2 * rho_mid * vol_mid
 
+        Enuc = Enuc + flame_qdot(j,1,k)*vol(j,1,k)*prim(irho,j,1,k)
+        Enuc = Enuc + deton_qdot(j,1,k)*vol(j,1,k)*prim(irho,j,1,k)
+
         endif
 
     enddo
@@ -1747,7 +1750,10 @@ do k = 1, nz, 1
 
             endif
 
+            Enuc = Enuc + burn_qdot(j,1,k)*vol(j,1,k)*prim(irho,j,1,k)
+
         endif
+
     enddo
 enddo                  
 
