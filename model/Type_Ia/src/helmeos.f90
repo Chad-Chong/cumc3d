@@ -48,7 +48,7 @@ double precision tsav,dsav,dth,dt2,dti,dt2i,dt3i, &
 
 ! open the file (use softlinks to input the desired table)
 
-OPEN(unit=19,file='./src/lib/helm_table.dat',status='old')
+OPEN(unit=19,file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/helm_table.dat',status='old')
 
 
 ! for standard table limits
@@ -242,7 +242,7 @@ IMPLICIT NONE
 INTEGER :: i, j, k
 REAL*8 :: dummy
 
-OPEN(unit=500, file='./src/lib/nse_table_7iso.dat',action='read')
+OPEN(unit=500, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/nse_table_7iso.dat',action='read')
 DO i = 0, den_rowno_nse, 1
     DO j = 0, temp_rowno_nse, 1
         READ(500,*) dummy, dummy, nsetable_binde(i,j), (nsetable_xiso(i,j,k), k = 1, totalion)
@@ -264,7 +264,7 @@ IMPLICIT NONE
 INTEGER :: i, j, k, k2
 REAL*8 :: dummy
 
-OPEN(unit=500, file='./src/lib/nse_table_495iso.dat',action='read')
+OPEN(unit=500, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/nse_table_495iso.dat',action='read')
 
 DO i = 0, den_rowno_nse2, 1
     DO j = 0, ye_rowno_nse2, 1
@@ -2083,7 +2083,7 @@ do k = 1, nz, 1
             prim(ihe4:ini56,j,1,k) = x_burn(:)
             ! burn_qdot(j,1,k) = 0.0D0  
         endif
-        
+
         Enuc = (epsilon(j,1,k)-eps_beg)*prim(irho,j,1,k)*vol(j,1,k)
 
     enddo         

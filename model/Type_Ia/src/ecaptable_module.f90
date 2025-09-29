@@ -53,7 +53,7 @@ contains
    real*8 :: input1, input2, input3, input4, input5
 
    ! Read in the low-Ye patch
-   open(unit=441, file='./src/lib/ecaptable_Ye040_wNabi_full.dat', action='read')
+   open(unit=441, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/ecaptable_Ye040_wNabi_full.dat', action='read')
    do i = 0, ye_row, 1  !0 - 15
       do j = 0, temp_row, 1
          do k = 0, rho_row, 1       
