@@ -8,10 +8,10 @@
 ! Feature Flags !
 
 !Flag for Rotation (set initial vphi to 0 if 0)!
-INTEGER, PARAMETER :: rotate_flag = 0
+INTEGER, PARAMETER :: rotate_flag = 1
 
 !Flag for MHD (set initial magnetic field to 0 if 0)!
-INTEGER, PARAMETER :: mhd_flag = 0
+INTEGER, PARAMETER :: mhd_flag = 1
 
 ! Flag for gravity
 INTEGER, PARAMETER :: gravity_flag = 1
@@ -135,7 +135,7 @@ INTEGER, PARAMETER :: relax_max = 100000
 REAL*8, PARAMETER :: tolerance = 1.0D-8
 
 ! Number of multipoles at the boundary, maximum is quadrupole !
-INTEGER, PARAMETER :: n_pole = 0
+INTEGER, PARAMETER :: n_pole = 2
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Helmholtz EOS Parameters !

@@ -1,3 +1,0 @@
-1. Compile CUMC3D with appropriate parameters.
-2. Put CUMC3D in a directory with outfile and profile directory
-3. Run

@@ -1,3 +1,3 @@
 #!/bin/bash
-cp ~/Codes/Helm_RotatingMagnetisedWhiteDwarf/hydro* ./
-cp ~/Codes/Helm_RotatingMagnetisedWhiteDwarf/Helm*.dat ./
+cp ~/Codes/Helm_RotatingMagnetisedWhiteDwarf/profile/hydro* ./
+cp ~/Codes/Helm_RotatingMagnetisedWhiteDwarf/profile/Helm*.dat ./
