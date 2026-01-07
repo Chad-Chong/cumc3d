@@ -310,6 +310,29 @@ call h5sclose_f(dspace_id,error)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! define DIMENSION !
+space_rank = 3
+sup_dims(1) = nx
+sup_dims(2) = ny
+sup_dims(3) = nz
+
+! open dataspace !
+call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+
+! create dataset !
+call h5dcreate_f(file_id,"lambdas",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,lambdas(1:nx,1:ny,1:nz),sup_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
 IF (helmeos_flag == 1) THEN
     space_rank = 3
     sup_dims(1) = nx + 2
@@ -509,18 +532,18 @@ ENDIF
 ! define DIMENSION !
 space_rank = 4
 data_dims(1) = (ibz - ibx) + 1
-data_dims(2) = nx + 3
-data_dims(3) = ny + 3
-data_dims(4) = nz + 3
+data_dims(2) = nx + 1
+data_dims(3) = ny + 1
+data_dims(4) = nz + 1
 
 ! open dataspace !
 call h5screate_simple_f(space_rank,data_dims,dspace_id,error)
 
 ! create dataset !
-call h5dcreate_f(file_id,"dbdt",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+call h5dcreate_f(file_id,"bcell",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,l_rk(ibx:ibz,-1:nx+1,-1:ny+1,-1:nz+1),data_dims,error)
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,bcell(ibx:ibz,0:nx,0:ny,0:nz),data_dims,error)
 
 ! close dataset !
 call h5dclose_f(dset_id1,error)
@@ -533,9 +556,33 @@ call h5sclose_f(dspace_id,error)
 ! define DIMENSION !
 space_rank = 4
 data_dims(1) = (ibz - ibx) + 1
-data_dims(2) = nx + 3
-data_dims(3) = ny + 3
-data_dims(4) = nz + 3
+data_dims(2) = nx + 6
+data_dims(3) = ny + 6
+data_dims(4) = nz + 6
+
+! open dataspace !
+call h5screate_simple_f(space_rank,data_dims,dspace_id,error)
+
+! create dataset !
+call h5dcreate_f(file_id,"dbdt",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,l_rk(ibx:ibz,-2:nx+3,-2:ny+3,-2:nz+3),data_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+space_rank = 4
+data_dims(1) = (ibz - ibx) + 1
+data_dims(2) = nx + 6
+data_dims(3) = ny + 6
+data_dims(4) = nz + 6
 
 ! open dataspace !
 call h5screate_simple_f(space_rank,data_dims,dspace_id,error)
@@ -544,7 +591,7 @@ call h5screate_simple_f(space_rank,data_dims,dspace_id,error)
 call h5dcreate_f(file_id,"bfield",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,prim(ibx:ibz,-1:nx+1,-1:ny+1,-1:nz+1),data_dims,error)
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,prim(ibx:ibz,-2:nx+3,-2:ny+3,-2:nz+3),data_dims,error)
 
 ! close dataset !
 call h5dclose_f(dset_id1,error)

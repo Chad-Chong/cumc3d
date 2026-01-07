@@ -12,6 +12,7 @@ compile_path = '/home/cnchong/Codes/cumc3d/model/Type_Ia'
 
 for i in data_paths:
     data_path = '/home/cnchong/Codes/cumc3d/model/Type_Ia/runs'+i[61:]
+    print(data_path)
     try: 
         os.mkdir(data_path)
         os.mkdir(data_path+'profile/')

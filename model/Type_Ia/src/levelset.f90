@@ -73,9 +73,9 @@ do j = 1, nx, 1
         ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
         !             30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
 
-    ! small c3 flame
-    !prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
-        !            15.23D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+    ! ! small c3 flame
+    ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
+    !                15.23D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
 
     ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
     !prim(iscaG1,j,1,k) = -DSQRT((x(j) - 47.86D0)**2 + (z(k) - 47.86D0)**2) + 7.0D0

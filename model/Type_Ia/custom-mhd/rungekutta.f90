@@ -453,6 +453,7 @@ END SUBROUTINE
 SUBROUTINE FINDDT
 USE DEFINITION
 USE MHD_MODULE
+USE CUSTOM_DEF
 IMPLICIT NONE
 
 ! Dummy variables
@@ -488,6 +489,7 @@ CALL system_clock(time_start)
 ! Set !
 dt_out1 = 1.0D5
 dt_out2 = 1.0D5
+lambdas = -1.0D0
 
 ! Now we find the minimum time constrained by NM sector
 !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC) & 
@@ -501,48 +503,50 @@ DO l = 1, nz
 		DO j = 1, nx
 
 			! Only grid with density above threshold density is counted
-			a2_mhd = cs(j,k,l)*cs(j,k,l)
-			a4_mhd = a2_mhd*a2_mhd
-			b2x_mhd = (bcell(ibx,j,k,l)*bcell(ibx,j,k,l)/prim(irho,j,k,l))
-			b2y_mhd = (bcell(iby,j,k,l)*bcell(iby,j,k,l)/prim(irho,j,k,l))
-			b2z_mhd = (bcell(ibz,j,k,l)*bcell(ibz,j,k,l)/prim(irho,j,k,l))
-			b2_mhd = b2x_mhd + b2y_mhd + b2z_mhd
-			b4_mhd = b2_mhd*b2_mhd
-			cfx_mhd = DSQRT(0.5D0*(a2_mhd + b2_mhd + DSQRT((a4_mhd + 2.0d0*a2_mhd*b2_mhd + b4_mhd) - 4.0D0*a2_mhd*b2x_mhd)))
-			cfy_mhd = DSQRT(0.5D0*(a2_mhd + b2_mhd + DSQRT((a4_mhd + 2.0d0*a2_mhd*b2_mhd + b4_mhd) - 4.0D0*a2_mhd*b2y_mhd)))
-			cfz_mhd = DSQRT(0.5D0*(a2_mhd + b2_mhd + DSQRT((a4_mhd + 2.0d0*a2_mhd*b2_mhd + b4_mhd) - 4.0D0*a2_mhd*b2z_mhd)))
-			lambda1 = ABS(prim(ivx,j,k,l)) + cfx_mhd
-			lambda2 = ABS(prim(ivy,j,k,l)) + cfy_mhd
-			lambda3 = ABS(prim(ivz,j,k,l)) + cfz_mhd
-			lambda = MAX(lambda1, lambda2, lambda3)
-                        
-			! Look for minimum grid size !
-			dt_temp2 = dx(j)
-			IF(coordinate_flag == 0) THEN
-				IF(n_dim > 1) THEN
-					dt_temp2 = MIN(dt_temp2, dy(k))
+			IF (prim(irho,j,k,l) > 1.0D2*prim_a(irho)) THEN
+				a2_mhd = cs(j,k,l)*cs(j,k,l)
+				a4_mhd = a2_mhd*a2_mhd
+				b2x_mhd = (bcell(ibx,j,k,l)*bcell(ibx,j,k,l)/prim(irho,j,k,l))
+				b2y_mhd = (bcell(iby,j,k,l)*bcell(iby,j,k,l)/prim(irho,j,k,l))
+				b2z_mhd = (bcell(ibz,j,k,l)*bcell(ibz,j,k,l)/prim(irho,j,k,l))
+				b2_mhd = b2x_mhd + b2y_mhd + b2z_mhd
+				b4_mhd = b2_mhd*b2_mhd
+				cfx_mhd = DSQRT(0.5D0*(a2_mhd + b2_mhd + DSQRT((a4_mhd + 2.0d0*a2_mhd*b2_mhd + b4_mhd) - 4.0D0*a2_mhd*b2x_mhd)))
+				cfy_mhd = DSQRT(0.5D0*(a2_mhd + b2_mhd + DSQRT((a4_mhd + 2.0d0*a2_mhd*b2_mhd + b4_mhd) - 4.0D0*a2_mhd*b2y_mhd)))
+				cfz_mhd = DSQRT(0.5D0*(a2_mhd + b2_mhd + DSQRT((a4_mhd + 2.0d0*a2_mhd*b2_mhd + b4_mhd) - 4.0D0*a2_mhd*b2z_mhd)))
+				lambda1 = ABS(prim(ivx,j,k,l)) + cfx_mhd
+				lambda2 = ABS(prim(ivy,j,k,l)) + cfy_mhd
+				lambda3 = ABS(prim(ivz,j,k,l)) + cfz_mhd
+				lambda = MAX(lambda1, lambda2, lambda3)
+							
+				! Look for minimum grid size !
+				dt_temp2 = dx(j)
+				IF(coordinate_flag == 0) THEN
+					IF(n_dim > 1) THEN
+						dt_temp2 = MIN(dt_temp2, dy(k))
+					END IF
+					IF(n_dim > 2) THEN
+						dt_temp2 = MIN(dt_temp2, dz(l))
+					END IF
+				ELSEIF(coordinate_flag == 1) THEN
+					IF(n_dim > 1 .AND. ny > 1) THEN
+						dt_temp2 = MIN(dt_temp2, x(j)*dy(k))
+					END IF
+					IF(n_dim > 2) THEN
+						dt_temp2 = MIN(dt_temp2, dz(l))
+					END IF
+				ELSEIF(coordinate_flag == 2) THEN
+					IF(n_dim > 1) THEN
+						dt_temp2 = MIN(dt_temp2, x(j)*dy(k))
+					END IF
+					IF(n_dim > 2) THEN
+						dt_temp2 = MIN(dt_temp2, x(j)*sine(k)*dz(l))
+					END IF
 				END IF
-				IF(n_dim > 2) THEN
-					dt_temp2 = MIN(dt_temp2, dz(l))
-				END IF
-			ELSEIF(coordinate_flag == 1) THEN
-				IF(n_dim > 1 .AND. ny > 1) THEN
-					dt_temp2 = MIN(dt_temp2, x(j)*dy(k))
-				END IF
-				IF(n_dim > 2) THEN
-					dt_temp2 = MIN(dt_temp2, dz(l))
-				END IF
-			ELSEIF(coordinate_flag == 2) THEN
-				IF(n_dim > 1) THEN
-					dt_temp2 = MIN(dt_temp2, x(j)*dy(k))
-				END IF
-				IF(n_dim > 2) THEN
-					dt_temp2 = MIN(dt_temp2, x(j)*sine(k)*dz(l))
-				END IF
+				dt_temp2 = dt_temp2*cfl/lambda
+				lambdas(j,k,l) = lambda
+				dt_out2 = MIN(dt_out2, dt_temp2)
 			END IF
-			dt_temp2 = dt_temp2*cfl/lambda
-			dt_out2 = MIN(dt_out2, dt_temp2)
-			
 		END DO
 	ENDDO
 ENDDO

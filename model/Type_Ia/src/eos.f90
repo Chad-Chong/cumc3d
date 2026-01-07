@@ -35,6 +35,7 @@ IF (helmeos_flag == 1) THEN
 				CALL HELM_EOSSOUNDSPEED(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar_in, cs(j,k,l))
 				IF (ieee_is_nan(cs(j,k,l))) THEN
 					WRITE(*,*) 'Global time', global_time, 'Input Rho', prim(irho,j,k,l), 'Input temp', temp2(j,k,l), 'abar2', abar2(j,k,l), 'zbar2', zbar2(j,k,l), 'ye', prim(iye2, j, k, l), 'at j,k,l', j,k,l
+					WRITE(*,*) MAXVAL(prim(irho,:,:,:))
 					STOP
 				ENDIF
 			END DO

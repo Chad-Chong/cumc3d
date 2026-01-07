@@ -124,13 +124,13 @@ DO while (global_time < total_time)
     WRITE(*,*) 'EOS inversion to find temperature failed at this timestep'
   ENDIF
 
-  IF (dt < 1) THEN
-    CALL print_hydroprofile 
-    WRITE(*,*) 'dt is extremely small'
-    STOP
-  ENDIF
+  ! IF (dt < 1) THEN
+  !   CALL print_hydroprofile 
+  !   WRITE(*,*) 'dt is extremely small'
+  !   STOP
+  ! ENDIF
 
-  ! IF (MOD(n_step,5) == 0) THEN
+  ! IF (MOD(n_step,1) == 0) THEN
   ! output_file = .true.
   ! ELSE
   !   output_file = .false.

@@ -8,7 +8,7 @@
 ! Feature Flags !
 
 !Flag for Rotation (set initial vphi to 0 if 0)!
-INTEGER, PARAMETER :: rotate_flag = 1
+INTEGER, PARAMETER :: rotate_flag = 0
 
 !Flag for MHD (set initial magnetic field to 0 if 0)!
 INTEGER, PARAMETER :: mhd_flag = 1
@@ -115,7 +115,7 @@ REAL*8, PARAMETER :: ye = 0.5D0
 ! Parameters !
 REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
-REAL*8, PARAMETER :: atmospheric = 1.0D-7
+REAL*8, PARAMETER :: atmospheric = 1.0D-6
 
 ! Constant for fermi equation of state !
 ! Note that the speed of light is unity !
@@ -126,7 +126,7 @@ REAL*8, PARAMETER :: bmax = (mb2*me2**3)/(3.0D0*pi**2*h_bar**3*ye)
 ! Section for solving gravity !
 
 ! Solve the potential per how many steps
-INTEGER, PARAMETER :: n_pot = 20
+INTEGER, PARAMETER :: n_pot = 200
 
 ! maximum number of relaxation !
 INTEGER, PARAMETER :: relax_max = 100000

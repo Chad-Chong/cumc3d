@@ -107,6 +107,9 @@ ALLOCATE (clp1(1:nx,1:ny,1:nz))
 ALLOCATE (clm1(1:nx,1:ny,1:nz))
 ALLOCATE (epsc(1:nx,1:ny,1:nz))
 
+! for CFL check !
+ALLOCATE (lambdas(1:nx,1:ny,1:nz))
+
 IF (turb_flag == 1) THEN
   WRITE(*,*) 'Build sub-grid turbulence variables'
   CALL buildTurb
@@ -195,7 +198,7 @@ OPEN(UNIT=970, FILE = './profile/hydro_x1_fgrid.dat', ACTION='READ')
 DO i = -3, nx+3
 	READ(970,*) xF(i)
   IF (xF(i) == 0.0D0) THEN
-    xF(i) = 1.0D-50 
+    xF(i) = 1.0D-10 
   ENDIF
 ENDDO
 CLOSE(970)
@@ -363,7 +366,7 @@ INTEGER :: i, j, k, l, flag_eostable
 REAL*8 :: dummy
 
 ! Threshold for atmosphere density
-REAL*8 :: diff, factor, bfield, alven, rho_old, m_local
+REAL*8 :: diff, factor, bfield, alven, rho_old, m_local, diff_eps
 
 ! Minimum / maximum internal energy density
 REAL*8 :: epsilon_temp_min, epsilon_temp_max
@@ -378,14 +381,9 @@ rate = REAL(cr)
 CALL system_clock(time_start)
 #endif
 
-IF (helmeos_flag == 1) THEN
-
-  prim_a(irho) = MIN(prim_a(irho), 1.0D-4 * MAXVAL(prim(irho,:,:,:)))
-
-ENDIF
+! prim_a(irho) = MIN(prim_a(irho), 1.0D-4 * MAXVAL(prim(irho,:,:,:)))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 DO l = 1, nz
   DO k = 1, ny
@@ -393,19 +391,37 @@ DO l = 1, nz
 
       ! Standard !
       diff = prim(irho,j,k,l) - prim_a(irho)
+      diff_eps = epsilon(j,k,l) - eps_a
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
 
-      IF (diff/prim_a(irho) < 1e-2) THEN
+      IF (xisotran_flag == 1) THEN
+        DO i = ihe4, ini56, 1
+          IF (prim(i,j,k,l) < 1.0D-30) THEN
+            prim(i,j,k,l) = 1.0D-30
+          ENDIF
+        END DO
+      ENDIF
+
+      IF (turb_flag == 1) THEN
+        IF (prim(iturbq,j,k,l) < 1.0D-10) THEN
+          prim(iturbq,j,k,l) = 1.0D-10
+        ENDIF
+      ENDIF
+
+      ! IF (diff_eps/eps_a <= 1.0D-1) THEN
+      !   epsilon(j,k,l) = eps_a
+      ! ENDIF      
+
+      IF (diff/prim_a(irho) <= 1.0D-1 .or. diff_eps/eps_a <= 1.0D-1) THEN ! Put the above condition as or here for stronger constraint: not allowing finite density cells to be cold.
 
         prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) ! Change the thermodynamic / hydro properties, not the composition
+        epsilon(j,k,l) = eps_a
 
         IF (helmeos_flag == 1) THEN
           CALL PRIVATE_HELMEOS_AZBAR(prim(ihe4:ini56,j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l))
           CALL private_invert_helm_ed(epsilon(j,k,l), prim(irho,j,k,l), abar2(j,k,l),zbar2(j,k,l), prim(iye2,j,k,l), temp2_old(j,k,l), temp2(j,k,l), flag_eostable)
           CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
-          CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
-        ELSE
-          epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*epsilon(nx,k,1)
+          ! CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
         ENDIF
         IF (turb_flag == 1) THEN
           prim(iturbq,j,k,l) = prim_a(iturbq)
@@ -425,20 +441,6 @@ DO l = 1, nz
       !       temp2(j,k,l) = temp_max
       !     ENDIF
       ! ENDIF
-
-      IF (xisotran_flag == 1) THEN
-        DO i = ihe4, ini56, 1
-          IF (prim(i,j,k,l) < 1.0D-30) THEN
-            prim(i,j,k,l) = 1.0D-30
-          ENDIF
-        END DO
-      ENDIF
-
-      IF (turb_flag == 1) THEN
-        IF (prim(iturbq,j,k,l) < 1.0D-10) THEN
-          prim(iturbq,j,k,l) = 1.0D-10
-        ENDIF
-      ENDIF
       
       IF (helmeos_flag /= 1) THEN
         factor = MAX(SIGN(1.0D0, epsilon(j,k,l)), 0.0D0)

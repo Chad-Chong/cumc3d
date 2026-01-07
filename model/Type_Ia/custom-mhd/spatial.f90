@@ -621,7 +621,7 @@ IMPLICIT NONE
 INTEGER :: i, j, k, l, lc, lcm1
 
 ! Real !
-REAL*8 :: rbar
+REAL*8 :: rbar, min_Bx, min_By, min_Bz
 
 ! Check timing with or without openmp
 #ifdef DEBUG
@@ -676,6 +676,20 @@ IF(coordinate_flag == 0) THEN
 	!$ACC END PARALLEL
 	!$OMP END DO
 ELSEIF(coordinate_flag == 1) THEN
+
+	min_Bx = minval(ABS(prim(ibx,0:nx, 0:ny, 0:nz)), MASK = ABS(prim(ibx,0:nx, 0:ny, 0:nz)) /= 0.0D0)
+	IF (min_Bx == HUGE(min_Bx)) THEN
+		min_Bx = 0.0D0
+	ENDIF
+	min_By = minval(ABS(prim(iby,0:nx, 0:ny, 0:nz)), MASK = ABS(prim(iby,0:nx, 0:ny, 0:nz)) /= 0.0D0)
+	IF (min_By == HUGE(min_By)) THEN
+		min_By = 0.0D0
+	ENDIF
+	min_Bz = minval(ABS(prim(ibz,0:nx, 0:ny, 0:nz)), MASK = ABS(prim(ibz,0:nx, 0:ny, 0:nz)) /= 0.0D0)
+	IF (min_Bz == HUGE(min_Bz)) THEN
+		min_Bz = 0.0D0
+	ENDIF
+
 	!$OMP DO COLLAPSE(3) SCHEDULE(STATIC)
 	!$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT) 
 	DO l = 0, nz
@@ -684,12 +698,40 @@ ELSEIF(coordinate_flag == 1) THEN
 
 				! dbx/dt !
 				l_rk(ibx,j,k,l) = - (efield_z(j,k,l) - efield_z(j,k-1,l))/(xF(j)*dy(k)) + (efield_y(j,k,l) - efield_y(j,k,l-1))/(dz(l))
+				IF (min_Bx == 0.0D0) THEN
+					IF ( ABS(l_rk(ibx,j,k,l)) < 1e-20 ) THEN
+						l_rk(ibx,j,k,l) = 0
+					ENDIF
+				ELSE
+					IF ( ABS(l_rk(ibx,j,k,l) - prim(ibx,j,k,l))/min_Bx < 1.0D-1 ) THEN
+					l_rk(ibx,j,k,l) = 0
+					ENDIF
+				ENDIF
+				
 
 				! dby/dt !
 				l_rk(iby,j,k,l) = - (efield_x(j,k,l) - efield_x(j,k,l-1))/(dz(l)) + (efield_z(j,k,l) - efield_z(j-1,k,l))/(dx(j))
+				IF (min_By == 0.0D0) THEN ! Suppress numerical error
+					IF ( ABS(l_rk(iby,j,k,l)) < 1e-20 ) THEN
+						l_rk(iby,j,k,l) = 0
+					ENDIF
+				ELSE
+					IF ( ABS(l_rk(iby,j,k,l) - prim(iby,j,k,l))/min_By < 1.0D-1 ) THEN
+					l_rk(iby,j,k,l) = 0
+					ENDIF
+				ENDIF
 
 				! dbz/dt !
 				l_rk(ibz,j,k,l) = - (xF(j)*efield_y(j,k,l) - xF(j-1)*efield_y(j-1,k,l))/(x(j)*dx(j)) + (efield_x(j,k,l) - efield_x(j,k-1,l))/(x(j)*dy(k))
+				IF (min_Bz == 0.0D0) THEN
+					IF ( ABS(l_rk(ibz,j,k,l)) < 1e-20 ) THEN
+						l_rk(ibz,j,k,l) = 0
+					ENDIF
+				ELSE
+					IF ( ABS(l_rk(ibz,j,k,l) - prim(ibz,j,k,l))/min_Bz < 1.0D-1 ) THEN
+					l_rk(ibz,j,k,l) = 0
+					ENDIF
+				ENDIF
 
 			END DO
 		END DO

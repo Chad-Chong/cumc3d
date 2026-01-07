@@ -89,8 +89,16 @@ ELSEIF (coordinate_flag == 1) THEN
 ENDIF
 CLOSE(970)
 prim(irho,:,:,:) = prim(irho,:,:,:)*rhocgs2code
+atmosphere = atmospheric*maxval(prim(irho,:,:,:))
+DO l = 1, nz
+  DO j = 1, nx
+    IF (prim(irho,j,1,l) < atmosphere) THEN
+      prim(irho,j,1,l) = atmosphere
+    ENDIF
+  ENDDO
+ENDDO
 PRINT *, "Finished reading rho"
-WRITE(*,*) 'Maximum rho is', MAXVAL(prim(irho,:,:,:))/rhocgs2code
+WRITE(*,*) 'Maximum rho is', atmosphere/atmospheric/rhocgs2code
 
 ! Assign velocity !
 IF (coordinate_flag == 2) THEN
@@ -174,8 +182,8 @@ IF (mhd_flag == 1) THEN
 
     prim(ibx:ibz,:,:,:) = prim(ibx:iby,:,:,:)*gauss2code*lencgs2code  ! length conversion for curl !
   ELSEIF(coordinate_flag == 1) THEN
-    DO l = 1, nz
-      DO k = 1, ny
+    DO l = 0, nz
+      DO k = 0, ny
         DO j = 0, nx
           prim(ibx,j,k,l) = - (a_phi(j,k,l) - a_phi(j,k,l-1))/(dz(l))
         END DO
@@ -183,8 +191,8 @@ IF (mhd_flag == 1) THEN
     END DO
 
     DO l = 0, nz
-      DO k = 1, ny
-        DO j = 1, nx
+      DO k = 0, ny
+        DO j = 0, nx
           prim(ibz,j,k,l) = (xF(j)*a_phi(j,k,l) - xF(j-1)*a_phi(j-1,k,l))/(x(j)*dx(j))
         END DO
       END DO
@@ -255,6 +263,18 @@ IF (helmeos_flag == 1) THEN
   temp2_old = temp2
   PRINT *, "Finished reading temperature for Helmholtz EOS"
 
+  ! OPEN(UNIT=970, FILE = trim('./profile/hydro_eps.dat'), ACTION='READ')
+  ! IF (coordinate_flag == 1) THEN
+  !   READ(970,*) ((epsilon(j,1,l), j = 1, nx), l = 1, nz)
+  ! ENDIF
+  ! CLOSE(970)
+  ! DO l = 1, nz
+  !   DO j = 1, nx
+  !     epsilon(j,1,l) = epsilon(j,1,l)*energycgs2code
+  !   ENDDO
+  ! ENDDO
+  ! PRINT *, "Finished reading epsilon for Helmholtz EOS"
+
   OPEN(UNIT=970, FILE = trim('./profile/Helm_Ye.dat'), ACTION='READ')
   IF (coordinate_flag == 2) THEN
     READ(970,*) ((prim(iye2,j,k,1), j = 1, nx), k = 1, ny)
@@ -263,6 +283,12 @@ IF (helmeos_flag == 1) THEN
   ENDIF
   CLOSE(970)
   PRINT *, "Finished reading Ye for Helmholtz EOS (electron capture)"
+
+  ! temp2 = 0.1D0
+  ! temp2_old = temp2
+  ! CALL findhelmtemp()
+  ! PRINT *, "Finished finding temperature for Helmholtz EOS"
+
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -312,7 +338,7 @@ ELSEIF (helmeos_flag == 0 .and. coordinate_flag == 1) THEN
   END DO
 ENDIF
 
-PRINT *, 'Finished calculating pressure, sound speed and epsilon'
+PRINT *, 'Finished calculating pressure, sound speed and (epsilon)'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -329,13 +355,14 @@ ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! set atmospheric primitive variables !
+! Set atmospheric primitive variables!
 prim_a(:) = 0.0D0
+! prim_a(irho) = atmospheric*maxval(prim(irho,:,:,:))
 IF (turb_flag == 1) THEN
   prim_a(iturbq) = turb_q_a
 ENDIF
 
-! atmosphere = atmospheric*MAXVAL(prim(irho,:,:,:))
+! Ensure epsilon is do not oscillate. Somehow the code dislikes osciallating energy very much
 
 IF (helmeos_flag == 1) THEN
   ! prim_a(ihe4) = xiso_ahe4
@@ -402,15 +429,11 @@ IF (helmeos_flag == 1) THEN
 
 ENDIF
 
-IF (helmcheck_flag == 1) THEN
-    WRITE(*,*) 'Atmosphere rho is', atmosphere, 'epsilon is', eps_a, 'pressure is', prim_a(itau), 'abar is', abar2_a, 'zbar is', zbar2_a, 'Ye is',  prim_a(iye2), 'temp is', temp2_a  
-ENDIF
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Assign floor variables !
 CALL CUSTOM_CHECKRHO
-WRITE(*,*) 'Finished assigning variable floor'
+WRITE(*,*) 'Finished atmosphere handling'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

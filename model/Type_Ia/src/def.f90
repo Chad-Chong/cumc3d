@@ -8,6 +8,11 @@ USE DEFINITION
 IMPLICIT NONE
 INCLUDE "param.h"
 
+! For CFL Check !
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: lambdas
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! Floors !
 REAL*8, ALLOCATABLE, DIMENSION (:) :: prim_a
 

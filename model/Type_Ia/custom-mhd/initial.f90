@@ -102,6 +102,9 @@ CALL FROMRVETOU
 WRITE(*,*) 'Done building initial conservative variables'
 WRITE(*,*)
 
+! ! print primitive profiles !
+! CALL print_hydroprofile
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Calculate the items needed for SPATIAL
 WRITE(*,*) 'Do update'

@@ -458,7 +458,7 @@ INTEGER :: flag_ans
 DO k = 1, nz, 1
     DO j = 1, ny, 1
         DO i = 1, nx, 1
-            IF(prim(irho,i,j,k) >= prim_a(irho)) THEN
+            IF(prim(irho,i,j,k) > prim_a(irho)) THEN
                 ! reset the flag
                 flag_notfindtemp = 0
 
@@ -537,6 +537,7 @@ IF (ieee_is_nan(epsilon_out)) THEN
     WRITE(*,*) 'Temperature', temp_row(1)
     WRITE(*,*) 'Abar', abar_row(1)
     WRITE(*,*) 'Zbar', zbar_row(1)
+    CALL print_hydroprofile
     STOP
 ENDIF
 
@@ -582,7 +583,9 @@ call helmeos
 cs_out = cs_row(1) / 3.0D10
 
 IF (ieee_is_nan(cs_out)) THEN
+    WRITE(*,*) temp_in, rho_in, abar_in, zbar_in
     WRITE(*,*) 'Speed of sound is nan'
+    CALL print_hydroprofile
     STOP
 ENDIF
 
@@ -628,6 +631,8 @@ IF (ieee_is_nan(p_out)) THEN
     WRITE(*,*) 'abar_row(1)', abar_row(1)
     WRITE(*,*) 'zbar_row(1)', zbar_row(1)
     WRITE(*,*) 'Pressure is nan'
+    CALL print_hydroprofile
+    STOP
 ENDIF
 
 END SUBROUTINE
@@ -786,6 +791,7 @@ include 'vector_eos.dek'
 
     IF (ieee_is_nan(temp_output)) THEN
         WRITE(*,*) 'Temperature is nan'
+        CALL print_hydroprofile
         STOP
     ENDIF
 END SUBROUTINE
