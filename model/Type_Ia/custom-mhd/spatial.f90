@@ -677,7 +677,7 @@ IF(coordinate_flag == 0) THEN
 	!$OMP END DO
 ELSEIF(coordinate_flag == 1) THEN
 
-	min_Bx = minval(ABS(prim(ibx,0:nx, 0:ny, 0:nz)), MASK = ABS(prim(ibx,0:nx, 0:ny, 0:nz)) /= 0.0D0)
+	min_Bx = minval(ABS(prim(ibx,1:nx, 0:ny, 0:nz)), MASK = ABS(prim(ibx,1:nx, 0:ny, 0:nz)) /= 0.0D0) ! not from 0:nx because prim(ibx,0,k,l) better be 0.
 	IF (min_Bx == HUGE(min_Bx)) THEN
 		min_Bx = 0.0D0
 	ENDIF
