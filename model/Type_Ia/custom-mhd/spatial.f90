@@ -703,7 +703,7 @@ ELSEIF(coordinate_flag == 1) THEN
 						l_rk(ibx,j,k,l) = 0
 					ENDIF
 				ELSE
-					IF ( ABS(l_rk(ibx,j,k,l) - prim(ibx,j,k,l))/min_Bx < 1.0D-1 ) THEN
+					IF ( ABS(l_rk(ibx,j,k,l))/min_Bx < 1.0D-1 ) THEN
 					l_rk(ibx,j,k,l) = 0
 					ENDIF
 				ENDIF
@@ -716,7 +716,7 @@ ELSEIF(coordinate_flag == 1) THEN
 						l_rk(iby,j,k,l) = 0
 					ENDIF
 				ELSE
-					IF ( ABS(l_rk(iby,j,k,l) - prim(iby,j,k,l))/min_By < 1.0D-1 ) THEN
+					IF ( ABS(l_rk(iby,j,k,l))/min_By < 1.0D-1 ) THEN
 					l_rk(iby,j,k,l) = 0
 					ENDIF
 				ENDIF
@@ -728,7 +728,7 @@ ELSEIF(coordinate_flag == 1) THEN
 						l_rk(ibz,j,k,l) = 0
 					ENDIF
 				ELSE
-					IF ( ABS(l_rk(ibz,j,k,l) - prim(ibz,j,k,l))/min_Bz < 1.0D-1 ) THEN
+					IF ( ABS(l_rk(ibz,j,k,l))/min_Bz < 1.0D-1 ) THEN
 					l_rk(ibz,j,k,l) = 0
 					ENDIF
 				ENDIF
