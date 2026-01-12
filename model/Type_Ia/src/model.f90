@@ -161,6 +161,8 @@ IF (mhd_flag == 1) THEN
 
   PRINT *, "Finished reading Bphi"
 
+  WRITE(*,*) ABS(xF(0)/xF(1))
+
   ! Coordinate here are in code unit but aphi is in gaussian unit !
   ! Unit conversion below !
   IF (coordinate_flag == 2) THEN
@@ -186,6 +188,13 @@ IF (mhd_flag == 1) THEN
       DO k = 0, ny
         DO j = 0, nx
           prim(ibx,j,k,l) = - (a_phi(j,k,l) - a_phi(j,k,l-1))/(dz(l))
+
+          IF (j==0) THEN
+            IF ( ABS(xF(0)/xF(1)) < 1e-10 ) THEN
+              prim(ibx,j,k,l) = 0.0D0
+            ENDIF
+          ENDIF
+
         END DO
       END DO
     END DO

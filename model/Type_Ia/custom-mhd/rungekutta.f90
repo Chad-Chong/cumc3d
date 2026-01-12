@@ -503,7 +503,7 @@ DO l = 1, nz
 		DO j = 1, nx
 
 			! Only grid with density above threshold density is counted
-			IF (prim(irho,j,k,l) > 1.0D2*prim_a(irho)) THEN
+			IF (prim(irho,j,k,l) > 1.0D1*prim_a(irho)) THEN
 				a2_mhd = cs(j,k,l)*cs(j,k,l)
 				a4_mhd = a2_mhd*a2_mhd
 				b2x_mhd = (bcell(ibx,j,k,l)*bcell(ibx,j,k,l)/prim(irho,j,k,l))
