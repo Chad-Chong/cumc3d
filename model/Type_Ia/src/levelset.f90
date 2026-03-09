@@ -43,6 +43,21 @@ end subroutine buildLevelSet
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+SUBROUTINE GET_MAX(m,n)
+USE definition
+USE CUSTOM_DEF
+IMPLICIT NONE
+INTEGER, intent(out) :: m, n
+REAL :: result(2)
+
+result = maxloc(prim(irho,1:nx,1,1:nz))
+m = result(1)
+n = result(2)
+
+END SUBROUTINE
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 SUBROUTINE GetFlame
 USE definition
 USE CUSTOM_DEF
@@ -52,56 +67,105 @@ IMPLICIT NONE
 ! Initialization of the scalar G
 
 ! Dummy variables
-integer :: j , k
+integer :: j, k, m, n
 
 ! Dist from the front
 real*8 :: dist
+
+! Coords of maximum density
+real*8 :: xm, zm
 
 ! Initilization
 flame_ratio_old = 0.0D0
 flame_ratio = 0.0D0
 
+CALL GET_MAX(m,n)
+
+xm = x(m)
+zm = z(n)
+
 ! Assign initial flame
 do j = 1, nx, 1   
     do k  = 1, nz, 1 
 
-    ! big c3 flame
-    prim(iscaG1,j,1,k) = 148.90D0 - DSQRT(x(j)**2 + z(k)**2) + &
-                   60.92D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+    IF (md_flag == 1) THEN
 
-    ! c3 flame
-        ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
-        !             30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+        ! big c3 flame
+        prim(iscaG1,j,1,k) = 148.90D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
+                    60.92D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
 
-    ! ! small c3 flame
-    ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
-    !                15.23D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+        ! c3 flame
+            ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + & 
+            !             30.46D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
 
-    ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
-    !prim(iscaG1,j,1,k) = -DSQRT((x(j) - 47.86D0)**2 + (z(k) - 47.86D0)**2) + 7.0D0
+        ! ! small c3 flame
+        ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
+        !                15.23D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
 
-    ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
-        !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 101.52D0)**2) + 15.0D0
+        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+        !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm) - 47.86D0)**2 + ((z(k)-zm) - 47.86D0)**2) + 7.0D0
 
-    ! A bubble along z-axis in the helium sphere
-    !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 1.0D3)**2) + 15.0D0
+        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+            !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm))**2 + ((z(k)-zm) - 101.52D0)**2) + 15.0D0
 
-    ! Two bubbles along two axis
-    
+        ! A bubble along z-axis in the helium sphere
+        !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm))**2 + ((z(k)-zm) - 1.0D3)**2) + 15.0D0
 
-    ! b5 flame Type A
-        !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
+        ! Two bubbles along two axis
+        
 
-    ! b5 flame Type B
-    !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
-        !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
+        ! b5 flame Type A
+            !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
+
+        ! b5 flame Type B
+        !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
+    ELSE
+        ! big c3 flame
+        prim(iscaG1,j,1,k) = 148.90D0 - DSQRT(x(j)**2 + z(k)**2) + &
+                    60.92D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+
+        ! c3 flame
+            ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
+            !             30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+
+        ! ! small c3 flame
+        ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
+        !                15.23D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+
+        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+        !prim(iscaG1,j,1,k) = -DSQRT((x(j) - 47.86D0)**2 + (z(k) - 47.86D0)**2) + 7.0D0
+
+        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+            !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 101.52D0)**2) + 15.0D0
+
+        ! A bubble along z-axis in the helium sphere
+        !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 1.0D3)**2) + 15.0D0
+
+        ! Two bubbles along two axis
+        
+
+        ! b5 flame Type A
+            !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
+
+        ! b5 flame Type B
+        !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
+            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
+        ENDIF
 
     enddo
 enddo 

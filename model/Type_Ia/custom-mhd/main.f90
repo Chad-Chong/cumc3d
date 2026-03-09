@@ -31,7 +31,7 @@ rate = REAL(cr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set number of threads !
-CALL OMP_SET_NUM_THREADS(16)
+CALL OMP_SET_NUM_THREADS(32)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -130,11 +130,11 @@ DO while (global_time < total_time)
   !   STOP
   ! ENDIF
 
-  IF (MOD(n_step,100) == 0) THEN
-  output_file = .true.
-  ELSE
-    output_file = .false.
-  ENDIF
+  ! IF (MOD(n_step,100) == 0) THEN
+  ! output_file = .true.
+  ! ELSE
+  !   output_file = .false.
+  ! ENDIF
 
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!s	
   ! Section for data I/O !

@@ -21,7 +21,7 @@ FIXPOLE = -DFIXPOLE
 MULTICORE = -mp
 
 # Define F90 compiler #
-F90=/home/shcheung/app/hdf5-1.12.3/fortran/src/h5fc
+F90=/home/cnchong/app/hdf5/bin/h5fc
 
 # need extra math packages? #
 #MATHPACK = -llapack -lblas

@@ -7,8 +7,12 @@
 
 ! Feature Flags !
 
+!Flags for Restarting from HDF5 files
+INTEGER, PARAMETER :: restart_flag = 0
+INTEGER, PARAMETER :: rs_burn = 0 !Flag to choose if to start burning from restart, if not already.
+
 !Flag for Rotation (set initial vphi to 0 if 0)!
-INTEGER, PARAMETER :: rotate_flag = 0
+INTEGER, PARAMETER :: rotate_flag = 1
 
 !Flag for MHD (set initial magnetic field to 0 if 0)!
 INTEGER, PARAMETER :: mhd_flag = 1
@@ -39,6 +43,7 @@ INTEGER, PARAMETER :: levelset_flag = 1
 INTEGER, PARAMETER :: flame_flag = 1 ! Flag to initialize flame
 INTEGER, PARAMETER :: update_flag = 1 ! Flag to change the level set by reinitialization
 INTEGER, PARAMETER :: burn_flag = 1
+INTEGER, PARAMETER :: md_flag = 1 ! Flag to initialise a flame at the centre of maximum density
 
 ! Flag for allowing the interaction between level set 1 and energy input
 ! 1 = Allow energy input by detonation + finding detonation
