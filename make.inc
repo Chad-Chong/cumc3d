@@ -27,12 +27,13 @@ F90=/home/cnchong/app/hdf5/bin/h5fc
 #MATHPACK = -llapack -lblas
 
 # Compiler flags
-#PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
-#ifortflags = -g -O3 -traceback -warn all -check all
+# PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
+# PGI = -g -O0 -Mbounds -Mchkptr -Mchkstk -traceback # for debug
+# ifortflags = -g -O3 -traceback -warn all -check all
 #ifortomp = -qopenmp
-#ifortdebug = -check all -fpe0
+# ifortdebug = -check all -fpe0
 
-#ifort = $(ifortflags) $(ifortomp) $(ifortdebug)
+# ifort = $(ifortflags) $(ifortomp) $(ifortdebug)
 
 # Define F90 flags #
 # -Mipa=fast is suppressed #

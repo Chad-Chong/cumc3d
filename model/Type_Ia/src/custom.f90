@@ -12,13 +12,6 @@ INTEGER, INTENT(INOUT) :: no_of_eq
 ! Isotopes !
 ! Set up the code for chemical composition !
 
-IF (turb_flag == 1) THEN
-  no_of_eq = no_of_eq + 1
-  imax = no_of_eq
-  iturbq = no_of_eq
-  WRITE(*,*) 'Make iturbq = ', no_of_eq
-END IF
-
 IF (xisotran_flag == 1) THEN
   ! Helium-4
   no_of_eq = no_of_eq + 1
@@ -67,6 +60,13 @@ IF (xisotran_flag == 1) THEN
   imax = no_of_eq
   iye2 = no_of_eq
   WRITE(*,*) 'Make iye2 = ', no_of_eq
+
+  IF (turb_flag == 1) THEN
+    no_of_eq = no_of_eq + 1
+    imax = no_of_eq
+    iturbq = no_of_eq
+  WRITE(*,*) 'Make iturbq = ', no_of_eq
+  END IF
 
   IF (levelset_flag == 1) THEN
     no_of_eq = no_of_eq + 1 ! Deflagration level set
@@ -501,33 +501,35 @@ INTEGER :: i, j, k,l
 
 IF (coordinate_flag == 2)THEN
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(dphidx, dphidy, dphidz, factor, diff) 
-  !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT) PRIVATE(dphidx, dphidy, dphidz, factor, diff) 
-  DO l = 1, nz
-    DO k = 1, ny
-      DO j = 1, nx
-        ! Include only non-atmosphere !
-        diff = prim(irho,j,k,l) - prim_a(irho)
-        factor = MAX(SIGN(1.0D0, diff), 0.0D0)
+  IF (gravity_flag == 1) THEN
+    !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(dphidx, dphidy, dphidz, factor, diff) 
+    !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT) PRIVATE(dphidx, dphidy, dphidz, factor, diff) 
+    DO l = 1, nz
+      DO k = 1, ny
+        DO j = 1, nx
+          ! Include only non-atmosphere !
+          diff = prim(irho,j,k,l) - prim_a(irho)
+          factor = MAX(SIGN(1.0D0, diff), 0.0D0)
 
-        ! Gravitational potential of the matter !
-        dphidx = first_derivative (x(j-1), x(j), x(j+1), phi(j-1,k,l), phi(j,k,l), phi(j+1,k,l))
-        dphidy = first_derivative (y(k-1), y(k), y(k+1), phi(j,k-1,l), phi(j,k,l), phi(j,k+1,l))
-        dphidz = first_derivative (z(l-1), z(l), z(l+1), phi(j,k,l-1), phi(j,k,l), phi(j,k,l+1))
-            
-        ! Add them to the source term !
-        sc(ivx,j,k,l) = sc(ivx,j,k,l) - factor*prim(irho,j,k,l)*dphidx
-        sc(ivy,j,k,l) = sc(ivy,j,k,l) - factor*prim(irho,j,k,l)*dphidy/x(j)
-        sc(ivz,j,k,l) = sc(ivz,j,k,l) - factor*prim(irho,j,k,l)*dphidz/x(j)/sine(k)
-        sc(itau,j,k,l) = sc(itau,j,k,l) - factor*prim(irho,j,k,l)* &
-                          (prim(ivx,j,k,l)*dphidx + prim(ivy,j,k,l)*dphidy/x(j) + &
-                          prim(ivz,j,k,l)*dphidz/x(j)/sine(k))
+          ! Gravitational potential of the matter !
+          dphidx = first_derivative (x(j-1), x(j), x(j+1), phi(j-1,k,l), phi(j,k,l), phi(j+1,k,l))
+          dphidy = first_derivative (y(k-1), y(k), y(k+1), phi(j,k-1,l), phi(j,k,l), phi(j,k+1,l))
+          dphidz = first_derivative (z(l-1), z(l), z(l+1), phi(j,k,l-1), phi(j,k,l), phi(j,k,l+1))
+              
+          ! Add them to the source term !
+          sc(ivx,j,k,l) = sc(ivx,j,k,l) - factor*prim(irho,j,k,l)*dphidx
+          sc(ivy,j,k,l) = sc(ivy,j,k,l) - factor*prim(irho,j,k,l)*dphidy/x(j)
+          sc(ivz,j,k,l) = sc(ivz,j,k,l) - factor*prim(irho,j,k,l)*dphidz/x(j)/sine(k)
+          sc(itau,j,k,l) = sc(itau,j,k,l) - factor*prim(irho,j,k,l)* &
+                            (prim(ivx,j,k,l)*dphidx + prim(ivy,j,k,l)*dphidy/x(j) + &
+                            prim(ivz,j,k,l)*dphidz/x(j)/sine(k))
+        END DO
       END DO
     END DO
-  END DO
-  !$ACC END PARALLEL
-  !$OMP END PARALLEL DO
-  
+    !$ACC END PARALLEL
+    !$OMP END PARALLEL DO
+    
+  ENDIF
 ELSEIF(coordinate_flag == 1) THEN
   IF (gravity_flag == 1) THEN
     !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(dphidx, dphidy, dphidz, factor, diff) 

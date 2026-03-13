@@ -52,6 +52,69 @@ dist_dims(1) = 1
 call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
 
 ! create dataset !
+call h5dcreate_f(file_id,"temp2_a",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,temp2_a,dist_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+space_rank = 1
+dist_dims(1) = 1
+
+! open dataspace !
+call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
+
+! create dataset !
+call h5dcreate_f(file_id,"eps_a",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,eps_a,dist_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+space_rank = 1
+dist_dims(1) = 1
+
+! open dataspace !
+call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
+
+! create dataset !
+call h5dcreate_f(file_id,"found_deton_flag",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+! write dataset !
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,found_deton_flag,dist_dims,error)
+
+! close dataset !
+call h5dclose_f(dset_id1,error)
+
+! close data space !
+call h5sclose_f(dspace_id,error)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+space_rank = 1
+dist_dims(1) = 1
+
+! open dataspace !
+call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
+
+! create dataset !
 call h5dcreate_f(file_id,"time",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
@@ -132,16 +195,16 @@ call h5sclose_f(dspace_id,error)
 
 ! define DIMENSION !
 space_rank = 1
-dist_dims(1) = 1
+dist_dims(1) = ibx-imin
 
 ! open dataspace !
 call h5screate_simple_f(space_rank,dist_dims,dspace_id,error)
 
 ! create dataset !
-call h5dcreate_f(file_id,"prim_a(irho)",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+call h5dcreate_f(file_id,"prim_a",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
 ! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,prim_a(irho),dist_dims,error)
+call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,prim_a,dist_dims,error)
 
 ! close dataset !
 call h5dclose_f(dset_id1,error)
@@ -309,26 +372,26 @@ call h5sclose_f(dspace_id,error)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! define DIMENSION !
-space_rank = 3
-sup_dims(1) = nx
-sup_dims(2) = ny
-sup_dims(3) = nz
+! ! define DIMENSION !
+! space_rank = 3
+! sup_dims(1) = nx
+! sup_dims(2) = ny
+! sup_dims(3) = nz
 
-! open dataspace !
-call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+! ! open dataspace !
+! call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
 
-! create dataset !
-call h5dcreate_f(file_id,"lambdas",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+! ! create dataset !
+! call h5dcreate_f(file_id,"lambdas",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
-! write dataset !
-call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,lambdas(1:nx,1:ny,1:nz),sup_dims,error)
+! ! write dataset !
+! call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,lambdas(1:nx,1:ny,1:nz),sup_dims,error)
 
-! close dataset !
-call h5dclose_f(dset_id1,error)
+! ! close dataset !
+! call h5dclose_f(dset_id1,error)
 
-! close data space !
-call h5sclose_f(dspace_id,error)
+! ! close data space !
+! call h5sclose_f(dspace_id,error)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -357,53 +420,53 @@ ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! define DIMENSION !
-IF (helmeos_flag == 1) THEN
-    space_rank = 3
-    sup_dims(1) = nx + 2
-    sup_dims(2) = ny + 2
-    sup_dims(3) = nz + 2
+! ! define DIMENSION !
+! IF (helmeos_flag == 1) THEN
+!     space_rank = 3
+!     sup_dims(1) = nx + 2
+!     sup_dims(2) = ny + 2
+!     sup_dims(3) = nz + 2
 
-    ! open dataspace !
-    call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+!     ! open dataspace !
+!     call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
 
-    ! create dataset !
-    call h5dcreate_f(file_id,"abar",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+!     ! create dataset !
+!     call h5dcreate_f(file_id,"abar",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
-    ! write dataset !
-    call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,abar2(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
+!     ! write dataset !
+!     call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,abar2(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
 
-    ! close dataset !
-    call h5dclose_f(dset_id1,error)
+!     ! close dataset !
+!     call h5dclose_f(dset_id1,error)
 
-    ! close data space !
-    call h5sclose_f(dspace_id,error)
-ENDIF
+!     ! close data space !
+!     call h5sclose_f(dspace_id,error)
+! ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! define DIMENSION !
-IF (helmeos_flag == 1) THEN
-    space_rank = 3
-    sup_dims(1) = nx + 2
-    sup_dims(2) = ny + 2
-    sup_dims(3) = nz + 2
+! ! define DIMENSION !
+! IF (helmeos_flag == 1) THEN
+!     space_rank = 3
+!     sup_dims(1) = nx + 2
+!     sup_dims(2) = ny + 2
+!     sup_dims(3) = nz + 2
 
-    ! open dataspace !
-    call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+!     ! open dataspace !
+!     call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
 
-    ! create dataset !
-    call h5dcreate_f(file_id,"zbar",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+!     ! create dataset !
+!     call h5dcreate_f(file_id,"zbar",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
 
-    ! write dataset !
-    call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,zbar2(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
+!     ! write dataset !
+!     call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,zbar2(0:nx+1,0:ny+1,0:nz+1),sup_dims,error)
 
-    ! close dataset !
-    call h5dclose_f(dset_id1,error)
+!     ! close dataset !
+!     call h5dclose_f(dset_id1,error)
 
-    ! close data space !
-    call h5sclose_f(dspace_id,error)
-ENDIF
+!     ! close data space !
+!     call h5sclose_f(dspace_id,error)
+! ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -502,6 +565,34 @@ IF (gravity_flag == 1) THEN
     ! close data space !
     call h5sclose_f(dspace_id,error)
 ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! define DIMENSION !
+IF (burn_flag == 1) THEN
+
+    space_rank = 3
+    sup_dims(1) = nx
+    sup_dims(2) = 1
+    sup_dims(3) = nz
+
+    ! open dataspace !
+    call h5screate_simple_f(space_rank,sup_dims,dspace_id,error)
+
+    ! create dataset !
+    call h5dcreate_f(file_id,"nse_flag",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+    ! write dataset !
+    call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,NSE_flag(1:nx,1,1:nz),sup_dims,error)
+
+    ! close dataset !
+    call h5dclose_f(dset_id1,error)
+
+    ! close data space !
+    call h5sclose_f(dspace_id,error)
+
+ENDIF
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

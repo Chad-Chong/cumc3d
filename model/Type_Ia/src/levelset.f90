@@ -81,18 +81,18 @@ flame_ratio = 0.0D0
 
 CALL GET_MAX(m,n)
 
-xm = x(m)
-zm = z(n)
+xm = x(m)+1.0D-10
+zm = z(n)+1.0D-10
 
 ! Assign initial flame
 do j = 1, nx, 1   
     do k  = 1, nz, 1 
 
     IF (md_flag == 1) THEN
-
+    
         ! big c3 flame
         prim(iscaG1,j,1,k) = 148.90D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
-                    60.92D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
+                    60.92D0 * ABS(DSIN(ASIN( (z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
 
         ! c3 flame
             ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + & 

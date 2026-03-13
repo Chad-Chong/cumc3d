@@ -31,7 +31,7 @@ rate = REAL(cr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set number of threads !
-CALL OMP_SET_NUM_THREADS(32)
+CALL OMP_SET_NUM_THREADS(16)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -70,8 +70,13 @@ CALL POPULATE_DEVICE
 ! do initial updates !
 CALL initial_update
 
-! print primitive profiles !
-CALL print_hydroprofile
+! print primitive profiles, only if the mode is not restart !
+IF (restart_flag == 1) THEN
+  n_iter = 1+start_index
+ELSE
+  CALL print_hydroprofile
+ENDIF
+
 
 ! Divergence B !
 #ifdef DIVB
@@ -97,7 +102,7 @@ CALL system_clock(time_start)
 #endif
 
 ! Loop !
-n_iter = 1
+n_iter = n_iter + 1
 DO while (global_time < total_time)
 
   invert = 0

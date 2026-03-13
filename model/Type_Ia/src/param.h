@@ -7,9 +7,10 @@
 
 ! Feature Flags !
 
-!Flags for Restarting from HDF5 files
+!Flags for Restarting from HDF5 files!
 INTEGER, PARAMETER :: restart_flag = 0
-INTEGER, PARAMETER :: rs_burn = 0 !Flag to choose if to start burning from restart, if not already.
+INTEGER, PARAMETER :: rs_burn = 1 !Flag to choose if to start burning from restart, if not already. Restart requires helmeos. Must be on if burning is on for the previous run
+INTEGER, PARAMETER :: start_index = 1
 
 !Flag for Rotation (set initial vphi to 0 if 0)!
 INTEGER, PARAMETER :: rotate_flag = 1
@@ -18,7 +19,7 @@ INTEGER, PARAMETER :: rotate_flag = 1
 INTEGER, PARAMETER :: mhd_flag = 1
 
 ! Flag for gravity
-INTEGER, PARAMETER :: gravity_flag = 1
+INTEGER, PARAMETER :: gravity_flag = 0
 
 ! Flag for testing phi (for this to work gravity flag needs to be 1)!
 INTEGER, PARAMETER :: phitest_flag = 0
