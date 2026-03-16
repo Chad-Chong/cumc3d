@@ -669,7 +669,7 @@ IF (turb_flag == 1) THEN
     IF (error == 0) THEN
       PRINT *, "Finished initialising turbulence"
     ELSE
-      PRINT *, "Error rinitialising turbulence"
+      PRINT *, "Error initialising turbulence"
       STOP
     END IF
 

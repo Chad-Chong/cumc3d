@@ -31,7 +31,7 @@ rate = REAL(cr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set number of threads !
-CALL OMP_SET_NUM_THREADS(16)
+CALL OMP_SET_NUM_THREADS(32)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -72,7 +72,7 @@ CALL initial_update
 
 ! print primitive profiles, only if the mode is not restart !
 IF (restart_flag == 1) THEN
-  n_iter = 1+start_index
+  CONTINUE
 ELSE
   CALL print_hydroprofile
 ENDIF
