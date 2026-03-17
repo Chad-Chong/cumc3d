@@ -485,8 +485,8 @@ WRITE (*,*)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set output profile interval !
-total_time = 1.5D0*tcgs2code ! cgs
-output_profiletime = total_time/100.0d0
+total_time = 1.5D0*tcgs2code + global_time ! cgs
+output_profiletime = (total_time-global_time)/100.0d0
 
 END SUBROUTINE
 
