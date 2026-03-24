@@ -72,7 +72,8 @@ CALL initial_update
 
 ! print primitive profiles, only if the mode is not restart !
 IF (restart_flag == 1) THEN
-  CONTINUE
+  output_profiletime_last = global_time
+  n_iter = start_index
 ELSE
   CALL print_hydroprofile
 ENDIF

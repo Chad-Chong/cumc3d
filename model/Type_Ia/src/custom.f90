@@ -414,7 +414,8 @@ DO l = 1, nz
 
       IF (diff/prim_a(irho) <= 1.0D-1 .or. diff_eps/eps_a <= 1.0D-1) THEN ! Put the above condition as or here for stronger constraint: not allowing finite density cells to be cold.
 
-        prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) ! Change the thermodynamic / hydro properties, not the composition
+        ! prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) 
+        prim(irho,j,k,l) =  prim_a(irho) ! Change the thermodynamic / hydro properties, not the composition
         epsilon(j,k,l) = eps_a
 
         IF (helmeos_flag == 1) THEN

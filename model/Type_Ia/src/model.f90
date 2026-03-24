@@ -485,8 +485,9 @@ WRITE (*,*)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set output profile interval !
-total_time = 1.5D0*tcgs2code + global_time ! cgs
+total_time = 1.5D0*tcgs2code + global_time ! cgs; global time is in code unit already
 output_profiletime = (total_time-global_time)/100.0d0
+WRITE(*,*) 'The code outputs every', output_profiletime, 'code unit'
 
 END SUBROUTINE
 
@@ -503,9 +504,13 @@ INTEGER(HID_T) :: file_id,dset_id,mem_id,dspace_id
 INTEGER(HSIZE_T) :: prim_dims(4), dims(3), bfield_dims(4), prim_adim(1), start(4), start_s(1),stride(4), block(4), stride_s(1), block_s(1), ddims(4), tmp(4), start3(3), stride3(3), block3(3)
 character(len=99) :: restart_file, index_time
 
+WRITE(*,*) 'Enter the the restart index for the code.'
+READ(*,*) start_index
+
 write(index_time,'(I)') start_index
 
-WRITE(*,*) 'Restarting the code from output index', index_time
+! WRITE(*,*) 'Restarting the code from output index', index_time
+
 restart_file = './outfile/rkiter-'// trim(adjustl(index_time)) //'-nm.hdf5'
 
 call h5open_f(error)

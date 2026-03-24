@@ -35,7 +35,7 @@ DO i = 1, n
     ENDIF
 ENDDO
 
-OPEN (UNIT = 125, FILE = '/home/cnchong/Codes/cumc3d/model/Type_Ia/outfile/Python_SNEC.dat', STATUS = 'REPLACE')
+OPEN (UNIT = 125, FILE = './Python_SNEC.dat', STATUS = 'REPLACE')
     DO i = 1, n, 1
         WRITE(125,*) T(i)
     ENDDO

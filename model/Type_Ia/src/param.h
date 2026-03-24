@@ -8,12 +8,11 @@
 ! Feature Flags !
 
 !Flags for Restarting from HDF5 files!
-INTEGER, PARAMETER :: restart_flag = 1
+INTEGER, PARAMETER :: restart_flag = 0
 INTEGER, PARAMETER :: rs_burn = 0 !Flag to choose if to start burning from restart, if not already. Restart requires helmeos. Must be on if burning is on for the previous run
-INTEGER, PARAMETER :: start_index = 100
 
 !Flag for Rotation (set initial vphi to 0 if 0)!
-INTEGER, PARAMETER :: rotate_flag = 1
+INTEGER, PARAMETER :: rotate_flag = 0
 
 !Flag for MHD (set initial magnetic field to 0 if 0)!
 INTEGER, PARAMETER :: mhd_flag = 1
@@ -35,42 +34,42 @@ INTEGER :: count = 0
 
 ! Turbulence Flag (only for cylindrical coordinates (uniform r z grid); spherical coordinates are not implemented correctly, the stress tensor viscosity definition needs to be modified)
 
-INTEGER, PARAMETER :: turb_flag = 1
+INTEGER, PARAMETER :: turb_flag = 0
 INTEGER, PARAMETER :: turbcheck_flag = 0
 INTEGER, PARAMETER :: turb_neighbour = 3 ! Number of cells that is not atmosphere for turbulence
 
 ! Flame Flags ! (the level set is written with uniform grid in mind)
-INTEGER, PARAMETER :: levelset_flag = 1
-INTEGER, PARAMETER :: flame_flag = 1 ! Flag to initialize flame
-INTEGER, PARAMETER :: update_flag = 1 ! Flag to change the level set by reinitialization
-INTEGER, PARAMETER :: burn_flag = 1
-INTEGER, PARAMETER :: md_flag = 1 ! Flag to initialise a flame at the centre of maximum density
+INTEGER, PARAMETER :: levelset_flag = 0
+INTEGER, PARAMETER :: flame_flag = 0 ! Flag to initialize flame
+INTEGER, PARAMETER :: update_flag = 0 ! Flag to change the level set by reinitialization
+INTEGER, PARAMETER :: burn_flag = 0
+INTEGER, PARAMETER :: md_flag = 0 ! Flag to initialise a flame at the centre of maximum density
 
 ! Flag for allowing the interaction between level set 1 and energy input
 ! 1 = Allow energy input by detonation + finding detonation
 
-INTEGER, PARAMETER :: deton_flag = 1
+INTEGER, PARAMETER :: deton_flag = 0
 
 ! Flag for allowing final burning input for level set 1 & 2
 ! 1 = Allow energy input by NSE evolution
 
-INTEGER, PARAMETER :: convert_nse_flag = 1
+INTEGER, PARAMETER :: convert_nse_flag = 0
 
 ! Flag for allowing 1st step burning input for level set 1 & 2
 ! 1 = Allow energy input by carbon burning
 
-INTEGER, PARAMETER 	:: carburn_flag = 1
+INTEGER, PARAMETER 	:: carburn_flag = 0
 
 ! Flag for allowing 2nd step burning input for level set 1 & 2
 ! 1 = Allow energy input by advanced burning
 
-INTEGER, PARAMETER 	:: advburn_flag = 1
+INTEGER, PARAMETER 	:: advburn_flag = 0
 
 ! Flag for thermal neutrino !
-INTEGER, PARAMETER 	:: thermal_flag = 1
+INTEGER, PARAMETER 	:: thermal_flag = 0
 
 ! Flag for neutrino spectrum 
-INTEGER, PARAMETER :: nuspec_flag = 1
+INTEGER, PARAMETER :: nuspec_flag = 0
 
 ! Flag for output
 INTEGER, PARAMETER :: say_flag = 0
