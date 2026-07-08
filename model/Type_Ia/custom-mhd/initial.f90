@@ -47,6 +47,8 @@ WRITE(*,*) 'Build grid variables'
 CALL GETGRID
 WRITE(*,*) 'Done building grid variables'
 WRITE(*,*) 'dx =', dx(1)/lencgs2code*1.0D-5, 'dy =', dy(1), 'dz =', dz(1)/lencgs2code*1.0D-5, 'km'
+WRITE(*,*) 'dx(0), dx(-1), dx(-2)', dx(0)/lencgs2code*1.0D-5, dx(-1)/lencgs2code*1.0D-5, dx(-2)/lencgs2code*1.0D-5
+WRITE(*,*) 'x(0), x(-1), x(-2)', x(0)/lencgs2code*1.0D-5, x(-1)/lencgs2code*1.0D-5, x(-2)/lencgs2code*1.0D-5
 WRITE(*,*)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

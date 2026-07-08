@@ -7,7 +7,8 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module MHD_module
-use definition   
+use definition
+use CUSTOM_DEF   
 implicit none
 
 ! Maximum divergence B
@@ -161,6 +162,10 @@ ELSEIF(coordinate_flag == 1) THEN
              + (prim(iby,j,k,l) - prim(iby,j,k-1,l))/(x(j)*dy(k)) &
 
              + (prim(ibz,j,k,l) - prim(ibz,j,k,l-1))/(dz(l))
+
+        ! divb_arr(j,k,l) = (xF(j)*prim(ibx,j,k,l) - xF(j-1)*prim(ibx,j-1,k,l))/(x(j)*dx(j)) + (prim(iby,j,k,l) - prim(iby,j,k-1,l))/(x(j)*dy(k)) + (prim(ibz,j,k,l) - prim(ibz,j,k,l-1))/(dz(l))
+
+        ! divb_arr(j,k,l) = prim(ivy,j,k,l) * ( (xF(j)*prim(ibx,j,k,l) - xF(j-1)*prim(ibx,j-1,k,l))/(x(j)*dx(j)) + (prim(ibz,j,k,l) - prim(ibz,j,k,l-1))/(dz(l)) )
 
         maxDivB = MAX(maxDivB, ABS(divb))
       END DO
@@ -370,59 +375,59 @@ DO l = 0, nz
 
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! First, get electric field gradient at cell interface !
-      !deds_f_u_m(ixy) = (ecell(iex,j,k+1,l) - eface(ixy,j,k,l))/(0.5D0*dy(k+1))
-      !deds_f_d_m(ixy) = (eface(ixy,j,k,l) - ecell(iex,j,k,l))/(0.5D0*dy(k))
-      !deds_f_u_m(ixz) = (ecell(iex,j,k,l+1) - eface(ixz,j,k,l))/(0.5D0*dz(l+1))
-      !deds_f_d_m(ixz) = (eface(ixz,j,k,l) - ecell(iex,j,k,l))/(0.5D0*dz(l))
-      !deds_f_u_m(iyx) = (ecell(iey,j+1,k,l) - eface(iyx,j,k,l))/(0.5D0*dx(j+1))
-      !deds_f_d_m(iyx) = (eface(iyx,j,k,l) - ecell(iey,j,k,l))/(0.5D0*dx(j))
-      !deds_f_u_m(iyz) = (ecell(iey,j,k,l+1) - eface(iyz,j,k,l))/(0.5D0*dz(l+1))
-      !deds_f_d_m(iyz) = (eface(iyz,j,k,l) - ecell(iey,j,k,l))/(0.5D0*dz(l))
-      !deds_f_u_m(izx) = (ecell(iez,j+1,k,l) - eface(izx,j,k,l))/(0.5D0*dx(j+1))
-      !deds_f_d_m(izx) = (eface(izx,j,k,l) - ecell(iez,j,k,l))/(0.5D0*dx(j))
-      !deds_f_u_m(izy) = (ecell(iez,j,k+1,l) - eface(izy,j,k,l))/(0.5D0*dy(k+1))
-      !deds_f_d_m(izy) = (eface(izy,j,k,l) - ecell(iez,j,k,l))/(0.5D0*dy(k))
+      ! deds_f_u_m(ixy) = (ecell(iex,j,k+1,l) - eface(ixy,j,k,l))/(0.5D0*dy(k+1))
+      ! deds_f_d_m(ixy) = (eface(ixy,j,k,l) - ecell(iex,j,k,l))/(0.5D0*dy(k))
+      ! deds_f_u_m(ixz) = (ecell(iex,j,k,l+1) - eface(ixz,j,k,l))/(0.5D0*dz(l+1))
+      ! deds_f_d_m(ixz) = (eface(ixz,j,k,l) - ecell(iex,j,k,l))/(0.5D0*dz(l))
+      ! deds_f_u_m(iyx) = (ecell(iey,j+1,k,l) - eface(iyx,j,k,l))/(0.5D0*dx(j+1))
+      ! deds_f_d_m(iyx) = (eface(iyx,j,k,l) - ecell(iey,j,k,l))/(0.5D0*dx(j))
+      ! deds_f_u_m(iyz) = (ecell(iey,j,k,l+1) - eface(iyz,j,k,l))/(0.5D0*dz(l+1))
+      ! deds_f_d_m(iyz) = (eface(iyz,j,k,l) - ecell(iey,j,k,l))/(0.5D0*dz(l))
+      ! deds_f_u_m(izx) = (ecell(iez,j+1,k,l) - eface(izx,j,k,l))/(0.5D0*dx(j+1))
+      ! deds_f_d_m(izx) = (eface(izx,j,k,l) - ecell(iez,j,k,l))/(0.5D0*dx(j))
+      ! deds_f_u_m(izy) = (ecell(iez,j,k+1,l) - eface(izy,j,k,l))/(0.5D0*dy(k+1))
+      ! deds_f_d_m(izy) = (eface(izy,j,k,l) - ecell(iez,j,k,l))/(0.5D0*dy(k))
       ! Also get the graident at an upper grid !
-      !deds_f_u_p(ixy) = (ecell(iex,j,k+1,l+1) - eface(ixy,j,k,l+1))/(0.5D0*dy(k+1))
-      !deds_f_d_p(ixy) = (eface(ixy,j,k,l+1) - ecell(iex,j,k,l+1))/(0.5D0*dy(k))
-      !deds_f_u_p(ixz) = (ecell(iex,j,k+1,l+1) - eface(ixz,j,k+1,l))/(0.5D0*dz(l+1))
-      !deds_f_d_p(ixz) = (eface(ixz,j,k+1,l) - ecell(iex,j,k+1,l))/(0.5D0*dz(l))
-      !deds_f_u_p(iyx) = (ecell(iey,j+1,k,l+1) - eface(iyx,j,k,l+1))/(0.5D0*dx(j+1))
-      !deds_f_d_p(iyx) = (eface(iyx,j,k,l+1) - ecell(iey,j,k,l+1))/(0.5D0*dx(j))
-      !deds_f_u_p(iyz) = (ecell(iey,j+1,k,l+1) - eface(iyz,j+1,k,l))/(0.5D0*dz(l+1))
-      !deds_f_d_p(iyz) = (eface(iyz,j+1,k,l) - ecell(iey,j+1,k,l))/(0.5D0*dz(l))
-      !deds_f_u_p(izx) = (ecell(iez,j+1,k+1,l) - eface(izx,j,k+1,l))/(0.5D0*dx(j+1))
-      !deds_f_d_p(izx) = (eface(izx,j,k+1,l) - ecell(iez,j,k+1,l))/(0.5D0*dx(j))
-      !deds_f_u_p(izy) = (ecell(iez,j+1,k+1,l) - eface(izy,j+1,k,l))/(0.5D0*dy(k+1))
-      !deds_f_d_p(izy) = (eface(izy,j+1,k,l) - ecell(iez,j+1,k,l))/(0.5D0*dy(k))
+      ! deds_f_u_p(ixy) = (ecell(iex,j,k+1,l+1) - eface(ixy,j,k,l+1))/(0.5D0*dy(k+1))
+      ! deds_f_d_p(ixy) = (eface(ixy,j,k,l+1) - ecell(iex,j,k,l+1))/(0.5D0*dy(k))
+      ! deds_f_u_p(ixz) = (ecell(iex,j,k+1,l+1) - eface(ixz,j,k+1,l))/(0.5D0*dz(l+1))
+      ! deds_f_d_p(ixz) = (eface(ixz,j,k+1,l) - ecell(iex,j,k+1,l))/(0.5D0*dz(l))
+      ! deds_f_u_p(iyx) = (ecell(iey,j+1,k,l+1) - eface(iyx,j,k,l+1))/(0.5D0*dx(j+1))
+      ! deds_f_d_p(iyx) = (eface(iyx,j,k,l+1) - ecell(iey,j,k,l+1))/(0.5D0*dx(j))
+      ! deds_f_u_p(iyz) = (ecell(iey,j+1,k,l+1) - eface(iyz,j+1,k,l))/(0.5D0*dz(l+1))
+      ! deds_f_d_p(iyz) = (eface(iyz,j+1,k,l) - ecell(iey,j+1,k,l))/(0.5D0*dz(l))
+      ! deds_f_u_p(izx) = (ecell(iez,j+1,k+1,l) - eface(izx,j,k+1,l))/(0.5D0*dx(j+1))
+      ! deds_f_d_p(izx) = (eface(izx,j,k+1,l) - ecell(iez,j,k+1,l))/(0.5D0*dx(j))
+      ! deds_f_u_p(izy) = (ecell(iez,j+1,k+1,l) - eface(izy,j+1,k,l))/(0.5D0*dy(k+1))
+      ! deds_f_d_p(izy) = (eface(izy,j+1,k,l) - ecell(iez,j+1,k,l))/(0.5D0*dy(k))
       ! Grid corner electric fiedl gradients using mass_flux as upwinding !
-      !deds_c_u(iyz) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_u_m(iyz) + (1.0D0 - sign_x(j,k,l))*deds_f_u_p(iyz))
-      !deds_c_u(izy) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_u_m(izy) + (1.0D0 - sign_x(j,k,l))*deds_f_u_p(izy))
-      !deds_c_d(iyz) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_d_m(iyz) + (1.0D0 - sign_x(j,k,l))*deds_f_d_p(iyz))
-      !deds_c_d(izy) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_d_m(izy) + (1.0D0 - sign_x(j,k,l))*deds_f_d_p(izy))
-      !deds_c_u(ixz) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_u_m(ixz) + (1.0D0 - sign_y(j,k,l))*deds_f_u_p(ixz))
-      !deds_c_u(izx) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_u_m(izx) + (1.0D0 - sign_y(j,k,l))*deds_f_u_p(izx))
-      !deds_c_d(ixz) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_d_m(ixz) + (1.0D0 - sign_y(j,k,l))*deds_f_d_p(ixz))
-      !deds_c_d(izx) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_d_m(izx) + (1.0D0 - sign_y(j,k,l))*deds_f_d_p(izx))
-      !deds_c_u(ixy) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_u_m(ixy) + (1.0D0 - sign_z(j,k,l))*deds_f_u_p(ixy))
-      !deds_c_u(iyx) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_u_m(iyx) + (1.0D0 - sign_z(j,k,l))*deds_f_u_p(iyx))
-      !deds_c_d(ixy) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_d_m(ixy) + (1.0D0 - sign_z(j,k,l))*deds_f_d_p(ixy))
-      !deds_c_d(iyx) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_d_m(iyx) + (1.0D0 - sign_z(j,k,l))*deds_f_d_p(iyx))
+      ! deds_c_u(iyz) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_u_m(iyz) + (1.0D0 - sign_x(j,k,l))*deds_f_u_p(iyz))
+      ! deds_c_u(izy) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_u_m(izy) + (1.0D0 - sign_x(j,k,l))*deds_f_u_p(izy))
+      ! deds_c_d(iyz) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_d_m(iyz) + (1.0D0 - sign_x(j,k,l))*deds_f_d_p(iyz))
+      ! deds_c_d(izy) = 0.5D0*((1.0D0 + sign_x(j,k,l))*deds_f_d_m(izy) + (1.0D0 - sign_x(j,k,l))*deds_f_d_p(izy))
+      ! deds_c_u(ixz) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_u_m(ixz) + (1.0D0 - sign_y(j,k,l))*deds_f_u_p(ixz))
+      ! deds_c_u(izx) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_u_m(izx) + (1.0D0 - sign_y(j,k,l))*deds_f_u_p(izx))
+      ! deds_c_d(ixz) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_d_m(ixz) + (1.0D0 - sign_y(j,k,l))*deds_f_d_p(ixz))
+      ! deds_c_d(izx) = 0.5D0*((1.0D0 + sign_y(j,k,l))*deds_f_d_m(izx) + (1.0D0 - sign_y(j,k,l))*deds_f_d_p(izx))
+      ! deds_c_u(ixy) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_u_m(ixy) + (1.0D0 - sign_z(j,k,l))*deds_f_u_p(ixy))
+      ! deds_c_u(iyx) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_u_m(iyx) + (1.0D0 - sign_z(j,k,l))*deds_f_u_p(iyx))
+      ! deds_c_d(ixy) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_d_m(ixy) + (1.0D0 - sign_z(j,k,l))*deds_f_d_p(ixy))
+      ! deds_c_d(iyx) = 0.5D0*((1.0D0 + sign_z(j,k,l))*deds_f_d_m(iyx) + (1.0D0 - sign_z(j,k,l))*deds_f_d_p(iyx))
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ! Add emf !
-      efield_x(j,k,l) = 0.50D0*(eface(ixy,j,k,l) + eface(ixy,j,k,l+1) + eface(ixz,j,k,l) + eface(ixz,j,k+1,l)) &
-                      - 0.25D0*(ecell(iex,j,k,l) + ecell(iex,j,k,l+1) + ecell(iex,j,k+1,l) + ecell(iex,j,k+1,l+1))
-                      !+ 0.125D0*((dy(k)*deds_c_d(ixy) - dy(k+1)*deds_c_u(ixy)) & 
-                      !+ (dz(l)*deds_c_d(ixz) - dz(l+1)*deds_c_u(ixz)))
-      efield_y(j,k,l) = 0.50D0*(eface(iyx,j,k,l) + eface(iyx,j,k,l+1) + eface(iyz,j,k,l) + eface(iyz,j+1,k,l)) &
-                      - 0.25D0*(ecell(iey,j,k,l) + ecell(iey,j,k,l+1) + ecell(iey,j+1,k,l) + ecell(iey,j+1,k,l+1))
-                      !+ 0.125D0*((dx(j)*deds_c_d(iyx) - dx(j+1)*deds_c_u(iyx)) &
-                      !+ (dz(l)*deds_c_d(iyz) - dz(l+1)*deds_c_u(iyz)))
-      efield_z(j,k,l) = 0.50D0*(eface(izx,j,k,l) + eface(izx,j,k+1,l) + eface(izy,j,k,l) + eface(izy,j+1,k,l)) &
-                      - 0.25D0*(ecell(iez,j,k,l) + ecell(iez,j,k+1,l) + ecell(iez,j+1,k,l) + ecell(iez,j+1,k+1,l))
-                      !+ 0.125D0*((dx(j)*deds_c_d(izx) - dx(j+1)*deds_c_u(izx)) &
-                      !+ (dy(k)*deds_c_d(izy) - dy(k+1)*deds_c_u(izy)))
+      efield_x(j,k,l) = 0.50D0*(eface(ixy,j,k,l) + eface(ixy,j,k,l+1) + eface(ixz,j,k,l) + eface(ixz,j,k+1,l)) 
+                      !0.25D0*(ecell(iex,j,k,l) + ecell(iex,j,k,l+1) + ecell(iex,j,k+1,l) + ecell(iex,j,k+1,l+1))
+                      ! + 0.125D0*((dy(k)*deds_c_d(ixy) - dy(k+1)*deds_c_u(ixy)) &
+                      ! + (dz(l)*deds_c_d(ixz) - dz(l+1)*deds_c_u(ixz)))
+      efield_y(j,k,l) = 0.50D0*(eface(iyx,j,k,l) + eface(iyx,j,k,l+1) + eface(iyz,j,k,l) + eface(iyz,j+1,k,l))
+                      !0.25D0*(ecell(iey,j,k,l) + ecell(iey,j,k,l+1) + ecell(iey,j+1,k,l) + ecell(iey,j+1,k,l+1))
+                      ! + 0.125D0*((dx(j)*deds_c_d(iyx) - dx(j+1)*deds_c_u(iyx)) &
+                      ! + (dz(l)*deds_c_d(iyz) - dz(l+1)*deds_c_u(iyz)))
+      efield_z(j,k,l) = 0.50D0*(eface(izx,j,k,l) + eface(izx,j,k+1,l) + eface(izy,j,k,l) + eface(izy,j+1,k,l))
+                      !0.25D0*(ecell(iez,j,k,l) + ecell(iez,j,k+1,l) + ecell(iez,j+1,k,l) + ecell(iez,j+1,k+1,l))
+                      ! + 0.125D0*((dx(j)*deds_c_d(izx) - dx(j+1)*deds_c_u(izx)) &
+                      ! + (dy(k)*deds_c_d(izy) - dy(k+1)*deds_c_u(izy)))
 
     
     END DO

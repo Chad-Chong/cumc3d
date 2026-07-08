@@ -31,7 +31,7 @@ rate = REAL(cr)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Set number of threads !
-CALL OMP_SET_NUM_THREADS(32)
+CALL OMP_SET_NUM_THREADS(60)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -136,11 +136,16 @@ DO while (global_time < total_time)
   !   STOP
   ! ENDIF
 
-  ! IF (MOD(n_step,100) == 0) THEN
+  ! IF (MOD(n_step,1) == 0) THEN
   ! output_file = .true.
   ! ELSE
   !   output_file = .false.
   ! ENDIF
+
+  IF (dt<1e-5) THEN
+    WRITE(*,*) 'Time step is smaller than 1e-5.'
+    output_file = .true.
+  ENDIF
 
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!s	
   ! Section for data I/O !
@@ -160,6 +165,14 @@ DO while (global_time < total_time)
 
     ! Increase the outfile index !
     n_iter = n_iter + 1
+
+    IF (dt<1e-5) THEN
+
+      WRITE(*,*) 'Time step is smaller than 1e-5.'
+		  CALL print_hydroprofile
+      STOP
+
+    ENDIF
 
   end if
 

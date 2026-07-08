@@ -16,6 +16,7 @@ REAL*8 :: dummy
 ! Magnetic field !
 REAL*8 :: maxdb
 REAL*8 :: div_b
+REAL*8 :: avg_vy
 
 REAL*8, ALLOCATABLE, DIMENSION(:,:,:) :: a_phi
 
@@ -120,6 +121,8 @@ IF (restart_flag == 0) THEN
     ELSEIF (coordinate_flag == 1) THEN
       READ(970,*) ((prim(ivy,j,1,l), j = 1, nx), l = 1, nz)
       prim(ivy,:,:,:) = prim(ivy,:,:,:)*lencgs2code/tcgs2code
+      ! avg_vy = sum(prim(ivy,1:nx,1,1:nz))/size(prim(ivy,1:nx,1,1:nz))
+      ! prim(ivy,:,:,:) = avg_vy*lencgs2code/tcgs2code
     ENDIF
     CLOSE(970)
     PRINT *, "Finished reading vphi"
@@ -373,6 +376,7 @@ ENDIF
 IF (restart_flag == 0) THEN
   ! Set atmospheric primitive variables!
   prim_a(:) = 0.0D0
+  rotation_atmosphere(:,:,:) = prim(ivy,1:nx,1:ny,1:nz)
   ! prim_a(irho) = atmospheric*maxval(prim(irho,:,:,:))
   IF (turb_flag == 1) THEN
     prim_a(iturbq) = turb_q_a
@@ -431,7 +435,11 @@ IF (restart_flag == 0) THEN
 
           diff = prim(irho,j,k,l) - prim_a(irho)
           factor = MAX(SIGN(1.0D0, diff), 0.0D0)
-          prim(imin:ibx-1,j,k,l) = factor*prim(imin:ibx-1,j,k,l) + (1.0D0 - factor)*prim_a(:)
+          DO i = imin, ibx-1
+            IF (i .ne. ivy) THEN
+              prim(i,j,k,l) = factor*prim(i,j,k,l) + (1.0D0 - factor)*prim_a(i)
+            ENDIF
+          ENDDO
           IF (helmeos_flag == 1) THEN
             temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
             abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a

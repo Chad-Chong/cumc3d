@@ -12,6 +12,20 @@ INCLUDE "param.h"
 REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: lambdas
 INTEGER :: start_index
 
+! For divergence !
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: divb_arr
+
+! For checking the induction equation
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: px_efield_z
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: pz_efield_x
+
+! For checking the fluxes
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:,:,:) :: debug_flux
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:,:) :: gravity_sc
+
+! For rotation at the atmosphere
+REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: rotation_atmosphere
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Floors !

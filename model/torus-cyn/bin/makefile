@@ -8,6 +8,10 @@ EXTRAOBJECTS += $(HDF5LIBS)
 #specify directories#
 SOLVER := ../../../solver/mhd
 SOURCE := ../src
+CUSTOM := $(CUMC3D_DIR)/model/torus-cyn/custom-mhd
+
+vpath %.f90 $(CUSTOM):$(SOLVER):$(MODEL)
+vpath %.h $(CUSTOM):$(SOLVER)
 
 #source list#
 SOURCE1 = $(shell cat $(SOLVER)/source.list)

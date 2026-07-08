@@ -19,7 +19,7 @@ SRC = $(notdir $(SOURCE))
 OBJ = $(patsubst %.f90,%.o,$(SRC))
 
 #core object files#
-DEF_OBJ    = definition.o
+DEF_OBJ    = definition.o def.o
 RECON_MOD  = ppmc_module.o tvd_module.o weno_module.o
 SIMPLE_MOD = rsolver_module.o mhd_module.o def.o				# Only depends on definition.o
 CHEM_DEF = ecaptable_module.o

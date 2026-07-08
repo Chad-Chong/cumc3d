@@ -1620,7 +1620,7 @@ deton_qdot(:,:,:) = 0.0D0
 
 !call findenergy
 !write(*,*) 'Before: ', energy2
-!esum = 0.0D0
+Enuc = 0.0D0
 
 ! Then, find the energy release due to nuclear fusion
 

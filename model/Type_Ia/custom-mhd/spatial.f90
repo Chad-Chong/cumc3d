@@ -425,6 +425,7 @@ END SUBROUTINE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE FLUX_DIFF(dir_in)
 USE DEFINITION 
+USE CUSTOM_DEF
 IMPLICIT NONE
 
 ! Integer !
@@ -476,6 +477,9 @@ IF(dir_in == x_dir) THEN
 					DO i = imin, ibx - 1
 						dflux = (xF(j)*flux (i,j,k,l) - xF(j-1)*flux (i,j-1,k,l)) / (x(j)*dx(j))
 						l_rk(i,j,k,l) = - dflux
+						IF ( i <= ivz .and. i >= ivx) THEN
+							debug_flux(1,i,j,k,l) = - dflux
+						ENDIF
 					END DO
 				END DO
 			END DO
@@ -526,6 +530,9 @@ ELSEIF(dir_in == y_dir) THEN
 					DO i = imin, ibx - 1
 						dflux = (flux (i,j,k,l) - flux (i,j,k-1,l)) / (x(j)*dy(k))
 						l_rk(i,j,k,l) = l_rk(i,j,k,l) - dflux
+						IF ( i <= ivz .and. i >= ivx) THEN
+							debug_flux(2,i,j,k,l) = - dflux
+						ENDIF
 					END DO
 				END DO
 			END DO
@@ -576,6 +583,9 @@ ELSEIF(dir_in == z_dir) THEN
 					DO i = imin, ibx - 1
 						dflux = (flux (i,j,k,l) - flux (i,j,k,l-1)) / dz(l)
 						l_rk(i,j,k,l) = l_rk(i,j,k,l) - dflux
+						IF ( i <= ivz .and. i >= ivx) THEN
+							debug_flux(3,i,j,k,l) = - dflux
+						ENDIF
 					END DO
 				END DO
 			END DO
@@ -697,7 +707,9 @@ ELSEIF(coordinate_flag == 1) THEN
 			DO j = 0, nx
 
 				! dbx/dt !
+
 				l_rk(ibx,j,k,l) = - (efield_z(j,k,l) - efield_z(j,k-1,l))/(xF(j)*dy(k)) + (efield_y(j,k,l) - efield_y(j,k,l-1))/(dz(l))
+
 				! IF (min_Bx == 0.0D0) THEN
 					! IF ( ABS(l_rk(ibx,j,k,l)) < 1e-20 ) THEN
 					! 	l_rk(ibx,j,k,l) = 0
@@ -710,7 +722,11 @@ ELSEIF(coordinate_flag == 1) THEN
 				
 
 				! dby/dt !
+
 				l_rk(iby,j,k,l) = - (efield_x(j,k,l) - efield_x(j,k,l-1))/(dz(l)) + (efield_z(j,k,l) - efield_z(j-1,k,l))/(dx(j))
+				! px_efield_z(j,k,l) = (efield_z(j,k,l) - efield_z(j-1,k,l))/(dx(j))
+				! pz_efield_x(j,k,l) = (efield_x(j,k,l) - efield_x(j,k,l-1))/(dz(l))
+
 				! IF (min_By == 0.0D0) THEN ! Suppress numerical error
 					! IF ( ABS(l_rk(iby,j,k,l)) < 1e-20 ) THEN
 					! 	l_rk(iby,j,k,l) = 0
@@ -722,7 +738,9 @@ ELSEIF(coordinate_flag == 1) THEN
 				! ENDIF
 
 				! dbz/dt !
+
 				l_rk(ibz,j,k,l) = - (xF(j)*efield_y(j,k,l) - xF(j-1)*efield_y(j-1,k,l))/(x(j)*dx(j)) + (efield_x(j,k,l) - efield_x(j,k-1,l))/(x(j)*dy(k))
+				
 				! IF (min_Bz == 0.0D0) THEN
 					! IF ( ABS(l_rk(ibz,j,k,l)) < 1e-20 ) THEN
 					! 	l_rk(ibz,j,k,l) = 0

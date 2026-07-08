@@ -314,32 +314,32 @@ do k = 1, nz, 1
          turb_source(i,j,k) = 0.0D0
          turb_diff(i,j,k) = 0.0D0
 
-         IF (turb_comp(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+         IF (turb_comp(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1.0D-2) THEN
             turb_comp(i,j,k) = 0.0D0
          ENDIF
 
-         IF (turb_str(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+         IF (turb_str(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1.0D-2) THEN
             turb_str(i,j,k) = 0.0D0
          ENDIF
 
-         IF (turb_eps(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+         IF (turb_eps(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1.0D-2) THEN
             turb_eps(i,j,k) = 0.0D0
          ENDIF
 
-         IF (turb_RT(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1e-2) THEN
+         IF (turb_RT(i,j,k)*dt/(prim(irho,i,j,k)*prim_a(iturbq)) < 1.0D-2) THEN
             turb_RT(i,j,k) = 0.0D0
          ENDIF
 
-         do m = -turb_neighbour, turb_neighbour, 1
-            do n = -turb_neighbour, turb_neighbour, 1
+         xloop: do m = -turb_neighbour, turb_neighbour, 1
+            zloop: do n = -turb_neighbour, turb_neighbour, 1
 
-               IF ( (prim(irho,i+m,j,k+n)-prim_a(irho))/prim_a(irho) < 1e-2 ) THEN
+               IF ( (prim(irho,i+m,j,k+n)-prim_a(irho))/prim_a(irho) < 5.0D-1 ) THEN
                   neighbour_flag = 0
-                  EXIT
+                  EXIT xloop
                ENDIF
 
-            enddo
-         enddo
+            enddo zloop
+         enddo xloop
          
          IF (neighbour_flag == 1) THEN
             ! Only calculate SGS turbulence for non-atmosphere terms whose neighbour also not atmosphere !

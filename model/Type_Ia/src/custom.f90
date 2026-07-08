@@ -93,6 +93,7 @@ IMPLICIT NONE
 
 ! atmospheric values !
 ALLOCATE (prim_a(imin:ibx-1))
+ALLOCATE (rotation_atmosphere(1:nx,1:ny,1:nz))
 
 ! gravitational potential energy !
 ALLOCATE (phi(-2:nx+3,-2:ny+3,-2:nz+3))
@@ -109,6 +110,15 @@ ALLOCATE (epsc(1:nx,1:ny,1:nz))
 
 ! for CFL check !
 ALLOCATE (lambdas(1:nx,1:ny,1:nz))
+
+! for debugging MHD !
+ALLOCATE(divb_arr(1:nx,1:ny,1:nz))
+ALLOCATE(px_efield_z(0:nx,0:ny,0:nz))
+ALLOCATE(pz_efield_x(0:nx,0:ny,0:nz))
+
+! for checking fluxes !
+ALLOCATE(debug_flux(1:3,ivx:ivz,1:nx,1,1:nz))
+ALLOCATE(gravity_sc(1:3,1:nx,1,1:nz))
 
 IF (turb_flag == 1) THEN
   WRITE(*,*) 'Build sub-grid turbulence variables'
@@ -197,9 +207,9 @@ END IF
 OPEN(UNIT=970, FILE = './profile/hydro_x1_fgrid.dat', ACTION='READ')
 DO i = -3, nx+3
 	READ(970,*) xF(i)
-  IF (xF(i) == 0.0D0) THEN
-    xF(i) = 1.0D-10 
-  ENDIF
+  ! IF (xF(i) == 0.0D0) THEN
+  !   xF(i) = 1.0D-10 
+  ! ENDIF
 ENDDO
 CLOSE(970)
 xF = xF*lencgs2code
@@ -381,7 +391,7 @@ rate = REAL(cr)
 CALL system_clock(time_start)
 #endif
 
-! prim_a(irho) = MIN(prim_a(irho), 1.0D-4 * MAXVAL(prim(irho,:,:,:)))
+prim_a(irho) = MIN(prim_a(irho), 1.0D-4 * MAXVAL(prim(irho,:,:,:)))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -412,10 +422,25 @@ DO l = 1, nz
       !   epsilon(j,k,l) = eps_a
       ! ENDIF      
 
-      IF (diff/prim_a(irho) <= 1.0D-1 .or. diff_eps/eps_a <= 1.0D-1) THEN ! Put the above condition as or here for stronger constraint: not allowing finite density cells to be cold.
+      ! IF (diff/prim_a(irho) <= 1.0D-3 .or. diff_eps/eps_a <= 1.0D-3 .or. prim(ivx,j,k,l) >= 1.0D0 .or. prim(ivx,j,k,l) >= 1.0D0) THEN ! Put the above condition as or here for stronger constraint: not allowing finite density cells to be cold.
 
+      IF (diff <= 0 ) THEN ! Put the above condition as or here for stronger constraint: not allowing finite density cells to be cold.
+
+        IF (prim(ivx,j,k,l) >= 1.0D0 .or. prim(ivx,j,k,l) >= 1.0D0) THEN
+          WRITE(*,*) "Exceeding the speed of light at", j, k, l
+        ENDIF
         ! prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) 
-        prim(irho,j,k,l) =  prim_a(irho) ! Change the thermodynamic / hydro properties, not the composition
+
+        prim(irho,j,k,l) =  prim_a(irho)
+
+        ! IF (diff < 0)THEN
+        !   prim(irho,j,k,l) =  prim_a(irho)
+        ! ENDIF
+
+        prim(ivx,j,k,l) =  prim_a(ivx)
+        prim(ivy,j,k,l) = rotation_atmosphere(j,k,l)
+        prim(ivz,j,k,l) =  prim_a(ivz)
+
         epsilon(j,k,l) = eps_a
 
         IF (helmeos_flag == 1) THEN
@@ -424,9 +449,11 @@ DO l = 1, nz
           CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
           ! CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
         ENDIF
+        
         IF (turb_flag == 1) THEN
           prim(iturbq,j,k,l) = prim_a(iturbq)
         ENDIF
+
       ENDIF
 
       ! This code segment gives a bug where it assigns epsilon_temp_min in the interior of the star (higher density)
@@ -520,6 +547,7 @@ IF (coordinate_flag == 2)THEN
           ! Add them to the source term !
           sc(ivx,j,k,l) = sc(ivx,j,k,l) - factor*prim(irho,j,k,l)*dphidx
           sc(ivy,j,k,l) = sc(ivy,j,k,l) - factor*prim(irho,j,k,l)*dphidy/x(j)
+          gravity_sc(ivy,j,k,l) = - factor*prim(irho,j,k,l)*dphidy/x(j)
           sc(ivz,j,k,l) = sc(ivz,j,k,l) - factor*prim(irho,j,k,l)*dphidz/x(j)/sine(k)
           sc(itau,j,k,l) = sc(itau,j,k,l) - factor*prim(irho,j,k,l)* &
                             (prim(ivx,j,k,l)*dphidx + prim(ivy,j,k,l)*dphidy/x(j) + &
@@ -549,8 +577,11 @@ ELSEIF(coordinate_flag == 1) THEN
               
           ! Add them to the source term !
           sc(ivx,j,k,l) = sc(ivx,j,k,l) - factor*prim(irho,j,k,l)*dphidx
+          gravity_sc(ivx,j,k,l) = - factor*prim(irho,j,k,l)*dphidx
           sc(ivy,j,k,l) = sc(ivy,j,k,l) - factor*prim(irho,j,k,l)*dphidy/x(j)
+          gravity_sc(ivy,j,k,l) = -factor*prim(irho,j,k,l)*dphidy/x(j)
           sc(ivz,j,k,l) = sc(ivz,j,k,l) - factor*prim(irho,j,k,l)*dphidz
+          gravity_sc(ivz,j,k,l) = - factor*prim(irho,j,k,l)*dphidz
           sc(itau,j,k,l) = sc(itau,j,k,l) - factor*prim(irho,j,k,l)*(prim(ivx,j,k,l)*dphidx + prim(ivy,j,k,l)*dphidy/x(j)+prim(ivz,j,k,l)*dphidz)
 
           IF (ieee_is_nan(factor*prim(irho,j,k,l)*dphidx)) THEN

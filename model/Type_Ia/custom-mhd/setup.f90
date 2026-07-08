@@ -120,6 +120,11 @@ ELSEIF(boundary_flag(1) == 3) THEN
 	bfac_xin(ibz) = -1
 ELSEIF(boundary_flag(1) == 4) THEN
 	STOP 'Equatorial symmetry is not allowed for the x-boundary'
+ELSEIF(boundary_flag(1) == 5) THEN
+	bfac_xin(ibx) = -1
+	bfac_xin(ivx) = 0
+	bfac_xin(ivy) = 0
+	bfac_xin(ivz) = 0
 END IF
 
 ! Flip signs, x outer boundary !
