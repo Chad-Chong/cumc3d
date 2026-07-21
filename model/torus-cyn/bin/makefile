@@ -1,35 +1,25 @@
 #include header#
 include ../../../make.inc
 
-#specify HDF5#
-EXTRAINCS += $(HDF5INCS)
-EXTRAOBJECTS += $(HDF5LIBS)
+EXTRAINCS += $(HDF5INCS) -module .
+EXTRAOBJECTS += $(HDF5LIBS)  -module .
 
-#specify directories#
-SOLVER := ../../../solver/mhd
-SOURCE := ../src
+SOLVER := $(CUMC3D_DIR)/solver/mhd
+SOURCE := $(CUMC3D_DIR)/model/torus-cyn/src
 CUSTOM := $(CUMC3D_DIR)/model/torus-cyn/custom-mhd
 
-vpath %.f90 $(CUSTOM):$(SOLVER):$(MODEL)
+vpath %.f90 $(CUSTOM):$(SOLVER):$(SOURCE)
 vpath %.h $(CUSTOM):$(SOLVER)
 
-#source list#
 SOURCE1 = $(shell cat $(SOLVER)/source.list)
-SRC1 = $(notdir $(SOURCE1))
-OBJ1 = $(patsubst %.f90,%.o,$(SRC1))
+SOURCE2 = $(shell cat $(SOURCE)/source.list)
 
-#local source files#
-SOURCE2 = $(shell cat $(SOURCE)/source.list) #$(wildcard *.f90 $(SOURCE) *.f90)
-SRC2 = $(notdir $(SOURCE2))
-OBJ2 = $(patsubst %.f90,%.o,$(SRC2))
+SRC = $(notdir $(SOURCE1)) $(notdir $(SOURCE2))
+OBJ = $(patsubst %.f90,%.o,$(SRC))
 
-ALL: $(OBJ1) $(OBJ2)
-	echo $(SRC1)
-	echo $(SRC2)
-	$(F90) $(LDFLAGS) -o ../CUMC3D $(OBJ1) $(OBJ2) $(EXTRAOBJECTS)
+ALL: $(OBJ)
+	$(F90) $(LDFLAGS) -o ../CUMC3D $(OBJ) $(EXTRAOBJECTS)
 
-$(OBJ1): %.o: $(SOLVER)/%.f90 
-	$(F90) $(F90FLAGS) $(EXTRAINCS) -c $< -o $@
-
-$(OBJ2): %.o: $(SOURCE)/%.f90 
+# 7. THE WORKING PATTERN RULE
+%.o: %.f90
 	$(F90) $(F90FLAGS) $(EXTRAINCS) -c $< -o $@

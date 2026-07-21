@@ -91,13 +91,13 @@ REAL*8 :: total_time = 120.0D0
 LOGICAL, PARAMETER :: LF_flag = .false.
 
 ! Use the HLL Riemann solver !
-LOGICAL, PARAMETER :: HLL_flag = .false.
+LOGICAL, PARAMETER :: HLL_flag = .true.
 
 ! Use the HLLC Riemann solver !
 LOGICAL, PARAMETER :: HLLC_flag = .false.
 
 ! Use the HLLD Riemann solver !
-LOGICAL, PARAMETER :: HLLD_flag = .true.
+LOGICAL, PARAMETER :: HLLD_flag = .false.
 
 ! Use the TVD (Mignone 2014) reconstruction scheme with Min-Mod limiter !
 LOGICAL, PARAMETER :: tvdmm_flag = .false.

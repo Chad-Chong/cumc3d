@@ -108,8 +108,10 @@ iscaG2 = 15
 #####################################################################
 #####################################################################
 
-working_directory = './outfile'
-profile_directory = './profile'
+print('Enter the outfile directory:')
+working_directory = input()
+print('Enter the profile directory:')
+profile_directory = input()
 print('Enter the index of the file for mapping to SNEC:')
 n = input()
 
@@ -195,6 +197,7 @@ Tguess_r = []
 xiso_r = []
 r_vol_r = []
 ir = -1
+flag = False
 
 for r in r_arr:
     ir += 1
@@ -282,7 +285,8 @@ xiso_r = np.array(xiso_r).T
 r_vol_r = np.array(r_vol_r)
 
 all = np.array((inte_r,dens_r,abar_r,zbar_r,Ye_r,Tguess_r))
-r_arr = r_arr[:ir]
+if flag == True:
+    r_arr = r_arr[:ir]
 
 #####################################################################
 #####################################################################

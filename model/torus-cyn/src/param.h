@@ -34,7 +34,7 @@ REAL*8, PARAMETER :: s_in = 3.0d0
 REAL*8, PARAMETER :: s_max = 4.7d0
 
 ! Refine grid? !
-LOGICAL, PARAMETER :: refine_grid = .false. 
+LOGICAL, PARAMETER :: refine_grid = .true. 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Corona !

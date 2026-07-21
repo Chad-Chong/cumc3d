@@ -71,9 +71,9 @@ REAL*8, PARAMETER :: y_end = 2.0D0*pi
 REAL*8, PARAMETER :: z_end = 2.0D0*pi ! Determined by custom grid
 
 ! The number of grid in the x,y,z direction for NM
-INTEGER, PARAMETER :: nx = 301
+INTEGER, PARAMETER :: nx = 501
 INTEGER, PARAMETER :: ny = 1 !Use 1 if 2D
-INTEGER, PARAMETER :: nz = 602
+INTEGER, PARAMETER :: nz = 1002
 
 ! Grid sizes for NM
 REAL*8, PARAMETER :: dx_ini = (x_end - x_start)/DBLE(nx)	
@@ -95,10 +95,10 @@ REAL*8 :: total_time = 120.0D0
 LOGICAL, PARAMETER :: LF_flag = .false.
 
 ! Use the HLL Riemann solver !
-LOGICAL, PARAMETER :: HLL_flag = .false.
+LOGICAL, PARAMETER :: HLL_flag = .true.
 
 ! Use the HLLC Riemann solver !
-LOGICAL, PARAMETER :: HLLC_flag = .true.
+LOGICAL, PARAMETER :: HLLC_flag = .false.
 
 ! Use the HLLD Riemann solver !
 LOGICAL, PARAMETER :: HLLD_flag = .false.

@@ -416,15 +416,15 @@ DO l = 0, nz
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ! Add emf !
-      efield_x(j,k,l) = 0.50D0*(eface(ixy,j,k,l) + eface(ixy,j,k,l+1) + eface(ixz,j,k,l) + eface(ixz,j,k+1,l)) 
+      efield_x(j,k,l) = 0.250D0*(eface(ixy,j,k,l) + eface(ixy,j,k,l+1) + eface(ixz,j,k,l) + eface(ixz,j,k+1,l)) 
                       !0.25D0*(ecell(iex,j,k,l) + ecell(iex,j,k,l+1) + ecell(iex,j,k+1,l) + ecell(iex,j,k+1,l+1))
                       ! + 0.125D0*((dy(k)*deds_c_d(ixy) - dy(k+1)*deds_c_u(ixy)) &
                       ! + (dz(l)*deds_c_d(ixz) - dz(l+1)*deds_c_u(ixz)))
-      efield_y(j,k,l) = 0.50D0*(eface(iyx,j,k,l) + eface(iyx,j,k,l+1) + eface(iyz,j,k,l) + eface(iyz,j+1,k,l))
+      efield_y(j,k,l) = 0.250D0*(eface(iyx,j,k,l) + eface(iyx,j,k,l+1) + eface(iyz,j,k,l) + eface(iyz,j+1,k,l))
                       !0.25D0*(ecell(iey,j,k,l) + ecell(iey,j,k,l+1) + ecell(iey,j+1,k,l) + ecell(iey,j+1,k,l+1))
                       ! + 0.125D0*((dx(j)*deds_c_d(iyx) - dx(j+1)*deds_c_u(iyx)) &
                       ! + (dz(l)*deds_c_d(iyz) - dz(l+1)*deds_c_u(iyz)))
-      efield_z(j,k,l) = 0.50D0*(eface(izx,j,k,l) + eface(izx,j,k+1,l) + eface(izy,j,k,l) + eface(izy,j+1,k,l))
+      efield_z(j,k,l) = 0.250D0*(eface(izx,j,k,l) + eface(izx,j,k+1,l) + eface(izy,j,k,l) + eface(izy,j+1,k,l))
                       !0.25D0*(ecell(iez,j,k,l) + ecell(iez,j,k+1,l) + ecell(iez,j+1,k,l) + ecell(iez,j+1,k+1,l))
                       ! + 0.125D0*((dx(j)*deds_c_d(izx) - dx(j+1)*deds_c_u(izx)) &
                       ! + (dy(k)*deds_c_d(izy) - dy(k+1)*deds_c_u(izy)))
