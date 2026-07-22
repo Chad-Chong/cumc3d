@@ -7,6 +7,7 @@
 *CUMC3D
 fort.*
 tmp.txt
-*.dat
+Helm_*.dat
+hydro_*.dat
 /model/Type_Ia/runs/
 *.gif
