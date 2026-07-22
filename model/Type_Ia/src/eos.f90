@@ -47,14 +47,14 @@ IF (helmeos_flag == 1) THEN
 
 ELSE
 	! Check timing with or without openmp
-	#ifdef DEBUG
-	INTEGER :: time_start, time_end
-	INTEGER :: cr
-	REAL*8 :: rate
-	CALL system_clock(count_rate=cr)
-	rate = REAL(cr)
-	CALL system_clock(time_start)
-	#endif
+	! #ifdef DEBUG
+	! INTEGER :: time_start, time_end
+	! INTEGER :: cr
+	! REAL*8 :: rate
+	! CALL system_clock(count_rate=cr)
+	! rate = REAL(cr)
+	! CALL system_clock(time_start)
+	! #endif
 
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	!$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(xe)
@@ -75,10 +75,10 @@ ELSE
 	!$ACC END PARALLEL
 	!$OMP END PARALLEL DO
 
-	#ifdef DEBUG
-	CALL system_clock(time_end)
-	WRITE(*,*) 'findpressure = ', REAL(time_end - time_start) / rate
-	#endif
+	! #ifdef DEBUG
+	! CALL system_clock(time_end)
+	! WRITE(*,*) 'findpressure = ', REAL(time_end - time_start) / rate
+	! #endif
 
 ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
