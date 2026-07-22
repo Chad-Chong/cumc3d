@@ -9,6 +9,7 @@ EXTRAOBJECTS +=  $(HDF5LIBS) -module .  # -check all
 SOLVER := $(CUMC3D_DIR)/solver/mhd
 MODEL  := $(CUMC3D_DIR)/model/Type_Ia/src
 CUSTOM := $(CUMC3D_DIR)/model/Type_Ia/custom-mhd
+TABLE  := $(CUMC3D_DIR)/model/Type_Ia/src/lib
 
 vpath %.f90 $(CUSTOM):$(SOLVER):$(MODEL)
 vpath %.h $(CUSTOM):$(SOLVER)
@@ -40,4 +41,4 @@ $(CHEM) : $(CHEM_DEF)
 $(OTHER_OBJ) : $(DEF_OBJ) $(SIMPLE_MOD) $(RECON_MOD) $(CHEM_DEF)
 
 %.o: %.f90
-	$(F90) $(F90FLAGS) $(EXTRAINCS) -c $< -o $@
+	$(F90) $(F90FLAGS) -DTABLE_PATH='"$(TABLE)"' $(EXTRAINCS) -c $< -o $@

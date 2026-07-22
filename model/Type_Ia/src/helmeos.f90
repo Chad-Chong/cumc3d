@@ -44,11 +44,11 @@ INCLUDE 'helm_table_storage.dek'
 integer          i,j
 double precision tsav,dsav,dth,dt2,dti,dt2i,dt3i, &
                     dd,dd2,ddi,dd2i,dd3i
-
+CHARACTER(LEN=256) :: table_dir
 
 ! open the file (use softlinks to input the desired table)
-
-OPEN(unit=19,file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/helm_table.dat',status='old')
+table_dir = TRIM(TABLE_PATH)
+OPEN(unit=19,file=table_dir // '/helm_table.dat',status='old')
 
 
 ! for standard table limits
