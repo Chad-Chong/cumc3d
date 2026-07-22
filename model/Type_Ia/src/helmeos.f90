@@ -379,8 +379,8 @@ end subroutine private_helmeos_azbar
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine azbar(xmass,aion,zion,wion,ionmax, &
-                    ymass,abar,zbar,wbar,ye,nxcess)
+subroutine azbar(xmass,aion_local,zion_local,wion_local,ionmax, &
+                    ymass_local,abar,zbar,wbar,ye_local,nxcess)
 use definition
 USE CUSTOM_DEF
 implicit none
@@ -389,45 +389,45 @@ implicit none
 
 ! input:
 ! mass fractions               = xmass(1:ionmax)  dimensionless
-! number of nucleons           = aion(1:ionmax)   dimensionless
-! charge of nucleus            = zion(1:ionmax)   dimensionless
-! atomic weight or molar mass  = wion(1:ionmax)    g/mole
+! number of nucleons           = aion_local(1:ionmax)   dimensionless
+! charge of nucleus            = zion_local(1:ionmax)   dimensionless
+! atomic weight or molar mass  = wion_local(1:ionmax)    g/mole
 ! number of isotopes           = ionmax
 !
 ! output:
-! molar abundances        = ymass(1:ionmax)   mole/g
+! molar abundances        = ymass_local(1:ionmax)   mole/g
 ! mean number of nucleons = abar              dimensionless
 ! mean nucleon charge     = zbar              dimensionless
 ! mean weight             = wbar              g/mole
-! electron fraction       = ye                mole/g
+! electron fraction       = ye_local                mole/g
 ! neutron excess          = xcess
 
 
 ! declare the pass
 integer          ionmax
-real (selected_real_kind(15,307)), dimension(1:totalion) :: xmass,aion,zion,wion,ymass
-real (selected_real_kind(15,307)) :: abar,zbar,wbar,ye,nxcess
+real (selected_real_kind(15,307)), dimension(1:totalion) :: xmass,aion_local,zion_local,wion_local,ymass_local
+real (selected_real_kind(15,307)) :: abar,zbar,wbar,ye_local,nxcess
 
 
 ! local variables
 real (selected_real_kind(15,307)) asum,sum1
 
 ! molar abundances
-ymass(1:totalion) = xmass(1:totalion)/wion(1:totalion)
+ymass_local(1:totalion) = xmass(1:totalion)/wion_local(1:totalion)
 
 ! mean molar mass
-wbar  = 1.0d0/sum(ymass(1:totalion))
+wbar  = 1.0d0/sum(ymass_local(1:totalion))
 
 ! mean number of nucleons
-sum1  = sum(aion(1:totalion)*ymass(1:totalion))
+sum1  = sum(aion_local(1:totalion)*ymass_local(1:totalion))
 abar  = wbar * sum1
 
 ! mean charge
-ye  = sum(zion(1:totalion)*ymass(1:totalion))
-zbar  = wbar * ye
+ye_local  = sum(zion_local(1:totalion)*ymass_local(1:totalion))
+zbar  = wbar * ye_local
 
 ! neutron excess
-nxcess = sum1 - 2.0d0 * ye
+nxcess = sum1 - 2.0d0 * ye_local
 
 end subroutine
 
