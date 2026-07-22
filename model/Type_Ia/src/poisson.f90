@@ -32,7 +32,7 @@ END SUBROUTINE
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE poisson_coef(xm1, xc, xp1, ym1, yc, yp1, zm1, zc, zp1, &
-  alphajp1, alphajm1, betakp1, betakm1, gammalp1, gammalm1, epsc)
+  alphajp1, alphajm1, betakp1, betakm1, gammalp1, gammalm1, epsc_local)
 USE CUSTOM_DEF 
 USE DEFINITION
 implicit none
@@ -44,14 +44,14 @@ real*8, INTENT(IN) :: xm1, xc, xp1, ym1, yc, yp1, zm1, zc, zp1
 real*8 :: dxp1, dxm1, dyp1, dym1, dzp1, dzm1, fxp1, fxm1, fyp1, fym1, fzp1, fzm1 
 
 ! output !
-real*8, INTENT(OUT) :: epsc
+real*8, INTENT(OUT) :: epsc_local
 real*8, INTENT(OUT) :: alphajp1, alphajm1
 real*8, INTENT(OUT) :: betakp1, betakm1
 real*8, INTENT(OUT) :: gammalp1, gammalm1
 
 IF (coordinate_flag == 2) THEN
 	! assign !
-	epsc = 2.0d0*(xp1+xm1-3.0d0*xc)/xc/(xp1-xc)/(xc-xm1) &
+	epsc_local = 2.0d0*(xp1+xm1-3.0d0*xc)/xc/(xp1-xc)/(xc-xm1) &
 	+ (yp1+ym1-2.0d0*yc-2.0d0*DTAN(yc))/xc**2/DTAN(yc)/(yp1-yc)/(yc-ym1) &
 	- 2.0d0/xc**2/DSIN(yc)**2/(zp1-zc)/(zc-zm1)
 
@@ -83,7 +83,7 @@ ELSEIF (coordinate_flag == 1) THEN
 	fzp1 = 1/(dzp1*(dzm1-dzp1))
 	fzm1 = 1/(dzm1*(dzm1-dzp1))
 
-	epsc = 2.0D0 *(fxp1-fxm1 + (fyp1-fym1)/xc**2 + fzp1-fzm1) + 1.0D0/xc*(dxp1*fxm1 - dxm1*fxp1)
+	epsc_local = 2.0D0 *(fxp1-fxm1 + (fyp1-fym1)/xc**2 + fzp1-fzm1) + 1.0D0/xc*(dxp1*fxm1 - dxm1*fxp1)
 
 	alphajp1 = 1.0D0/xc*dxm1*fxp1 - 2.0D0*fxp1
 	alphajm1 = -1.0D0/xc*dxp1*fxm1 + 2.0D0*fxm1
