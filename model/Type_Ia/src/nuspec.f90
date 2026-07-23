@@ -93,8 +93,14 @@ implicit none
 integer :: i, j
 
 ! open the files
-open(unit=898, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/nu_mass.dat', action='read')
-open(unit=899, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/nu_emiss.dat', action='read')
+
+CHARACTER(LEN=256) :: table_dir
+
+#define stringify(x) #x
+#define expand(x) stringify(x)
+table_dir = expand(TABLE_PATH)
+open(unit=898, file=TRIM(table_dir)//'/nu_mass.dat', action='read')
+open(unit=899, file=TRIM(table_dir)//'/nu_emiss.dat', action='read')
 
 ! read the table
 do i = 1, temp_rowno3, 1

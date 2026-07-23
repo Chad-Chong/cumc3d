@@ -47,8 +47,11 @@ double precision tsav,dsav,dth,dt2,dti,dt2i,dt3i, &
 CHARACTER(LEN=256) :: table_dir
 
 ! open the file (use softlinks to input the desired table)
-table_dir = TRIM(TABLE_PATH)
-OPEN(unit=19,file=table_dir // '/helm_table.dat',status='old')
+#define stringify(x) #x
+#define expand(x) stringify(x)
+table_dir = expand(TABLE_PATH)
+
+OPEN(unit=19,file=TRIM(table_dir)//'/helm_table.dat',status='old')
 
 
 ! for standard table limits
@@ -242,7 +245,13 @@ IMPLICIT NONE
 INTEGER :: i, j, k
 REAL*8 :: dummy
 
-OPEN(unit=500, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/nse_table_7iso.dat',action='read')
+CHARACTER(LEN=256) :: table_dir
+
+#define stringify(x) #x
+#define expand(x) stringify(x)
+table_dir = expand(TABLE_PATH)
+
+OPEN(unit=500, file=TRIM(table_dir)//'/nse_table_7iso.dat',action='read')
 DO i = 0, den_rowno_nse, 1
     DO j = 0, temp_rowno_nse, 1
         READ(500,*) dummy, dummy, nsetable_binde(i,j), (nsetable_xiso(i,j,k), k = 1, totalion)
@@ -264,7 +273,13 @@ IMPLICIT NONE
 INTEGER :: i, j, k, k2
 REAL*8 :: dummy
 
-OPEN(unit=500, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/nse_table_495iso.dat',action='read')
+CHARACTER(LEN=256) :: table_dir
+
+#define stringify(x) #x
+#define expand(x) stringify(x)
+table_dir = expand(TABLE_PATH)
+
+OPEN(unit=500, file=TRIM(table_dir)//'/nse_table_495iso.dat',action='read')
 
 DO i = 0, den_rowno_nse2, 1
     DO j = 0, ye_rowno_nse2, 1

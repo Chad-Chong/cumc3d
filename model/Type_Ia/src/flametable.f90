@@ -76,7 +76,13 @@ integer :: i, j, k
 REAL*8 :: dummy
 
 ! For flame data
-open(unit=500, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/def_table_7iso_2.0e9.dat',action='read')
+CHARACTER(LEN=256) :: table_dir
+
+#define stringify(x) #x
+#define expand(x) stringify(x)
+table_dir = expand(TABLE_PATH)
+
+open(unit=500, file=TRIM(table_dir)//'/def_table_7iso_2.0e9.dat',action='read')
 
 do i = 0, den_rowno1
    do j = 0, temp_rowno1
@@ -136,7 +142,13 @@ integer :: i, j, k
 REAL*8 :: dummy
 
 ! For deton data
-open(unit=500, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/det_table_7iso_2.5e9.dat',action='read')
+CHARACTER(LEN=256) :: table_dir
+
+#define stringify(x) #x
+#define expand(x) stringify(x)
+table_dir = expand(TABLE_PATH)
+
+open(unit=500, file=TRIM(table_dir)//'/det_table_7iso_2.5e9.dat',action='read')
 
 do i = 0, den_rowno2
    do j = 0, temp_rowno2

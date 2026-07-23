@@ -41,4 +41,4 @@ $(CHEM) : $(CHEM_DEF)
 $(OTHER_OBJ) : $(DEF_OBJ) $(SIMPLE_MOD) $(RECON_MOD) $(CHEM_DEF)
 
 %.o: %.f90
-	$(F90) $(F90FLAGS) -DTABLE_PATH='"$(TABLE)"' $(EXTRAINCS) -c $< -o $@
+	$(F90) $(F90FLAGS) -Mpreprocess -DTABLE_PATH=$(TABLE) $(EXTRAINCS) -c $< -o $@

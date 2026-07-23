@@ -52,8 +52,14 @@ contains
    ! Read-in data from file
    real*8 :: input1, input2, input3, input4, input5
 
+   CHARACTER(LEN=256) :: table_dir
+
+   #define stringify(x) #x
+   #define expand(x) stringify(x)
+   table_dir = expand(TABLE_PATH)
+
    ! Read in the low-Ye patch
-   open(unit=441, file='/home/cnchong/Codes/cumc3d/model/Type_Ia/src/lib/ecaptable_Ye040_wNabi_full.dat', action='read')
+   open(unit=441, file=TRIM(table_dir)//'/ecaptable_Ye040_wNabi_full.dat', action='read')
    do i = 0, ye_row, 1  !0 - 15
       do j = 0, temp_row, 1
          do k = 0, rho_row, 1       
