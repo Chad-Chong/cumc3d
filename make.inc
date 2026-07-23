@@ -10,6 +10,9 @@ FIXPOLE = -DFIXPOLE
 # Want to debug? #
 #DEBUG = -DDEBUG
 
+# Force legacy behaviour, turn this off when bugged #
+#LEGACY = -fpp -vms -nofor-main
+
 # Want to get divergence of B? #
 #DIVB = -DDIVB
 
@@ -18,10 +21,11 @@ FIXPOLE = -DFIXPOLE
 
 # Choose between CPU or GPU threading #
 #MULTICORE = -DGPU -acc
-MULTICORE = -mp
+MULTICORE = -qopenmp
 
 # Define F90 compiler #
-F90=/home/cnchong/app/hdf5/bin/h5fc
+# dummy := $(shell module load hdf5/1.14.0 2>/dev/null)
+F90 := h5pfc
 
 # need extra math packages? #
 #MATHPACK = -llapack -lblas
@@ -37,5 +41,5 @@ F90=/home/cnchong/app/hdf5/bin/h5fc
 
 # Define F90 flags #
 # -Mipa=fast is suppressed #
-F90FLAGS= -cpp -module . $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
-LDFLAGS= -cpp -module . $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+F90FLAGS= -cpp -module . $(LEGACY) $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
+LDFLAGS= -cpp -module . $(LEGACY) $(PGI) $(ifort) $(MULTICORE) $(COMPILE) $(DEBUG) $(DIVB) $(FIXPOLE) $(MATHPACK)
