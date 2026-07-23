@@ -1,3 +1,6 @@
+#declare directory#
+CUMC3D_DIR :=/project/MCChu/cnchong/cumc3d
+
 #include header#
 include $(CUMC3D_DIR)/make.inc
 
@@ -40,5 +43,8 @@ $(CHEM_DEF) : $(DEF_OBJ)
 $(CHEM) : $(CHEM_DEF)
 $(OTHER_OBJ) : $(DEF_OBJ) $(SIMPLE_MOD) $(RECON_MOD) $(CHEM_DEF)
 
+#As ifort refuses preprocessing macros (#), use sed to change to the right path instead.
 %.o: %.f90
-	$(F90) $(F90FLAGS) -DTABLE_PATH=$(TABLE) $(EXTRAINCS) -c $< -o $@
+	sed 's|expand(TABLE_PATH)|"$(TABLE)"|g; s|stringify(TABLE_PATH)|"$(TABLE)"|g' $< > $*_temp.f90
+	$(F90) $(F90FLAGS) $(EXTRAINCS) -I. -I$(dir $<) -c $*_temp.f90 -o $@
+	rm -f $*_temp.f90
