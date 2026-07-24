@@ -382,7 +382,7 @@ IF (restart_flag == 0) THEN
     prim_a(iturbq) = turb_q_a
   ENDIF
 
-  ! Ensure epsilon do not oscillate. Somehow the code dislikes osciallating energy very much
+  ! Ensure epsilon is not discontinuous. Somehow the code dislikes discontinuous energy very much
 
   IF (helmeos_flag == 1) THEN
     ! prim_a(ihe4) = xiso_ahe4

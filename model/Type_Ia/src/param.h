@@ -123,7 +123,7 @@ REAL*8, PARAMETER :: ye = 0.5D0
 ! Parameters !
 REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
-REAL*8, PARAMETER :: atmospheric = 1.0D-6
+REAL*8, PARAMETER :: atmospheric = 1.0D-8
 
 ! Constant for fermi equation of state !
 ! Note that the speed of light is unity !

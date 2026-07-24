@@ -437,9 +437,9 @@ DO l = 1, nz
         !   prim(irho,j,k,l) =  prim_a(irho)
         ! ENDIF
 
-        prim(ivx,j,k,l) =  prim_a(ivx)
-        prim(ivy,j,k,l) = rotation_atmosphere(j,k,l)
-        prim(ivz,j,k,l) =  prim_a(ivz)
+        ! prim(ivx,j,k,l) =  prim_a(ivx)
+        ! prim(ivy,j,k,l) = rotation_atmosphere(j,k,l)
+        ! prim(ivz,j,k,l) =  prim_a(ivz)
 
         epsilon(j,k,l) = eps_a
 
