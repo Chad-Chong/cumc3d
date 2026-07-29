@@ -14,8 +14,8 @@ INTEGER, PARAMETER :: rs_burn = 0 !Flag to choose if to start burning from resta
 !Flag for Rotation (set initial vphi to 0 if 0)!
 INTEGER, PARAMETER :: rotate_flag = 1
 
-!Flag for near r correction
-! INTEGER, PARAMETER :: r_corr = 1
+!Flag for equatorial symmetry in gravity!
+INTEGER, PARAMETER :: phi_eqs = 0
 
 !Flag for MHD (set initial magnetic field to 0 if 0)!
 INTEGER, PARAMETER :: mhd_flag = 1
@@ -123,7 +123,7 @@ REAL*8, PARAMETER :: ye = 0.5D0
 ! Parameters !
 REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
-REAL*8, PARAMETER :: atmospheric = 1.0D-8
+REAL*8, PARAMETER :: atmospheric = 1.0D-7
 
 ! Constant for fermi equation of state !
 ! Note that the speed of light is unity !

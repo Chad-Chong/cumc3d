@@ -401,7 +401,7 @@ DO l = 1, nz
 
       ! Standard !
       diff = prim(irho,j,k,l) - prim_a(irho)
-      diff_eps = epsilon(j,k,l) - eps_a
+      ! diff_eps = epsilon(j,k,l) - eps_a
       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
 
       IF (xisotran_flag == 1) THEN
@@ -441,14 +441,14 @@ DO l = 1, nz
         ! prim(ivy,j,k,l) = rotation_atmosphere(j,k,l)
         ! prim(ivz,j,k,l) =  prim_a(ivz)
 
-        epsilon(j,k,l) = eps_a
+        ! epsilon(j,k,l) = eps_a
 
-        IF (helmeos_flag == 1) THEN
-          CALL PRIVATE_HELMEOS_AZBAR(prim(ihe4:ini56,j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l))
-          CALL private_invert_helm_ed(epsilon(j,k,l), prim(irho,j,k,l), abar2(j,k,l),zbar2(j,k,l), prim(iye2,j,k,l), temp2_old(j,k,l), temp2(j,k,l), flag_eostable)
-          CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
-          ! CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
-        ENDIF
+        ! IF (helmeos_flag == 1) THEN
+        !   CALL PRIVATE_HELMEOS_AZBAR(prim(ihe4:ini56,j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l))
+        !   CALL private_invert_helm_ed(epsilon(j,k,l), prim(irho,j,k,l), abar2(j,k,l),zbar2(j,k,l), prim(iye2,j,k,l), temp2_old(j,k,l), temp2(j,k,l), flag_eostable)
+        !   CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
+        !   ! CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon(j,k,l))
+        ! ENDIF
         
         IF (turb_flag == 1) THEN
           prim(iturbq,j,k,l) = prim_a(iturbq)
@@ -742,13 +742,14 @@ IF (gravity_flag == 1) THEN
         ENDIF
         !$OMP PARALLEL DO COLLAPSE(3) SCHEDULE(STATIC)
         !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(3) DEFAULT(PRESENT)
-        DO l = 0, nz+1 
-          DO k = 0, ny+1
-            DO j = 0, nx+1
+        DO l = 1, nz
+          DO k = 1, ny
+            DO j = 1, nx
               posit(1) = abs(x(j)*DCOS(y(k)))
               posit(2) = abs(x(j)*DSIN(y(k)))
               posit(3) = z(l)
               phi(j,k,l) = -mono/DSQRT(x(j)**2+z(l)**2) - dot_product(dipo, posit)/DSQRT(x(j)**2+z(l)**2)**3 - quadSum(quad, posit, posit)/(2*DSQRT(x(j)**2+z(l)**2)**5)
+              ! phi(j,k,l) = 0.0D0
             END DO
           END DO
         END DO
@@ -759,10 +760,9 @@ IF (gravity_flag == 1) THEN
         ENDIF    
       ENDIF
 
-    ELSE
-
-    IF (coordinate_flag == 1) THEN
+    ENDIF
     
+    IF (coordinate_flag == 1) THEN
         CALL multipole_expansion(mono, dipo, quad)
 
         IF (phitest_flag == 1) THEN
@@ -822,9 +822,8 @@ IF (gravity_flag == 1) THEN
         IF (phitest_flag == 1) THEN
           WRITE(*,*) 'End imposing boundary'
         ENDIF
-      ENDIF
-
     ENDIF
+
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Calucaltes potential by RBSOR
     DO n = 1, relax_max
@@ -974,6 +973,19 @@ IF (gravity_flag == 1) THEN
         END DO
         !$ACC END PARALLEL
         !$OMP END DO
+
+        IF (phi_eqs == 1) THEN
+          !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
+          !$ACC PARALLEL LOOP GANG WORKER VECTOR COLLAPSE(2) DEFAULT(PRESENT)
+          DO k = 1, ny
+            DO j = 1, nx
+              phi(j,k,0) = phi(j,k,1)
+            END DO
+          END DO
+          !$ACC END PARALLEL
+          !$OMP END DO
+        ENDIF
+
       ENDIF
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       !$OMP END PARALLEL

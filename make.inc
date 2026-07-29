@@ -28,7 +28,7 @@ F90=/home/cnchong/app/hdf5/bin/h5fc
 
 # Compiler flags
 # PGI = -fastsse -Mvect=simd -Mvect=levels:5 -Msmartalloc -Mstack_arrays -Mprefetch -O4
-# PGI = -g -O0 -Mbounds -Mchkptr -Mchkstk -traceback # for debug
+# PGI = -g -O2 -Mbounds -Mchkptr -Mchkstk -traceback # for debug
 # ifortflags = -g -O3 -traceback -warn all -check all
 #ifortomp = -qopenmp
 # ifortdebug = -check all -fpe0

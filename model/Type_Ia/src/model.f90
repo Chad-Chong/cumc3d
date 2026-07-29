@@ -377,7 +377,7 @@ IF (restart_flag == 0) THEN
   ! Set atmospheric primitive variables!
   prim_a(:) = 0.0D0
   rotation_atmosphere(:,:,:) = prim(ivy,1:nx,1:ny,1:nz)
-  ! prim_a(irho) = atmospheric*maxval(prim(irho,:,:,:))
+  prim_a(irho) = atmospheric*maxval(prim(irho,:,:,:))
   IF (turb_flag == 1) THEN
     prim_a(iturbq) = turb_q_a
   ENDIF
@@ -390,7 +390,7 @@ IF (restart_flag == 0) THEN
     prim_a(io16) = xiso_ao16
     CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, prim_a(iye2))
 
-    eps_a = MINVAL(epsilon(1:nx, 1, 1:nz))
+    ! eps_a = MINVAL(epsilon(1:nx, 1, 1:nz))
 
     found_atmo = 0
 
@@ -398,24 +398,24 @@ IF (restart_flag == 0) THEN
       DO k = 1, ny
         DO j = 1, nx
           IF (helmeos_flag == 1) THEN
-            IF (epsilon(j,k,l) == eps_a .and. found_atmo == 0) THEN
+            ! IF (epsilon(j,k,l) == eps_a .and. found_atmo == 0) THEN
 
-              eps_a = epsilon(j,k,l)
-              prim_a(irho) = prim(irho,j,k,l)
+            !   eps_a = epsilon(j,k,l)
+            !   ! prim_a(irho) = prim(irho,j,k,l)
 
               
-              WRITE(*,*) 'Atmosphere epsilon is', eps_a
+            !   WRITE(*,*) 'Atmosphere epsilon is', eps_a
 
-              CALL private_invert_helm_ed(epsilon(j,k,l), &
-                                prim_a(irho), abar2_a, &
-                                zbar2_a, prim_a(iye2), &
-                                                temp2_old(j,k,l), temp2_a, flag_notfindtemp)
-              WRITE(*,*) 'Found temp_a is', temp2_a
-              CALL HELM_EOSPRESSURE(prim_a(irho), temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
+            !   CALL private_invert_helm_ed(epsilon(j,k,l), &
+            !                     prim_a(irho), abar2_a, &
+            !                     zbar2_a, prim_a(iye2), &
+            !                                     temp2_old(j,k,l), temp2_a, flag_notfindtemp)
+            !   WRITE(*,*) 'Found temp_a is', temp2_a
+            !   CALL HELM_EOSPRESSURE(prim_a(irho), temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
 
-              found_atmo = 1
+            !   found_atmo = 1
             
-            ENDIF
+            ! ENDIF
           ELSE
 
             prim_a(itau) = prim(itau,nx,1,1)

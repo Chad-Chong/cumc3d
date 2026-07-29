@@ -133,6 +133,10 @@ IF (n_pole == 0) THEN
 		ENDDO
 	ENDDO
 
+IF (phi_eqs == 1) THEN
+	mono = mono*2.0D0
+ENDIF
+
 ELSEIF (n_pole == 1) THEN
 
 DO j = 1, nx
@@ -152,6 +156,12 @@ DO j = 1, nx
 		ENDDO
 	ENDDO
 ENDDO
+
+IF (phi_eqs == 1) THEN
+	mono = mono*2.0D0
+	dipo(3) = 0
+	dipo(:) = dipo(:)*2.0D0
+ENDIF
 
 ELSEIF (n_pole == 2) THEN
 
@@ -179,9 +189,23 @@ DO j = 1, nx
 			qposit(3,3) = posit(3)*posit(3)
 			quad(:,:) = quad(:,:) + (3.0D0*qposit(:,:)-(x(j)**2+z(l)**2)*eye(:,:))*rho_in*vol(j,k,l)
 
+			IF (phi_eqs == 1) THEN ! for each z, one more entry in the sum if symmetry
+				qposit(1,3) = -1.0D0*qposit(1,3)
+				qposit(2,3) = -1.0D0*qposit(2,3)
+				qposit(3,1) = -1.0D0*qposit(3,1)
+				qposit(3,2) = -1.0D0*qposit(3,2)
+				quad(:,:) = quad(:,:) + (3.0D0*qposit(:,:)-(x(j)**2+z(l)**2)*eye(:,:))*rho_in*vol(j,k,l)
+			ENDIF
+
 		ENDDO
 	ENDDO
 ENDDO
+
+IF (phi_eqs == 1) THEN
+	mono = mono*2.0D0
+	dipo(3) = 0
+	dipo(:) = dipo(:)*2.0D0
+ENDIF
 
 ELSE
 
