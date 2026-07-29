@@ -10,7 +10,7 @@ INCLUDE "param.h"
 
 ! For CFL Check !
 REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: lambdas
-INTEGER :: start_index
+INTEGER :: start_index = 6
 
 ! For divergence !
 REAL*8, ALLOCATABLE, DIMENSION (:,:,:) :: divb_arr
