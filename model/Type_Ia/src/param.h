@@ -21,7 +21,7 @@ INTEGER, PARAMETER :: phi_eqs = 0
 INTEGER, PARAMETER :: mhd_flag = 1
 
 ! Flag for gravity
-INTEGER, PARAMETER :: gravity_flag = 1
+INTEGER, PARAMETER :: gravity_flag = 0
 
 ! Flag for testing phi (for this to work gravity flag needs to be 1)!
 INTEGER, PARAMETER :: phitest_flag = 0

@@ -117,8 +117,8 @@ DO l = 1, nz
 				! CALL HELM_EOSSOUNDSPEED(primR(irho,j-1,k,l), tR, abarR, zbarR, csR(j-1,k,l))
 				! CALL HELM_EOSSOUNDSPEED(primL(irho,j,k,l), tL, abarL, zbarL, csL(j,k,l))
 
-				CALL TVD(limiter, wx(j,1:14), epsilon(j-1,k,l), epsilon(j,k,l), epsilon(j+1,k,l), epsR(j-1,k,l), epsL(j,k,l))
-				CALL TVD(limiter, wx(j,1:14), cs(j-1,k,l), cs(j,k,l), cs(j+1,k,l), csR(j-1,k,l), csL(j,k,l))
+				CALL TVD(limiter, wx(j,1:2), epsilon(j-1,k,l), epsilon(j,k,l), epsilon(j+1,k,l), epsR(j-1,k,l), epsL(j,k,l))
+				CALL TVD(limiter, wx(j,1:2), cs(j-1,k,l), cs(j,k,l), cs(j+1,k,l), csR(j-1,k,l), csL(j,k,l))
 
 			ELSE
 				CALL EOSEPSILON_NM (primR(irho,j-1,k,l), primR(itau,j-1,k,l), epsR(j-1,k,l))
@@ -212,8 +212,8 @@ DO l = 1, nz
 				! CALL HELM_EOSSOUNDSPEED(primR(irho,j,k-1,l), tR, abarR, zbarR, csR(j,k-1,l))
 				! CALL HELM_EOSSOUNDSPEED(primL(irho,j,k,l), tL, abarL, zbarL, csL(j,k,l))
 
-				CALL TVD(limiter, wx(j,1:14), epsilon(j,k-1,l), epsilon(j,k,l), epsilon(j,k+1,l), epsR(j,k-1,l), epsL(j,k,l))
-				CALL TVD(limiter, wx(j,1:14), cs(j,k-1,l), cs(j,k,l), cs(j,k+1,l), csR(j,k-1,l), csL(j,k,l))
+				CALL TVD(limiter, wy(k,1:2), epsilon(j,k-1,l), epsilon(j,k,l), epsilon(j,k+1,l), epsR(j,k-1,l), epsL(j,k,l))
+				CALL TVD(limiter, wy(k,1:2), cs(j,k-1,l), cs(j,k,l), cs(j,k+1,l), csR(j,k-1,l), csL(j,k,l))
 
 			ELSE
 				CALL EOSEPSILON_NM (primR(irho,j,k-1,l), primR(itau,j,k-1,l), epsR(j,k-1,l))
@@ -307,8 +307,8 @@ DO l = 0, nz + 1
 				! CALL HELM_EOSSOUNDSPEED(primR(irho,j,k,l-1), tR, abarR, zbarR, csR(j,k,l-1))
 				! CALL HELM_EOSSOUNDSPEED(primL(irho,j,k,l), tL, abarL, zbarL, csL(j,k,l))
 
-				CALL TVD(limiter, wx(j,1:14), epsilon(j,k,l-1), epsilon(j,k,l), epsilon(j,k,l+1), epsR(j,k,l-1), epsL(j,k,l))
-				CALL TVD(limiter, wx(j,1:14), cs(j,k,l-1), cs(j,k,l), cs(j,k,l+1), csR(j,k,l-1), csL(j,k,l))
+				CALL TVD(limiter, wz(l,1:2), epsilon(j,k,l-1), epsilon(j,k,l), epsilon(j,k,l+1), epsR(j,k,l-1), epsL(j,k,l))
+				CALL TVD(limiter, wz(l,1:2), cs(j,k,l-1), cs(j,k,l), cs(j,k,l+1), csR(j,k,l-1), csL(j,k,l))
 
 			ELSE
 				CALL EOSEPSILON_NM (primR(irho,j,k,l-1), primR(itau,j,k,l-1), epsR(j,k,l-1))

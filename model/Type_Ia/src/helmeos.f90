@@ -130,14 +130,14 @@ enddo
 
 
 
-     write(6,*)
-     write(6,*) 'finished reading eos table'
-     write(6,04) 'imax=',imax,' jmax=',jmax
-04    format(1x,4(a,i4))
-     write(6,03) 'temp(1)   =',t(1),' temp(jmax)   =',t(jmax)
-     write(6,03) 'ye*den(1) =',d(1),' ye*den(imax) =',d(imax)
-03    format(1x,4(a,1pe11.3))
-     write(6,*)
+!      write(6,*)
+!      write(6,*) 'finished reading eos table'
+!      write(6,04) 'imax=',imax,' jmax=',jmax
+!04    format(1x,4(a,i4))
+!      write(6,03) 'temp(1)   =',t(1),' temp(jmax)   =',t(jmax)
+!      write(6,03) 'ye*den(1) =',d(1),' ye*den(imax) =',d(imax)
+!03    format(1x,4(a,1pe11.3))
+!      write(6,*)
 
 RETURN
 END SUBROUTINE read_helm_table
@@ -255,7 +255,7 @@ OPEN(unit=500, file=TRIM(table_dir)//'/nse_table_7iso.dat',action='read')
 DO i = 0, den_rowno_nse, 1
     DO j = 0, temp_rowno_nse, 1
         READ(500,*) dummy, dummy, nsetable_binde(i,j), (nsetable_xiso(i,j,k), k = 1, totalion)
-        nsetable_binde(i,j) = nsetable_binde(i,j) / 8.987551787368177e+20
+        nsetable_binde(i,j) = nsetable_binde(i,j) / 9.0D20
     ENDDO
 ENDDO
 
@@ -527,7 +527,7 @@ REAL (selected_real_kind(15,307)) :: epsilon_out
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Convert the data from code unit to cgs and input the blanks
 
-den_row(1) = rho_in * 6.175454983417567D17
+den_row(1) = rho_in * 6.1710D17
 temp_row(1) = temp_in * 1.0D9
 abar_row(1) = abar_in
 ! zbar_row(1) = zbar_in
@@ -580,7 +580,7 @@ integer :: flag_eostable
 ! Convert data from code unit to cgs and input the necessary blanks
         
 temp_row(1) = temp_in * 1.0D9
-den_row(1) = rho_in * 6.175454983417567D17   
+den_row(1) = rho_in * 6.1710D17   
 abar_row(1) = abar_in
 zbar_row(1) = zbar_in
 ! zbar_row(1) = MIN(zbar_in, ye_in * abar_in)
@@ -595,7 +595,7 @@ call helmeos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Output to code unit
 
-cs_out = cs_row(1) / 2.99792458D10
+cs_out = cs_row(1) / 3.0D10
 
 IF (ieee_is_nan(cs_out)) THEN
     WRITE(*,*) temp_in, rho_in, abar_in, zbar_in
@@ -620,7 +620,7 @@ INTEGER :: flag_eostable
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Convert data from code unit to cgs and input the necessary blanks
 
-den_row(1) = rho_in * 6.175454983417567D17
+den_row(1) = rho_in * 6.1710D17
 temp_row(1) = temp_in * 1.0D9
 abar_row(1) = abar_in
 zbar_row(1) = MIN(zbar_in, ye_in * abar_in)
@@ -635,9 +635,9 @@ CALL helmeos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Convert the results back to code unit
 
-p_out = ptot_row(1) / 5.550222147402627D38
-dpdrho_out = dpd_row(1) / 8.987551787368177D20
-dpdeps_out = (dpt_row(1) / det_row(1))/6.175454983417567D17   !den_row(1) * (gam1_row(1) - 1.0D0) / 6.175454983417567D17
+p_out = ptot_row(1) / 5.5539D38
+dpdrho_out = dpd_row(1) / 9.0D20
+dpdeps_out = (dpt_row(1) / det_row(1))/6.1710D17   !den_row(1) * (gam1_row(1) - 1.0D0) / 6.1710D17
 IF(eosfail .eqv. .true.) flag_eostable = 0
 
 IF (ieee_is_nan(p_out)) THEN
@@ -695,9 +695,9 @@ include 'vector_eos.dek'
 
     jlo_eos = 1
     jhi_eos = 1
-    etot_row(1) 	= epsilon_input * 8.987551787368177e+20
+    etot_row(1) 	= epsilon_input * 9.0D20
     temp_row(1) 	= temp_input * 1.0D9
-    den_row(1) 	= rho_input * 6.175454983417567D17 
+    den_row(1) 	= rho_input * 6.1710D17 
     abar_row(1) 	= abar_input
     zbar_row(1) 	= zbar_input
     !zbar_row(1) 	= MIN(zbar_input(1), ye_input(1) * abar_input(1))
@@ -846,8 +846,8 @@ include 'vector_eos.dek'
   ! initialize
   jlo_eos = 1
   jhi_eos = 1
-  den_row(1)        = (rho_input * 6.175454983417567D17)
-  ptot_row(1) 	  = (p_input * 5.550222147402627e+38)
+  den_row(1)        = (rho_input * 6.1710D17)
+  ptot_row(1) 	  = (p_input * 5.5539D38)
   temp_row(1)       = (temp_input * 1.0D9)    
   abar_row(1)       = abar_input
   zbar_row(1)       = MIN(zbar_input, ye_input*abar_input)
