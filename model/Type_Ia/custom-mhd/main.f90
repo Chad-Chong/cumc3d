@@ -136,11 +136,11 @@ DO while (global_time < total_time)
   !   STOP
   ! ENDIF
 
-  IF (MOD(n_step,1) == 0) THEN
-  output_file = .true.
-  ELSE
-    output_file = .false.
-  ENDIF
+  ! IF (MOD(n_step,1) == 0) THEN
+  ! output_file = .true.
+  ! ELSE
+  !   output_file = .false.
+  ! ENDIF
 
   IF (dt<1e-5) THEN
     WRITE(*,*) 'Time step is smaller than 1e-5.'

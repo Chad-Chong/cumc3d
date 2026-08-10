@@ -456,19 +456,20 @@ DO l = 1, nz
 
       ENDIF
 
-      ! This code segment gives a bug where it assigns epsilon_temp_min in the interior of the star (higher density)
-      ! IF (helmeos_flag == 1) THEN
-      !   CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_min, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_min)
-      !   CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_max, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_max)
-      !     IF (epsilon(j,k,l) < epsilon_temp_min) THEN
-      !       epsilon(j,k,l) = epsilon_temp_min
-      !       temp2(j,k,l) = temp_min
-      !     ENDIF
-      !     IF (epsilon(j,k,l) > epsilon_temp_max) THEN
-      !       epsilon(j,k,l) = epsilon_temp_max
-      !       temp2(j,k,l) = temp_max
-      !     ENDIF
-      ! ENDIF
+      ! Floor for internal energy set by temp_min; change the pressure correspondingly.
+      IF (helmeos_flag == 1) THEN
+        CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_min, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_min)
+        CALL HELM_EOSPRESSURE(prim(irho,j,k,l), temp2(j,k,l), abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), prim(itau,j,k,l), dummy, dummy, flag_eostable)
+        ! CALL HELM_EOSEPSILON(prim(irho,j,k,l), temp_max, abar2(j,k,l), zbar2(j,k,l), prim(iye2,j,k,l), epsilon_temp_max)
+          IF (epsilon(j,k,l) <= epsilon_temp_min) THEN
+            epsilon(j,k,l) = epsilon_temp_min
+            temp2(j,k,l) = temp_min
+          ENDIF
+          ! IF (epsilon(j,k,l) > epsilon_temp_max) THEN
+          !   epsilon(j,k,l) = epsilon_temp_max
+          !   temp2(j,k,l) = temp_max
+          ! ENDIF
+      ENDIF
       
       IF (helmeos_flag /= 1) THEN
         factor = MAX(SIGN(1.0D0, epsilon(j,k,l)), 0.0D0)

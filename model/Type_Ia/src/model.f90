@@ -429,27 +429,28 @@ IF (restart_flag == 0) THEN
       END DO
     END DO
 
-    DO l = 1, nz
-      DO k = 1, ny
-        DO j = 1, nx
+    ! DO l = 1, nz
+    !   DO k = 1, ny
+    !     DO j = 1, nx
 
-          diff = prim(irho,j,k,l) - prim_a(irho)
-          factor = MAX(SIGN(1.0D0, diff), 0.0D0)
-          DO i = imin, ibx-1
-            IF (i .ne. ivy) THEN
-              prim(i,j,k,l) = factor*prim(i,j,k,l) + (1.0D0 - factor)*prim_a(i)
-            ENDIF
-          ENDDO
-          IF (helmeos_flag == 1) THEN
-            temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
-            abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
-            zbar2(j,k,l) = factor*zbar2(j,k,l) + (1.0D0 - factor)*zbar2_a
-            epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
-          ENDIF
+    !       diff = prim(irho,j,k,l) - prim_a(irho)
+    !       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
+    !       DO i = imin, ibx-1
+    !         IF (i .ne. ivy) THEN
+    !           prim(i,j,k,l) = factor*prim(i,j,k,l) + (1.0D0 - factor)*prim_a(i)
+    !         ENDIF
+    !       ENDDO
+    !       IF (helmeos_flag == 1) THEN
+    !         temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
+    !         abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
+    !         zbar2(j,k,l) = factor*zbar2(j,k,l) + (1.0D0 - factor)*zbar2_a
+    !         epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
+    !       ENDIF
           
-        END DO
-      END DO
-    END DO
+    !     END DO
+    !   END DO
+    ! END DO
+
   ENDIF
 
 ENDIF
@@ -648,7 +649,7 @@ IF (turb_flag == 1) THEN
   IF ((ddims(1)-2) >= (iturbq-imin+1) ) THEN !There is turbulence in the previous run
     call h5sselect_hyperslab_f(dspace_id, H5S_SELECT_SET_F, start, prim_dims, error, stride, block)
     call h5screate_simple_f(4, prim_dims, mem_id, error)
-    call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, prim(imin:iye2,0:nx+1,0:ny+1,0:nz+1), prim_dims, error, mem_id, dspace_id)
+    call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, prim(iturbq,0:nx+1,0:ny+1,0:nz+1), prim_dims, error, mem_id, dspace_id)
     CALL h5dclose_f(dset_id, error)
     call h5sclose_f(mem_id, error)
     call h5sclose_f(dspace_id, error)
