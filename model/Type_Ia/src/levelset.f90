@@ -67,13 +67,21 @@ IMPLICIT NONE
 ! Initialization of the scalar G
 
 ! Dummy variables
-integer :: j, k, m, n
+integer :: i, j, k, l, m, n
 
 ! Dist from the front
 real*8 :: dist
 
 ! Coords of maximum density
 real*8 :: xm, zm
+
+! Masses
+real*8 :: mono
+real*8, dimension(3) :: dipo
+real*8, dimension(3,3) :: quad
+
+! Flame radius, flame mass
+real*8 :: fr, flame_mass, diff, rho_in, factor
 
 ! Initilization
 flame_ratio_old = 0.0D0
@@ -84,92 +92,138 @@ CALL GET_MAX(m,n)
 xm = x(m)+1.0D-10
 zm = z(n)+1.0D-10
 
+        
 ! Assign initial flame
-do j = 1, nx, 1   
-    do k  = 1, nz, 1 
+IF (md_flag == 1) THEN
 
-    IF (md_flag == 1) THEN
-    
-        ! big c3 flame
-        prim(iscaG1,j,1,k) = 148.90D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
-                    60.92D0 * ABS(DSIN(ASIN( (z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
-
-        ! c3 flame
-            ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + & 
-            !             30.46D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
-
-        ! ! small c3 flame
-        ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
-        !                15.23D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
-
-        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
-        !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm) - 47.86D0)**2 + ((z(k)-zm) - 47.86D0)**2) + 7.0D0
-
-        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
-            !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm))**2 + ((z(k)-zm) - 101.52D0)**2) + 15.0D0
-
-        ! A bubble along z-axis in the helium sphere
-        !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm))**2 + ((z(k)-zm) - 1.0D3)**2) + 15.0D0
-
-        ! Two bubbles along two axis
-        
-
-        ! b5 flame Type A
-            !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
-
-        ! b5 flame Type B
-        !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
-    ELSE
-        ! big c3 flame
-        prim(iscaG1,j,1,k) = 148.90D0 - DSQRT(x(j)**2 + z(k)**2) + &
-                    60.92D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
-
-        ! c3 flame
-            ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
-            !             30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
-
-        ! ! small c3 flame
-        ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
-        !                15.23D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
-
-        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
-        !prim(iscaG1,j,1,k) = -DSQRT((x(j) - 47.86D0)**2 + (z(k) - 47.86D0)**2) + 7.0D0
-
-        ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
-            !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 101.52D0)**2) + 15.0D0
-
-        ! A bubble along z-axis in the helium sphere
-        !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 1.0D3)**2) + 15.0D0
-
-        ! Two bubbles along two axis
-        
-
-        ! b5 flame Type A
-            !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
-
-        ! b5 flame Type B
-        !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
-            !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
+! spherical flame until 2% of initial mass
+    flame_mass = 0
+    CALL multipole_expansion(mono, dipo, quad)
+    DO i = 1, nx
+        IF (flame_mass > 0.02*mono) THEN
+            EXIT
         ENDIF
 
-    enddo
-enddo 
+        fr = i*dx(1)
+        flame_mass = 0
+        DO j = 1, nx
+            DO l = 1, nz
+                prim(iscaG1,j,1,l) = fr - DSQRT((x(j)-xm)**2 + (z(l)-zm)**2)
+                factor = MERGE(1.0d0, 0.0d0, prim(iscaG1,j,1,l) > 0.0d0)
+                rho_in = factor*prim(irho,j,1,l)
+                flame_mass = flame_mass + rho_in*vol(j,1,l)
+            ENDDO
+        ENDDO
+    ENDDO
 
+    ! do j = 1, nx, 1   
+    !     do k  = 1, nz, 1 
+
+            ! big c3 flame
+            ! prim(iscaG1,j,1,k) = 148.90D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
+            !             60.92D0 * ABS(DSIN(ASIN( (z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
+
+            ! c3 flame
+                ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + & 
+                !             30.46D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
+
+            ! ! small c3 flame
+            ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT((x(j)-xm)**2 + (z(k)-zm)**2) + &
+            !                15.23D0 * ABS(DSIN(ASIN((z(k)-zm) / DSQRT((x(j)-xm)**2 + (z(k)-zm)**2)) * 6.0D0))
+
+            ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+            !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm) - 47.86D0)**2 + ((z(k)-zm) - 47.86D0)**2) + 7.0D0
+
+            ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+                !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm))**2 + ((z(k)-zm) - 101.52D0)**2) + 15.0D0
+
+            ! A bubble along z-axis in the helium sphere
+            !prim(iscaG1,j,1,k) = -DSQRT(((x(j)-xm))**2 + ((z(k)-zm) - 1.0D3)**2) + 15.0D0
+
+            ! Two bubbles along two axis
+            
+
+            ! b5 flame Type A
+                !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
+
+            ! b5 flame Type B
+            !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
+    !     enddo
+    ! enddo
+
+ELSE
+
+    ! spherical flame until 2% of initial mass
+    flame_mass = 0
+    CALL multipole_expansion(mono, dipo, quad)
+    DO i = 1, nx
+        IF (flame_mass > 0.02*mono) THEN
+            EXIT
+        ENDIF
+        fr = i*dx(1)
+        flame_mass = 0
+        DO j = 1, nx
+            DO l = 1, nz
+                prim(iscaG1,j,1,l) = fr - DSQRT((x(j))**2 + (z(l))**2)
+                factor = MERGE(1.0d0, 0.0d0, prim(iscaG1,j,1,l) > 0.0d0)
+                rho_in = factor*prim(irho,j,1,l)
+                flame_mass = flame_mass + rho_in*vol(j,1,l)
+            ENDDO
+        ENDDO
+    ENDDO
+
+    ! do j = 1, nx, 1   
+    !     do k  = 1, nz, 1 
+            ! big c3 flame
+            ! prim(iscaG1,j,1,k) = 148.90D0 - DSQRT(x(j)**2 + z(k)**2) + &
+            !             60.92D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+
+            ! c3 flame
+                ! prim(iscaG1,j,1,k) = 74.45D0 - DSQRT(x(j)**2 + z(k)**2) + & 
+                !             30.46D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+
+            ! ! small c3 flame
+            ! prim(iscaG1,j,1,k) = 37.23D0 - DSQRT(x(j)**2 + z(k)**2) + &
+            !                15.23D0 * ABS(DSIN(ASIN(z(k) / DSQRT(x(j)**2 + z(k)**2)) * 6.0D0))
+
+            ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+            !prim(iscaG1,j,1,k) = -DSQRT((x(j) - 47.86D0)**2 + (z(k) - 47.86D0)**2) + 7.0D0
+
+            ! b1 flame 23.93 -> 50 km, 28.72 -> 60 km
+                !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 101.52D0)**2) + 15.0D0
+
+            ! A bubble along z-axis in the helium sphere
+            !prim(iscaG1,j,1,k) = -DSQRT((x(j))**2 + (z(k) - 1.0D3)**2) + 15.0D0
+
+            ! Two bubbles along two axis
+            
+
+            ! b5 flame Type A
+                !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 20.0D0)**2 + (DBLE(k-1)*dx(j) - 40.0D0)**2), &      
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 40.0D0)**2 + (DBLE(k-1)*dx(j) - 20.0D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 25.0D0)**2 + (DBLE(k-1)*dx(j) - 75.0D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 50.0D0)**2 + (DBLE(k-1)*dx(j) - 50.0D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 75.0D0)**2 + (DBLE(k-1)*dx(j) - 25.0D0)**2))
+
+            ! b5 flame Type B
+            !prim(iscaG1,j,1,k) = MAX(10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 33.84D0)**2 + (DBLE(k-1)*dx(j) - 67.68D0)**2), &      
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 67.68D0)**2 + (DBLE(k-1)*dx(j) - 33.84D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 51.80D0)**2 + (DBLE(k-1)*dx(j) - 125.07D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 95.72D0)**2 + (DBLE(k-1)*dx(j) - 95.72D0)**2), &
+                !               10.0D0 - DSQRT((DBLE(j-1)*dx(j) - 125.07D0)**2 + (DBLE(k-1)*dx(j) - 51.80D0)**2))
+    !     enddo
+    ! enddo 
+ENDIF
+
+WRITE(*,*) "The deflagration level set contains", flame_mass/mono, 'of initial mass'
 ! Copy the data to ghost cells
 CALL boundary1D_NM(prim(iscaG1,:,:,:), even, even, even, even, even, even)
 
