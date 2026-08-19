@@ -1,4 +1,4 @@
-subroutine locate_tail_grid(dens, tail_count, tail_position)
+subroutine locate_tail_grid(dens, tail_count, tail_position_local)
 use definition
 USE CUSTOM_DEF
 implicit none
@@ -15,7 +15,7 @@ integer :: tail_count
 REAL*8 :: tail_rad
 
 ! Output array of intersection point
-real*8, dimension(nx*nz, 2) :: tail_position
+real*8, dimension(nx*nz, 2) :: tail_position_local
 
 ! Initialization
 tail_count = 0 
@@ -29,16 +29,16 @@ do k = 1, nz, 1
 
     if(dens(j,1,k) * dens(j+1,1,k) < 0.0D0) then
         tail_count = tail_count + 1
-        tail_position(tail_count, 1) = x(j)
-        tail_position(tail_count, 2) = z(k)
-        if(tail_position(tail_count, 1) > tail_rad) tail_rad = tail_position(tail_count, 1)
+        tail_position_local(tail_count, 1) = x(j)
+        tail_position_local(tail_count, 2) = z(k)
+        if(tail_position_local(tail_count, 1) > tail_rad) tail_rad = tail_position_local(tail_count, 1)
     endif
 
     if(dens(j,1,k) * dens(j,1,k+1) < 0.0D0) then             
         tail_count = tail_count + 1
-        tail_position(tail_count, 1) = x(j)
-        tail_position(tail_count, 2) = z(k)
-        if(tail_position(tail_count, 1) > tail_rad) tail_rad = tail_position(tail_count, 1) 
+        tail_position_local(tail_count, 1) = x(j)
+        tail_position_local(tail_count, 2) = z(k)
+        if(tail_position_local(tail_count, 1) > tail_rad) tail_rad = tail_position_local(tail_count, 1) 
     endif
 
     enddo
@@ -47,7 +47,7 @@ enddo
 
 end subroutine
 
-subroutine locate_min_tail_distance(tail_count, tail_position, tail_distance)
+subroutine locate_min_tail_distance(tail_count, tail_position_local, tail_distance_local)
 use definition
 USE CUSTOM_DEF
 implicit none
@@ -62,10 +62,10 @@ integer :: tail_count
 real (selected_real_kind(15,307)):: distance, last_distance
 
 ! Output array for the minimal distance
-real (selected_real_kind(15,307)), dimension(-2:nx+3, -2:nz+3), intent(out):: tail_distance
+real (selected_real_kind(15,307)), dimension(-2:nx+3, -2:nz+3), intent(out):: tail_distance_local
 
 ! Input array of intersection point positions
-real (selected_real_kind(15,307)), dimension(nx * nz, 2), intent(in) :: tail_position
+real (selected_real_kind(15,307)), dimension(nx * nz, 2), intent(in) :: tail_position_local
 
 
 do j = 1, nx, 1
@@ -76,15 +76,15 @@ do j = 1, nx, 1
         ! Search for the minimal distance
         do k2 = 1, tail_count, 1
 
-            distance = DSQRT((tail_position(k2,1) - x(j)) ** 2 + & 
-                        (tail_position(k2,2) - z(k)) ** 2)
+            distance = DSQRT((tail_position_local(k2,1) - x(j)) ** 2 + & 
+                        (tail_position_local(k2,2) - z(k)) ** 2)
 
-            if ((x(j)**2+z(k)**2) < (tail_position(k2,1)**2+tail_position(k2,2)**2)) then
+            if ((x(j)**2+z(k)**2) < (tail_position_local(k2,1)**2+tail_position_local(k2,2)**2)) then
                 distance = -distance
             endif
 
             if((tail_count > 1 .and. ABS(distance) <= ABS(last_distance)) .or. tail_count == 1) then
-                tail_distance(j,k) = distance
+                tail_distance_local(j,k) = distance
                 last_distance = distance
             endif
 
@@ -95,7 +95,7 @@ do j = 1, nx, 1
 enddo
 
 
-!WRITE(*,*) tail_distance(1,1), tail_count
+!WRITE(*,*) tail_distance_local(1,1), tail_count
 
 100 FORMAT (6E13.6)
 
