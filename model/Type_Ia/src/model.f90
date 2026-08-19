@@ -23,6 +23,22 @@ REAL*8, ALLOCATABLE, DIMENSION(:,:,:) :: a_phi
 ! For Atmosphere
 REAL*8 :: diff, factor
 
+! Masses
+real*8 :: mono
+real*8, dimension(3) :: dipo
+real*8, dimension(3,3) :: quad
+
+real*8 :: s_len
+
+! The number of point intersected by the tail
+integer :: tail_count
+
+allocate(tail_distance(-2:nx+3, -2:nz+3))
+allocate(tail_position(nx*nz, 2))
+allocate(H_d_array(nx,nz))
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Flag Checking !
 IF (axissym_flag == 1 .and. coordinate_flag == 1) THEN
@@ -92,16 +108,7 @@ IF (restart_flag == 0) THEN
   ENDIF
   CLOSE(970)
   prim(irho,:,:,:) = prim(irho,:,:,:)*rhocgs2code
-  atmosphere = atmospheric*maxval(prim(irho,:,:,:))
-  DO l = 1, nz
-    DO j = 1, nx
-      IF (prim(irho,j,1,l) < atmosphere) THEN
-        prim(irho,j,1,l) = atmosphere
-      ENDIF
-    ENDDO
-  ENDDO
   PRINT *, "Finished reading rho"
-  WRITE(*,*) 'Maximum rho is', atmosphere/atmospheric/rhocgs2code
 
   ! Assign velocity !
   IF (coordinate_flag == 2) THEN
@@ -309,6 +316,120 @@ IF (nuspec_flag == 1) THEN
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+IF (restart_flag == 0) THEN
+  ! Set atmospheric primitive variables!
+  prim_a(:) = 0.0D0
+  rotation_atmosphere(:,:,:) = prim(ivy,1:nx,1:ny,1:nz)
+  prim_a(irho) = atmospheric*maxval(prim(irho,:,:,:))
+  tail_density = tail_density_factor*maxval(prim(irho,:,:,:))
+
+  IF (tail_flag == 1) THEN !Find tail like finding the level set
+  CALL multipole_expansion(mono, dipo, quad)
+  WRITE(*,*) 'Mass before tail', mono
+
+  CALL locate_tail_grid(prim(irho,:,1,:)-tail_density, tail_count, tail_position)
+  CALL locate_min_tail_distance(tail_count, tail_position, tail_distance)
+  s_len=1/(10.0D0*dx(1))
+    DO l = 1, nz
+      DO j = 1, nx
+        IF (prim(irho,j,1,l) < tail_density) THEN
+          prim(irho,j,1,l) = tail_density*(0.5D0+1/(1+exp(s_len*tail_distance(j,l))) )
+        ENDIF
+      ENDDO
+    ENDDO
+
+    CALL multipole_expansion(mono, dipo, quad)
+    WRITE(*,*) 'Mass after tail', mono
+
+  ENDIF
+
+  DO l = 1, nz
+    DO j = 1, nx
+      IF (prim(irho,j,1,l) < prim_a(irho)) THEN
+        prim(irho,j,1,l) = prim_a(irho)
+      ENDIF
+    ENDDO
+  ENDDO
+  
+  IF (turb_flag == 1) THEN
+    prim_a(iturbq) = turb_q_a
+  ENDIF
+
+  ! Ensure epsilon is not discontinuous. Somehow the code dislikes discontinuous energy very much
+
+  ! IF (helmeos_flag == 1) THEN
+  !   prim_a(ihe4) = xiso_ahe4
+  !   prim_a(ic12) = xiso_ac12
+  !   prim_a(io16) = xiso_ao16
+  !   CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, prim_a(iye2))
+
+  !   eps_a = MINVAL(epsilon(1:nx, 1, 1:nz))
+
+  !   found_atmo = 0
+
+  !   DO l = 1, nz
+  !     DO k = 1, ny
+  !       DO j = 1, nx
+  !         IF (helmeos_flag == 1) THEN
+  !           IF (epsilon(j,k,l) == eps_a .and. found_atmo == 0) THEN
+
+  !             eps_a = epsilon(j,k,l)
+  !             ! prim_a(irho) = prim(irho,j,k,l)
+
+              
+  !             WRITE(*,*) 'Atmosphere epsilon is', eps_a
+
+  !             CALL private_invert_helm_ed(epsilon(j,k,l), &
+  !                               prim_a(irho), abar2_a, &
+  !                               zbar2_a, prim_a(iye2), &
+  !                                               temp2_old(j,k,l), temp2_a, flag_notfindtemp)
+  !             WRITE(*,*) 'Found temp_a is', temp2_a
+  !             CALL HELM_EOSPRESSURE(prim_a(irho), temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
+
+  !             found_atmo = 1
+            
+  !           ! ENDIF
+  !         ELSE
+
+  !           prim_a(itau) = prim(itau,nx,1,1)
+  !           eps_a = epsilon(nx,1,1)
+
+  !           EXIT
+
+  !         ENDIF
+
+  !       END DO
+  !     END DO
+  !   END DO
+
+  !   DO l = 1, nz
+  !     DO k = 1, ny
+  !       DO j = 1, nx
+
+  !         diff = prim(irho,j,k,l) - prim_a(irho)
+  !         factor = MAX(SIGN(1.0D0, diff), 0.0D0)
+  !         DO i = imin, ibx-1
+  !           IF (i .ne. ivy) THEN
+  !             prim(i,j,k,l) = factor*prim(i,j,k,l) + (1.0D0 - factor)*prim_a(i)
+  !           ENDIF
+  !         ENDDO
+  !         IF (helmeos_flag == 1) THEN
+  !           temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
+  !           abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
+  !           zbar2(j,k,l) = factor*zbar2(j,k,l) + (1.0D0 - factor)*zbar2_a
+  !           epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
+  !         ENDIF
+          
+  !       END DO
+  !     END DO
+  !   END DO
+
+  ! ENDIF
+
+ENDIF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 IF (restart_flag == 0) THEN
 
   CALL FINDPRESSURE
@@ -374,93 +495,11 @@ ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 IF (restart_flag == 0) THEN
-  ! Set atmospheric primitive variables!
-  prim_a(:) = 0.0D0
-  rotation_atmosphere(:,:,:) = prim(ivy,1:nx,1:ny,1:nz)
-  prim_a(irho) = atmospheric*maxval(prim(irho,:,:,:))
-  IF (turb_flag == 1) THEN
-    prim_a(iturbq) = turb_q_a
-  ENDIF
-
-  ! Ensure epsilon is not discontinuous. Somehow the code dislikes discontinuous energy very much
-
-  IF (helmeos_flag == 1) THEN
-    ! prim_a(ihe4) = xiso_ahe4
-    prim_a(ic12) = xiso_ac12
-    prim_a(io16) = xiso_ao16
-    CALL PRIVATE_HELMEOS_AZBAR(prim_a(ihe4:ini56), abar2_a, zbar2_a, prim_a(iye2))
-
-    ! eps_a = MINVAL(epsilon(1:nx, 1, 1:nz))
-
-    found_atmo = 0
-
-    DO l = 1, nz
-      DO k = 1, ny
-        DO j = 1, nx
-          IF (helmeos_flag == 1) THEN
-            ! IF (epsilon(j,k,l) == eps_a .and. found_atmo == 0) THEN
-
-            !   eps_a = epsilon(j,k,l)
-            !   ! prim_a(irho) = prim(irho,j,k,l)
-
-              
-            !   WRITE(*,*) 'Atmosphere epsilon is', eps_a
-
-            !   CALL private_invert_helm_ed(epsilon(j,k,l), &
-            !                     prim_a(irho), abar2_a, &
-            !                     zbar2_a, prim_a(iye2), &
-            !                                     temp2_old(j,k,l), temp2_a, flag_notfindtemp)
-            !   WRITE(*,*) 'Found temp_a is', temp2_a
-            !   CALL HELM_EOSPRESSURE(prim_a(irho), temp2_a, abar2_a, zbar2_a, prim_a(iye2), prim_a(itau), dummy, dummy, flag_eostable)
-
-            !   found_atmo = 1
-            
-            ! ENDIF
-          ELSE
-
-            prim_a(itau) = prim(itau,nx,1,1)
-            eps_a = epsilon(nx,1,1)
-
-            EXIT
-
-          ENDIF
-
-        END DO
-      END DO
-    END DO
-
-    ! DO l = 1, nz
-    !   DO k = 1, ny
-    !     DO j = 1, nx
-
-    !       diff = prim(irho,j,k,l) - prim_a(irho)
-    !       factor = MAX(SIGN(1.0D0, diff), 0.0D0)
-    !       DO i = imin, ibx-1
-    !         IF (i .ne. ivy) THEN
-    !           prim(i,j,k,l) = factor*prim(i,j,k,l) + (1.0D0 - factor)*prim_a(i)
-    !         ENDIF
-    !       ENDDO
-    !       IF (helmeos_flag == 1) THEN
-    !         temp2(j,k,l) = factor*temp2(j,k,l) + (1.0D0 - factor)*temp2_a
-    !         abar2(j,k,l) = factor*abar2(j,k,l) + (1.0D0 - factor)*abar2_a
-    !         zbar2(j,k,l) = factor*zbar2(j,k,l) + (1.0D0 - factor)*zbar2_a
-    !         epsilon(j,k,l) = factor*epsilon(j,k,l) + (1.0D0 - factor)*eps_a
-    !       ENDIF
-          
-    !     END DO
-    !   END DO
-    ! END DO
-
-  ENDIF
-
-ENDIF
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (restart_flag == 0) THEN
   ! Assign floor variables !
   CALL CUSTOM_CHECKRHO
   WRITE(*,*) 'Finished atmosphere handling'
 ENDIF
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 IF (restart_flag == 0) THEN
 

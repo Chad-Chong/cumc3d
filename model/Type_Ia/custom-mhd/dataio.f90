@@ -16,7 +16,7 @@ integer :: error, space_rank
 character(len=99) :: globalt
 character(len=99) :: filename
 integer(HID_T) :: file_id, dspace_id, dset_id1
-integer(HSIZE_T) :: sup_dims(3), data_dims(4), dist_dims(1),df_dims(4)
+integer(HSIZE_T) :: sup_dims(3), data_dims(4), dist_dims(1),df_dims(4), tdims(2)
 
 ! integer !
 INTEGER :: j  
@@ -1184,6 +1184,28 @@ call h5dclose_f(dset_id1,error)
 ! close data space !
 call h5sclose_f(dspace_id,error)
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! IF (tail_flag == 1) THEN
+!     ! define DIMENSION !
+!     space_rank = 2
+!     tdims(1) = nx+6
+!     tdims(2) = nz+6
+
+!     ! open dataspace !
+!     call h5screate_simple_f(space_rank,tdims,dspace_id,error)
+
+!     ! create dataset !
+!     call h5dcreate_f(file_id,"H_d",H5T_NATIVE_DOUBLE,dspace_id,dset_id1,error)
+
+!     ! write dataset !
+!     call h5dwrite_f(dset_id1,H5T_NATIVE_DOUBLE,tail_distance,tdims,error)
+
+!     ! close dataset !
+!     call h5dclose_f(dset_id1,error)
+
+!     ! close data space !
+!     call h5sclose_f(dspace_id,error)
+! ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! close the file !

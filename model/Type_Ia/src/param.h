@@ -22,7 +22,10 @@ INTEGER, PARAMETER :: phi_eqs = 0
 INTEGER, PARAMETER :: mhd_flag = 1
 
 ! Flag for gravity
-INTEGER, PARAMETER :: gravity_flag = 1
+INTEGER, PARAMETER :: gravity_flag = 0
+
+! Flag for adding a density tail
+INTEGER, PARAMETER :: tail_flag = 1
 
 ! Flag for testing phi (for this to work gravity flag needs to be 1)!
 INTEGER, PARAMETER :: phitest_flag = 0
@@ -124,7 +127,9 @@ REAL*8, PARAMETER :: ye = 0.5D0
 ! Parameters !
 REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
-REAL*8, PARAMETER :: atmospheric = 5.0D-8
+REAL*8, PARAMETER :: atmospheric = 1.0D-8
+REAL*8, PARAMETER :: tail_density_factor = 1.0D-6
+REAL*8 :: tail_density
 
 ! Constant for fermi equation of state !
 ! Note that the speed of light is unity !

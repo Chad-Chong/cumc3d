@@ -11,3 +11,4 @@ levelset.f90
 funct_fermi1.f90
 sneut5.f90
 nuspec.f90
+tail.f90

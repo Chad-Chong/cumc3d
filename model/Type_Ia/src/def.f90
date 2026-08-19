@@ -281,4 +281,13 @@ real*8, allocatable, dimension(:) :: det_times
 ! Energy released in nuclear fusion
 real*8 :: Enuc = 0.0D0
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+real*8, allocatable, dimension(:,:) :: H_d_array
+
+! Array storing the minimal distance of the grid to the nearest tail
+real*8, allocatable, dimension(:,:) :: tail_distance
+
+! Array storing all intersection points
+real*8, allocatable, dimension(:,:) :: tail_position
+
 END MODULE

@@ -426,9 +426,9 @@ DO l = 1, nz
 
       IF (diff <= 0 ) THEN ! Put the above condition as or here for stronger constraint: not allowing finite density cells to be cold.
 
-        IF (prim(ivx,j,k,l) >= 1.0D0 .or. prim(ivx,j,k,l) >= 1.0D0) THEN
-          WRITE(*,*) "Exceeding the speed of light at", j, k, l
-        ENDIF
+        ! IF (prim(ivx,j,k,l) >= 1.0D0 .or. prim(ivx,j,k,l) >= 1.0D0) THEN
+        !   WRITE(*,*) "Exceeding the speed of light at", j, k, l
+        ! ENDIF
         ! prim(irho:ivz,j,k,l) =  prim_a(irho:ivz) 
 
         prim(irho,j,k,l) =  prim_a(irho)
