@@ -334,7 +334,7 @@ IF (restart_flag == 0) THEN
     DO l = 1, nz
       DO j = 1, nx
         IF (prim(irho,j,1,l) < tail_density) THEN
-          prim(irho,j,1,l) = tail_density*(0.5D0+1/(1+exp(s_len*tail_distance(j,l))) )
+          prim(irho,j,1,l) = tail_density*(2/(1+exp(s_len*tail_distance(j,l))) )
         ENDIF
       ENDDO
     ENDDO
