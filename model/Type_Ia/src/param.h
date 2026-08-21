@@ -22,7 +22,7 @@ INTEGER, PARAMETER :: phi_eqs = 0
 INTEGER, PARAMETER :: mhd_flag = 1
 
 ! Flag for gravity
-INTEGER, PARAMETER :: gravity_flag = 0
+INTEGER, PARAMETER :: gravity_flag = 1
 
 ! Flag for adding a density tail
 INTEGER, PARAMETER :: tail_flag = 1
@@ -129,6 +129,7 @@ REAL*8, PARAMETER :: rhomax = 1.0D9*rhocgs2code
 REAL*8 :: atmosphere 
 REAL*8, PARAMETER :: atmospheric = 1.0D-8
 REAL*8, PARAMETER :: tail_density_factor = 1.0D-6
+REAL*8, PARAMETER :: tail_length_factor = 40.0D0
 REAL*8 :: tail_density
 
 ! Constant for fermi equation of state !

@@ -330,7 +330,7 @@ IF (restart_flag == 0) THEN
 
   CALL locate_tail_grid(prim(irho,:,1,:)-tail_density, tail_count, tail_position)
   CALL locate_min_tail_distance(tail_count, tail_position, tail_distance)
-  s_len=1/(10.0D0*dx(1))
+  s_len=1/(tail_length_factor*dx(1))
     DO l = 1, nz
       DO j = 1, nx
         IF (prim(irho,j,1,l) < tail_density) THEN
