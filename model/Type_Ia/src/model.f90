@@ -520,6 +520,10 @@ ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 IF (restart_flag == 1) THEN
   CALL READ_HDF5
+  IF (xisotran_flag == 1) THEN
+    CALL FIND_AZBAR()
+  ENDIF
+  ! CALL print_restart
   CALL BOUNDARY
 ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
